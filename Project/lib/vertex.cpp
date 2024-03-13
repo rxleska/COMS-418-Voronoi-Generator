@@ -1,0 +1,1 @@
+// Vertex Class Definition (just 2 ints with some functions and naming conventions)
