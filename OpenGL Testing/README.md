@@ -1,0 +1,1 @@
+# This section of repo is for testing OpenGL code and learning how to use it in C++.
