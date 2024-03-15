@@ -59,7 +59,9 @@ int main(int argc, char* argv[])
         std::cout << "Vertex " << i << ": (" << vertices[i].x << ", " << vertices[i].y << ")" << std::endl;
     }
 
-    // Calculate the voronoi diagram of the sites 
+    // Calculate the voronoi diagram of the sites
+    
+
 
     // Calculate the delaunay triangulation of the voronoi diagram
 
