@@ -32,4 +32,8 @@
 *.app
 
 
-# ignore binary files without a file extension
+#ignore vscode
+.vscode
+
+#ignore run file
+run
