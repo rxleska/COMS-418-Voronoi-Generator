@@ -5,9 +5,10 @@
 
 static glm::vec3 offset(0.3f, 0.0f, 0.0f);
 #define mainRadius 0.6f
-#define circleRadius 0.12f
+#define circleRadius 0.15f
 #define width 1920.0f
 #define height 1080.0f
+#define radiusPerSection 3.5f
 
 glm::vec3 rotate(glm::vec3 s, glm::vec3 rot){
     glm::mat3 rotateX = glm::mat3(
@@ -55,7 +56,7 @@ void display()
     //set color green
     glColor3f(0.0, 1.0, 0.0);
     glBegin(GL_LINE_LOOP);
-    for(float i = 0.0f; i < 360; i+=12){
+    for(float i = 0.0f; i < 360; i+=radiusPerSection){
         glm::vec3 circleCenter = glm::vec3(mainRadius * cos(toRadian(i)), 0.0f,  mainRadius * sin(toRadian(i)));      
         glm::vec3 rotatedCircleCenter = rotate(circleCenter, offset);
         rotatedCircleCenter = placeInFrame(rotatedCircleCenter);
@@ -75,12 +76,12 @@ void display()
     //draw a torus using a sequence of circles
     //vertical circles
 
-    for(float i = 0.0f; i < 360; i+=12){
+    for(float i = 0.0f; i < 360; i+=radiusPerSection){
         glm::vec3 circleCenter = glm::vec3(mainRadius * cos(toRadian(i)), 0.0f, mainRadius * sin(toRadian(i)));   
 
         // for each centerpoint draw a circle tangent to the centerpoint
         glBegin(GL_LINE_LOOP);
-        for(float j = 0.0f; j < 360; j+=12){
+        for(float j = 0.0f; j < 360; j+=radiusPerSection){
             //get circle point
             glm::vec3 subcirclePosition = glm::vec3(circleRadius * cos(toRadian(j)), circleRadius * sin(toRadian(j)), 0.0f);
             //rotate circle to normal of circleCenter on outer circle
@@ -102,11 +103,11 @@ void display()
     }
     //horizontal circles
     //todo:
-    for(float i = 0.0f; i < 360; i+=10){
+    for(float i = 0.0f; i < 360; i+=radiusPerSection){
 
         // for each centerpoint draw a circle tangent to the centerpoint
         glBegin(GL_LINE_LOOP);
-        for(float j = 0.0f; j < 360; j+=10){
+        for(float j = 0.0f; j < 360; j+=radiusPerSection){
             glm::vec3 circleCenter = glm::vec3(mainRadius * cos(toRadian(j)), 0.0f, mainRadius * sin(toRadian(j)));   
             //get circle point
             glm::vec3 subcirclePosition = glm::vec3(circleRadius * cos(toRadian(i)), circleRadius * sin(toRadian(i)), 0.0f);
@@ -144,7 +145,7 @@ void update(int value){
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
-    glutCreateWindow("Cube");
+    glutCreateWindow("Torus");
     glutInitWindowSize(1920, 1080);
     glutInitWindowPosition(0, 0);
     glutDisplayFunc(display);

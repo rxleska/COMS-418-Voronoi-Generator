@@ -4,6 +4,15 @@
 
 #include "DCELEdge.hpp"
 
+class DCELFace{
+    private:
+        DCELEdge* edge;
+    public:
+        DCELFace();
+        DCELFace(DCELEdge* edge);
+        void setEdge(DCELEdge* edge);
+        DCELEdge* getEdge();
+};
 
 
 #endif

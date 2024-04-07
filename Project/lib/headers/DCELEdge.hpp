@@ -3,27 +3,34 @@
 #define DCEL_EDGE_HPP
 
 #include "Vertex.hpp"
+#include "DCELFace.hpp"
 
 class DCELEdge{
     private: 
+        static int idCounter;
         Vertex* origin;
         DCELEdge* twin;
         DCELEdge* next;
         DCELEdge* prev;
-        DCELEdge* incidentFace;
+        DCELFace* incidentFace;
+        int id;
     public:
         DCELEdge();
         DCELEdge(Vertex* origin);
+        DCELEdge(Vertex* origin, DCELEdge* twin, DCELEdge* next, DCELEdge* prev, DCELFace* incidentFace);
+        DCELEdge(Vertex* origin, int id);
+        DCELEdge(Vertex* origin, DCELEdge* twin, DCELEdge* next, DCELEdge* prev, DCELFace* incidentFace, int id);
         void setOrigin(Vertex* origin);
         void setTwin(DCELEdge* twin);
         void setNext(DCELEdge* next);
         void setPrev(DCELEdge* prev);
-        void setIncidentFace(DCELEdge* incidentFace);
+        void setIncidentFace(DCELFace* incidentFace);
         Vertex* getOrigin();
+        Vertex* getDestination();
         DCELEdge* getTwin();
         DCELEdge* getNext();
         DCELEdge* getPrev();
-        DCELEdge* getIncidentFace();
+        DCELFace* getIncidentFace();
 
 };
 

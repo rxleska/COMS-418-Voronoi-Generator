@@ -2,14 +2,27 @@
 
 #include "headers/Vertex.hpp"
 
+//initialize the id counter
+int Vertex::idCounter = 0;
+
 Vertex::Vertex(){
     x = 0;
     y = 0;
+    id = idCounter;
+    idCounter++;
 }
 Vertex::Vertex(int x, int y){
     this->x = x;
     this->y = y;
+    id = idCounter;
+    idCounter++;
 }
+Vertex::Vertex(int x, int y, int id){
+    this->x = x;
+    this->y = y;
+    this->id = id;
+}
+
 //overload the + operator
 Vertex Vertex::operator+(const Vertex& v){
     Vertex result;

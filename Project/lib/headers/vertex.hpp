@@ -4,11 +4,15 @@
 
 
 class Vertex{
+    private:
+        static int idCounter;
     public:
         int x;
         int y;
+        int id; //unique id for each vertex
         Vertex();
         Vertex(int x, int y);
+        Vertex(int x, int y, int id);
         //overload the + operator
         Vertex operator+(const Vertex& v);
         //overload the - operator
