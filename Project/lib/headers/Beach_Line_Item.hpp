@@ -32,6 +32,7 @@ class Beach_Line_Item{
         Beach_Line_Item* getRight();
         Beach_Line_Item* getParent();
         int getIsRed();
+        Beach_Line_Item* getUncle();
         void setIsLeaf(int isLeaf);
         void setPoint(Vertex *point);
         void setLeftArc(Vertex *leftarc);

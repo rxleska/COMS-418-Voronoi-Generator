@@ -45,7 +45,162 @@ void Beach_line_BBST::insert(Beach_Line_Item *item){
         parent->setRight(item);
     }
 
-    // check if the tree is still a valid red-black tree after the insertion
+    // if the parent is red, fix the tree
+    //3 cases uncle is red too, uncle is black or null
+    // note for self uncles is the sibling of the parent i.e the other child of the grandparent
+    if(parent->getIsRed()){
+        Beach_Line_Item *uncle = item->getUncle();
+        Beach_Line_Item *grandparent = parent->getParent();
+        if(uncle != nullptr && uncle->getIsRed()){ // uncle is a red node 
+            parent->setIsRed(0); // set the parent to black
+            uncle->setIsRed(0); // set the uncle to black
+            //if grandparent is not root 
+            if(parent->getParent() != this->root){ //prevent root from becoming red (not allowed in RB trees)
+                parent->getParent()->setIsRed(1); // set the grandparent to red
+            }
+        }
+        else{ //uncle is a black node, 4 cases 
+            int parentIsRightChild = (parent == grandparent->getRight());
+            int itemIsRightChild = (item == parent->getRight());
+            if(parentIsRightChild && itemIsRightChild){// Parent is right child of grandparent and new node is right child of parent
+                //left rotation at grandparent
+                //if grandparent is root (use this->root instead of greatparent)
+                if(grandparent == this->root){ //using root
+                    //set in order of top down left right
+                    //top
+                    this->root = parent;
+                    parent->setParent(nullptr);
+
+                    //left
+                    parent->setLeft(grandparent);
+                    grandparent->setParent(parent);
+
+                    //right
+                    parent->setRight(item);
+                    item->setParent(parent);
+
+                    //left left already set 
+
+                    //left right 
+                    grandparent->setLeft(nullptr);
+
+                    //right left and right right are null since they are null
+                }
+                else{ //using greatparent
+                    Beach_Line_Item *greatparent = grandparent->getParent();
+                    Beach_Line_Item *sibling = parent->getLeft();
+                    if(greatparent->getLeft() == grandparent){ //grandparent is left child of greatparent
+                        //set in order of top down left right 
+                        //top
+                        greatparent->setLeft(parent);
+                        parent->setParent(greatparent);
+
+                    }else{ //grandparent is right child of greatparent
+                        //set in order of top down left right
+                        //top
+                        greatparent->setRight(parent);
+                        parent->setParent(greatparent);
+                    }
+                    //left 
+                    parent->setLeft(grandparent);
+                    grandparent->setParent(parent);
+
+                    //right
+                    parent->setRight(item);
+                    item->setParent(parent);
+
+                    //left left already set 
+
+                    //left right 
+                    grandparent->setRight(sibling);
+                    sibling->setParent(grandparent);
+
+                    //right left and right right are null since they are null 
+
+                }
+            
+            }else if(parentIsRightChild && (!itemIsRightChild)){// Parent is right child of grandparent and new node is left child of parent
+                //right rotation at parent
+                grandparent->setRight(item);
+                item->setParent(grandparent);
+
+                item->setRight(parent);
+                parent->setParent(item);
+
+                parent->setLeft(nullptr);
+
+
+            }else if((!parentIsRightChild) && (!itemIsRightChild)){// Parent is left child of grandparent and new node is left child of parent
+                //right rotation at grandparent
+                //if grandparent is root (use this->root instead of greatparent)
+                if(grandparent == this->root){ //using root
+                    //set in order of top down right left
+                    //top
+                    this->root = parent;
+                    parent->setParent(nullptr);
+
+                    //left
+                    parent->setLeft(item);
+                    item->setParent(parent);
+
+                    //right
+                    parent->setRight(grandparent);
+                    grandparent->setParent(parent);
+
+                    //left right and left left are null since they are null
+
+                    //right left 
+                    grandparent->setRight(nullptr);
+
+                    //right right already set 
+
+                }
+                else{ //using greatparent
+                    Beach_Line_Item *greatparent = grandparent->getParent();
+                    Beach_Line_Item *sibling = parent->getRight();
+                    if(greatparent->getRight() == grandparent){ //grandparent is right child of greatparent
+                        //set in order of top down right left 
+                        //top
+                        greatparent->setRight(parent);
+                        parent->setParent(greatparent);
+
+                    }else{ //grandparent is left child of greatparent
+                        //set in order of top down right left
+                        //top
+                        greatparent->setLeft(parent);
+                        parent->setParent(greatparent);
+                    }
+                    
+                    //left
+                    parent->setLeft(item);
+                    item->setParent(parent);
+                    
+                    //right 
+                    parent->setRight(grandparent);
+                    grandparent->setParent(parent);
+
+                    //left right and left left are null since they are null 
+
+                    //right left 
+                    grandparent->setLeft(sibling);
+                    sibling->setParent(grandparent);
+
+                    //right right already set 
+
+                }
+            
+            }else{// Parent is left child of grandparent and new node is right child of parent 
+                //left rotation at parent
+                grandparent->setLeft(item);
+                item->setParent(grandparent);
+
+                item->setLeft(parent);
+                parent->setParent(item);
+
+                parent->setRight(nullptr);
+            }
+        }
+    }
     
 
 

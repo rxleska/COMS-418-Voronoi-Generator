@@ -126,6 +126,17 @@ int Beach_Line_Item::getIsRed(){
     return this->isRed;
 }
 
+Beach_Line_Item* Beach_Line_Item::getUncle(){
+    if(this->parent == nullptr || this->parent->parent == nullptr){
+        return nullptr;
+    }
+    if(this->parent == this->parent->parent->left){
+        return this->parent->parent->right;
+    }else{
+        return this->parent->parent->left;
+    }
+}
+
 // Setters
 void Beach_Line_Item::setIsLeaf(int isLeaf){
     this->isLeaf = isLeaf;
