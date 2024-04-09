@@ -64,31 +64,39 @@ void Beach_line_BBST::insert(Beach_Line_Item *item){
             int itemIsRightChild = (item == parent->getRight());
             if(parentIsRightChild && itemIsRightChild){// Parent is right child of grandparent and new node is right child of parent
                 //left rotation at grandparent
+                Beach_Line_Item *sibling = parent->getLeft();
                 //if grandparent is root (use this->root instead of greatparent)
                 if(grandparent == this->root){ //using root
                     //set in order of top down left right
                     //top
                     this->root = parent;
                     parent->setParent(nullptr);
+                    parent->setIsRed(0); // set the parent to black
 
                     //left
                     parent->setLeft(grandparent);
                     grandparent->setParent(parent);
+                    grandparent->setIsRed(0); // set the grandparent to black (black next to black is fine due to the upper node being the root)
 
                     //right
                     parent->setRight(item);
                     item->setParent(parent);
+                    item->setIsRed(0); // set the item to black (black next to black is fine due to the upper node being the root)
 
                     //left left already set 
+                    grandparent->getLeft()->setIsRed(1); // set the left left to red
 
                     //left right 
-                    grandparent->setLeft(nullptr);
+                    grandparent->setLeft(sibling);
+                    if(sibling != nullptr){
+                        sibling->setParent(grandparent);
+                        sibling->setIsRed(1); // set the left right to red
+                    }
 
-                    //right left and right right are null since they are null
+                    //right left and right right are null since they are null on addition 
                 }
                 else{ //using greatparent
                     Beach_Line_Item *greatparent = grandparent->getParent();
-                    Beach_Line_Item *sibling = parent->getLeft();
                     if(greatparent->getLeft() == grandparent){ //grandparent is left child of greatparent
                         //set in order of top down left right 
                         //top
