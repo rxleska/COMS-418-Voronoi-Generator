@@ -2,6 +2,8 @@
 // will sort beach line items (lib/beach_line_item.cpp)
 #include "Beach_Line_BBST.hpp"
 
+#include <iostream>
+
 Beach_line_BBST::Beach_line_BBST(){
     this->root = nullptr;
 }
@@ -209,7 +211,120 @@ void Beach_line_BBST::insert(Beach_Line_Item *item){
             }
         }
     }
-    
+}
 
 
+
+
+void Beach_line_BBST::remove(Beach_Line_Item *item){
+    // if the tree is empty, return
+    if(this->root == nullptr){
+        return;
+    }
+
+    // find the item to remove
+    Beach_Line_Item *current = this->root;
+    while(current != nullptr){
+        if(item->getX() == current->getX()){
+            break;
+        }else if(item->getX() < current->getX()){
+            current = current->getLeft();
+        }else{
+            current = current->getRight();
+        }
+    }
+
+    // if item is not found, return
+    if(current == nullptr){
+        return;
+    }
+
+    //if the item has 0 children remove it (case 1)
+    if(current->getLeft() == nullptr && current->getRight() == nullptr){
+        if(current == this->root){
+            this->root = nullptr;
+        }else{
+            if(current->getParent()->getLeft() == current){
+                current->getParent()->setLeft(nullptr);
+            }else{
+                current->getParent()->setRight(nullptr);
+            }
+        }
+        return;
+    }
+
+    //if the item has 1 child the child replaces item (case 2)
+    if(current->getLeft() == nullptr || current->getRight() == nullptr){
+        Beach_Line_Item *child = current->getLeft() == nullptr ? current->getRight() : current->getLeft();
+        if(current == this->root){
+            this->root = child;
+            child->setParent(nullptr);
+        }else{
+            if(current->getParent()->getLeft() == current){
+                current->getParent()->setLeft(child);
+            }else{
+                current->getParent()->setRight(child);
+            }
+            child->setParent(current->getParent());
+        }
+        return;
+    }
+
+    //if the item has 2 children, replace the item with the inorder successor (case 3)
+    //which is the leftmost node in the right subtree. Then delete the in-order successor node as if it has at most one child.
+    Beach_Line_Item *successor = current->getRight();
+    while(successor->getLeft() != nullptr){
+        successor = successor->getLeft();
+    } 
+    //if the successor has a right child, replace item with successor and successor with its right child
+    if(successor->getRight() != nullptr){
+        if(successor->getParent()->getLeft() == successor){
+            successor->getParent()->setLeft(successor->getRight());
+        }else{
+            successor->getParent()->setRight(successor->getRight());
+        }
+        successor->getRight()->setParent(successor->getParent());
+    }
+    //replace item with successor
+    if(current == this->root){
+        this->root = successor;
+        successor->setParent(nullptr);
+    }else{
+        if(current->getParent()->getLeft() == current){
+            current->getParent()->setLeft(successor);
+        }else{
+            current->getParent()->setRight(successor);
+        }
+        successor->setParent(current->getParent());
+    }
+
+    //set the children of the successor to the children of the item
+    successor->setLeft(current->getLeft());
+    current->getLeft()->setParent(successor);
+    successor->setRight(current->getRight());
+    current->getRight()->setParent(successor);
+
+
+}
+
+
+void Beach_line_BBST::printForestViewLatex(Beach_Line_Item *item){
+    if(this->root == nullptr){
+        std::cout << "" << std::endl;
+        return;
+    }
+
+    std::cout << "[" << std::endl;
+    std::cout << "    " << item->getX() << " " << item->getPoint()->y << " " << item->getIsRed() << std::endl;
+    if(item->getLeft() != nullptr){
+        printForestViewLatex(item->getLeft());
+    }else{
+        std::cout << "    " << "null" << std::endl;
+    }
+    if(item->getRight() != nullptr){
+        printForestViewLatex(item->getRight());
+    }else{
+        std::cout << "    " << "null" << std::endl;
+    }
+    std::cout << "]" << std::endl;
 }

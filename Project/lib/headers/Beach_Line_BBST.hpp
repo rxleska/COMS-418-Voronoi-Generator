@@ -17,7 +17,7 @@ class Beach_line_BBST{
         void remove(Beach_Line_Item *item);
         Beach_Line_Item* search(Beach_Line_Item *item);
         Beach_Line_Item* search(double x);
-        char* printForestViewLatex(); //gives the tree as an output readable by latex forest package
+        void printForestViewLatex(Beach_Line_Item *item); //gives the tree as an output readable by latex forest package
         
 };
 

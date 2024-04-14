@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "../lib/headers/Vertex.hpp"
+#include "../lib/Beach_Line_RedBlackTree.cpp"
 
 // This is the main file for the project. It will hopefully read in the data from sites.txt, calculate the voronoi diagram, the delaunay triangulation of the voronoi diagram, and then display the results in a window.
 
@@ -58,6 +59,17 @@ int main(int argc, char* argv[])
     for (int i = 0; i < (int) vertices.size(); i++){
         std::cout << "Vertex " << i << ": (" << vertices[i].x << ", " << vertices[i].y << ")" << std::endl;
     }
+
+
+    // feed the vertices into the red black tree as leaves for testing
+    RBTree tree = RBTree();
+    for (int i = 0; i < (int) vertices.size(); i++){
+        tree.insert(vertices[i].x, &vertices[i]);            
+    }
+
+    tree.printInOrder();
+    tree.forest(tree.getRoot());
+
 
     // Calculate the voronoi diagram of the sites
     

@@ -2,6 +2,7 @@
 // If a beach line item is a leaf node, it represents a arc in the beach line (labeled by a site)
 // If a beach line item is a internal node, it represents a breakpoint in the beach line
 
+
 #include "Beach_Line_Item.hpp"
 
 // Constructors
