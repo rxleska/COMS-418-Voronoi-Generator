@@ -11,11 +11,17 @@
 //string to int function
 int stringToInt(std::string str){
     int result = 0;
-    for (int i = 0; i < (int) str.length(); i++){
+    int sign = 1;
+    int startIndex = 0;
+    if (str[0] == '-') {
+        sign = -1;
+        startIndex = 1;
+    }
+    for (int i = startIndex; i < (int) str.length(); i++){
         result *= 10;
         result += str[i] - '0';
     }
-    return result;
+    return result * sign;
 }
 
 
@@ -33,9 +39,9 @@ int main(int argc, char* argv[])
     std::vector<Vertex> vertices;
     while(!file.eof()){ //while not end of file marker
         //if the next character is a number, read it in 
-        if('0' <= file.peek() && file.peek() <= '9'){
+        if(('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-'){
             std::string num = "";
-            while('0' <= file.peek() && file.peek() <= '9'){
+            while(('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-'){
                 num += file.get();
             }
             if(isLeft){

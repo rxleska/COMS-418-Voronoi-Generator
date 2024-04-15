@@ -617,8 +617,10 @@ public:
 
          //print the tree in latex forest format
     void forest(Node *x){
-        if (x == NULL)
+        if (x == NULL){
+            std::cout << "[" << "null" << "]" << std::endl;
             return;
+        }
         std::cout << "[" << x->val << ":" << (x->color == RED ? "red" : "black");
         forest(x->left);
         forest(x->right);
