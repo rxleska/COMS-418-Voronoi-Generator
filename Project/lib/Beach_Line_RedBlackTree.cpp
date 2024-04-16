@@ -87,7 +87,7 @@ public:
 class RBTree
 {
     Node *root;
-
+    public:
     // left rotates the given node
     void leftRotate(Node *x)
     {

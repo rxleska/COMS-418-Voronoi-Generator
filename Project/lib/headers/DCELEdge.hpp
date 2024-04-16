@@ -1,9 +1,13 @@
 //header file for DCEL edge data structure (Doubly connected edge list edge) (lib/DCELEdge.cpp)
+
+
 #ifndef DCEL_EDGE_HPP
 #define DCEL_EDGE_HPP
 
 #include "Vertex.hpp"
 #include "DCELFace.hpp"
+
+class DCELFace;
 
 class DCELEdge{
     private: 

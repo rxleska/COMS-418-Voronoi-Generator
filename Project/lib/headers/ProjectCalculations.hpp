@@ -3,11 +3,17 @@
 #ifndef PROJECTCALCULATIONS_HPP
 #define PROJECTCALCULATIONS_HPP
 
-#include "headers/DCEL.hpp"
+#include "DCEL.hpp"
+#include "Vertex.hpp"
+#include <vector>
+
+bool comparePoints(Vertex a, Vertex b);
 
 namespace ProjectCalculations{
+    //function to order two points by y-coordinate used when implementing sorting the points in the event queue
+    
     //function to calculate the voronoi diagram
-    DCEL calculateVoronoiDiagram();
+    DCEL calculateVoronoiDiagram(std::vector<Vertex> *points);
     //function to calculate the delaunay triangulation of the voronoi diagram
     DCEL calculateDelaunayTriangulation();
 }
