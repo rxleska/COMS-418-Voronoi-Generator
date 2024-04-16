@@ -32,7 +32,7 @@ public:
     Node *uncle()
     {
         // If no parent or grandparent, then no uncle
-        if (parent == NULL or parent->parent == NULL)
+        if (parent == NULL || parent->parent == NULL)
             return NULL;
 
         if (parent->isOnLeft())
@@ -79,8 +79,8 @@ public:
 
     bool hasRedChild()
     {
-        return (left != NULL and left->color == RED) or
-               (right != NULL and right->color == RED);
+        return (left != NULL && left->color == RED) ||
+               (right != NULL && right->color == RED);
     }
 };
 
@@ -227,11 +227,11 @@ class RBTree
     Node *BSTreplace(Node *x)
     {
         // when node have 2 children
-        if (x->left != NULL and x->right != NULL)
+        if (x->left != NULL && x->right != NULL)
             return successor(x->right);
 
         // when leaf
-        if (x->left == NULL and x->right == NULL)
+        if (x->left == NULL && x->right == NULL)
             return NULL;
 
         // when single child
@@ -247,7 +247,7 @@ class RBTree
         Node *u = BSTreplace(v);
 
         // True when u and v are both black
-        bool uvBlack = ((u == NULL or u->color == BLACK) and (v->color == BLACK));
+        bool uvBlack = ((u == NULL || u->color == BLACK) && (v->color == BLACK));
         Node *parent = v->parent;
 
         if (u == NULL)
@@ -288,7 +288,7 @@ class RBTree
             return;
         }
 
-        if (v->left == NULL or v->right == NULL)
+        if (v->left == NULL || v->right == NULL)
         {
             // v has 1 child
             if (v == root)
@@ -367,7 +367,7 @@ class RBTree
                 if (sibling->hasRedChild())
                 {
                     // at least 1 red children
-                    if (sibling->left != NULL and sibling->left->color == RED)
+                    if (sibling->left != NULL && sibling->left->color == RED)
                     {
                         if (sibling->isOnLeft())
                         {
@@ -548,7 +548,7 @@ public:
     void insert(int n, Vertex *leftarc, Vertex *rightarc)
     {
         Node *newNode = new Node(n);
-        newNode->isLeaf = 1;
+        newNode->isLeaf = 0;
         newNode->leftarc = leftarc;
         newNode->rightarc = rightarc;
         if (root == NULL)
