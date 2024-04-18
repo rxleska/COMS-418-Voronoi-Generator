@@ -12,7 +12,9 @@ enum COLOR
 
 class Node
 {
-public:
+public: //TODO: IDEA: replace val with function call that calcuates the x value at the current height of the sweep line (new nodes have a difference of 0 in y value, so the x value is the same as the site point) (using left value can be calculated by finding the intersection with this node and its left most neighbor) 
+    //TODO OR: recalculate the x value of the nodes on every sweep line update
+    //TODO OR: Store a slope of the line being created at an arc join point
     int val;
     Vertex *point, *leftarc, *rightarc; 
     int isLeaf; 
