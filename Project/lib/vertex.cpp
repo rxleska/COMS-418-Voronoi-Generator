@@ -12,13 +12,13 @@ Vertex::Vertex(){
     id = idCounter;
     idCounter++;
 }
-Vertex::Vertex(int x, int y){
+Vertex::Vertex(double x, double y){
     this->x = x;
     this->y = y;
     id = idCounter;
     idCounter++;
 }
-Vertex::Vertex(int x, int y, int id){
+Vertex::Vertex(double x, double y, int id){
     this->x = x;
     this->y = y;
     this->id = id;
@@ -59,6 +59,6 @@ Vertex Vertex::dot (const Vertex& v){
     result.y = this->y * v.y;
     return result;
 }
-int Vertex::cross (const Vertex& v){
+double Vertex::cross (const Vertex& v){
     return (this->x * v.y) - (this->y * v.x);
 }

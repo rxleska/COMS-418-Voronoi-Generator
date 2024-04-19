@@ -1,636 +1,486 @@
-#include <iostream>
-#include "headers/Vertex.hpp"
+#include "headers/Beach_Line_RedBlackTree.hpp"
 
-#ifndef BEACH_LINE_RBT
-#define BEACH_LINE_RBT
 
-enum COLOR
+// ------------------------------------------------------------
+// -------------------------- Arc -----------------------------
+// ------------------------------------------------------------
+
+Arc::Arc(){
+    focus = Vertex();
+    id = -1;
+}
+
+Arc::Arc(Vertex f, int i){
+    focus = f;
+    id = i;
+}
+
+// ------------------------------------------------------------
+// ----------------------- HalfLine ---------------------------
+// ------------------------------------------------------------
+
+HalfLine::HalfLine(){
+    start = Vertex();
+    end = Vertex();
+    pointsUp = false;
+    leftArc = nullptr;
+    rightArc = nullptr;
+}
+
+HalfLine::HalfLine(Vertex s, Vertex e, bool ex, Arc *l, Arc *r){
+    start = s;
+    end = e;
+    pointsUp = ex;
+    leftArc = l;
+    rightArc = r;
+}
+
+// ------------------------------------------------------------
+// -------------------------- Node ----------------------------
+// ------------------------------------------------------------
+
+Node::Node(){
+    isArc = false;
+    color = BLACK;
+    left = nullptr;
+    right = nullptr;
+    parent = nullptr;
+}
+
+//these are public but for ease of reading they are here as functions
+void Node::SetLeft(Node *n){
+    left = n;
+    if(n != nullptr){
+        n->parent = this;
+    }
+}
+
+void Node::SetRight(Node *n){
+    right = n;
+    if(n != nullptr){
+        n->parent = this;
+    }
+}
+
+void Node::SetParent(Node *n){
+    parent = n;
+}
+
+Node *Node::uncle(){
+    if(parent == nullptr || parent->parent == nullptr){
+        return nullptr;
+    }
+    if(parent->isOnLeft()){
+        return parent->parent->right;
+    }else{
+        return parent->parent->left;
+    }
+}
+
+bool Node::isOnLeft(){
+    return this == parent->left;
+}
+
+Node *Node::sibling(){
+    if(parent == nullptr){
+        return nullptr;
+    }
+    if(isOnLeft()){
+        return parent->right;
+    }
+    return parent->left;
+}
+
+void Node::moveDown(Node *nParent){
+    if(parent != nullptr){
+        if(isOnLeft()){
+            parent->left = nParent;
+        }else{
+            parent->right = nParent;
+        }
+    }
+    nParent->parent = parent;
+    parent = nParent;
+}
+
+bool Node::hasRedChild(){
+    return (left != nullptr && left->color == RED) || (right != nullptr && right->color == RED);
+}
+
+double Node::getEdgeValue(){ //assumes that the node has been checked to be an edge
+    if(this->isArc){
+        throw "Node is not an edge, cannot get edge value";
+    }
+    else if(this->edge.pointsUp){
+        throw "Edge is not downwards, cannot get edge value";
+    }
+    else{
+        //calculate where the line intersects the sweep line 
+        double slToStart = sweepLine - this->edge.start.y;
+        double scaling = slToStart / (this->edge.end.y - this->edge.start.y);
+        double xValue = this->edge.start.x + (scaling * (this->edge.end.x - this->edge.start.x));
+        return xValue;
+    }
+}
+
+// ------------------------------------------------------------
+// -------------- Beach Line Red Black Tree -------------------
+// ------------------------------------------------------------
+
+BeachLineRedBlackTree::BeachLineRedBlackTree(){
+    root = nullptr;
+    size = 0;
+}
+
+Node *BeachLineRedBlackTree::getRoot(){
+    return root;
+}
+
+void BeachLineRedBlackTree::setRoot(Node *n){
+    root = n;
+}
+
+void BeachLineRedBlackTree::rotateLeft(Node *x)
 {
-    RED,
-    BLACK
-};
+    // new parent will be node's right child
+    Node *nParent = x->right;
 
-class Node
+    // update root if current node is root
+    if (x == root)
+        root = nParent;
+
+    x->moveDown(nParent);
+
+    // connect x with new parent's left element
+    x->right = nParent->left;
+    // connect new parent's left element with node
+    // if it is not null
+    if (nParent->left != nullptr)
+        nParent->left->parent = x;
+
+    // connect new parent with x
+    nParent->left = x;
+}
+
+void BeachLineRedBlackTree::rotateRight(Node *x)
 {
-public: //TODO: IDEA: replace val with function call that calcuates the x value at the current height of the sweep line (new nodes have a difference of 0 in y value, so the x value is the same as the site point) (using left value can be calculated by finding the intersection with this node and its left most neighbor) 
-    //TODO OR: recalculate the x value of the nodes on every sweep line update
-    //TODO OR: Store a slope of the line being created at an arc join point
-    int val;
-    Vertex *point, *leftarc, *rightarc; 
-    int isLeaf; 
-    COLOR color;
-    Node *left, *right, *parent;
+    // new parent will be node's left child
+    Node *nParent = x->left;
 
-    Node(int val) : val(val)
-    {
-        parent = left = right = NULL;
+    // update root if current node is root
+    if (x == root)
+        root = nParent;
 
-        // Node is created during insertion
-        // Node is red at insertion
-        color = RED;
+    x->moveDown(nParent);
+
+    // connect x with new parent's right element
+    x->left = nParent->right;
+    // connect new parent's right element with node
+    // if it is not null
+    if (nParent->right != nullptr)
+        nParent->right->parent = x;
+
+    // connect new parent with x
+    nParent->right = x;
+}
+
+void BeachLineRedBlackTree::swapColors(Node *x1, Node *x2)
+{
+    COLOR temp;
+    temp = x1->color;
+    x1->color = x2->color;
+    x2->color = temp;
+}
+
+void BeachLineRedBlackTree::swapValues(Node *u, Node *v)
+{
+    //fill temp with u's values
+    Node temp;
+    if(u->isArc){
+        temp.isArc = true;
+        temp.arc = u->arc;
+        temp.color = u->color;
+    }
+    else{
+        temp.isArc = false;
+        temp.edge = u->edge;
+        temp.color = u->color;
     }
 
-    // returns pointer to uncle
-    Node *uncle()
-    {
-        // If no parent or grandparent, then no uncle
-        if (parent == NULL || parent->parent == NULL)
-            return NULL;
+    //fill u with v's values
+    if(v->isArc){
+        u->isArc = true;
+        u->arc = v->arc;
+        u->color = v->color;
+    }
+    else{
+        u->isArc = false;
+        u->edge = v->edge;
+        u->color = v->color;
+    }
 
-        if (parent->isOnLeft())
-            // uncle on right
-            return parent->parent->right;
+    //fill v with temp's values (u's values)
+    if(temp.isArc){
+        v->isArc = true;
+        v->arc = temp.arc;
+        v->color = temp.color;
+    }
+    else{
+        v->isArc = false;
+        v->edge = temp.edge;
+        v->color = temp.color;
+    }
+}
+
+void BeachLineRedBlackTree::fixRedRed(Node *x){
+    // if x is root color it black and return
+    if (x == root)
+    {
+        x->color = BLACK;
+        return;
+    }
+
+    // initialize parent, grandparent, uncle
+    Node *parent = x->parent, *grandparent = parent->parent,
+            *uncle = x->uncle();
+
+    if (parent->color != BLACK)
+    {
+        if (uncle != nullptr && uncle->color == RED)
+        {
+            // uncle red, perform recoloring and recurse
+            parent->color = BLACK;
+            uncle->color = BLACK;
+            grandparent->color = RED;
+            fixRedRed(grandparent);
+        }
         else
-            // uncle on left
-            return parent->parent->left;
-    }
-
-    // check if node is left child of parent
-    bool isOnLeft() { return this == parent->left; }
-
-    // returns pointer to sibling
-    Node *sibling()
-    {
-        // sibling null if no parent
-        if (parent == NULL)
-            return NULL;
-
-        if (isOnLeft())
-            return parent->right;
-
-        return parent->left;
-    }
-
-    // moves node down and moves given node in its place
-    void moveDown(Node *nParent)
-    {
-        if (parent != NULL)
         {
-            if (isOnLeft())
+            // Else perform LR, LL, RL, RR
+            if (parent->isOnLeft())
             {
-                parent->left = nParent;
-            }
-            else
-            {
-                parent->right = nParent;
-            }
-        }
-        nParent->parent = parent;
-        parent = nParent;
-    }
-
-    bool hasRedChild()
-    {
-        return (left != NULL && left->color == RED) ||
-               (right != NULL && right->color == RED);
-    }
-};
-
-class RBTree
-{
-    Node *root;
-    public:
-    // left rotates the given node
-    void leftRotate(Node *x)
-    {
-        // new parent will be node's right child
-        Node *nParent = x->right;
-
-        // update root if current node is root
-        if (x == root)
-            root = nParent;
-
-        x->moveDown(nParent);
-
-        // connect x with new parent's left element
-        x->right = nParent->left;
-        // connect new parent's left element with node
-        // if it is not null
-        if (nParent->left != NULL)
-            nParent->left->parent = x;
-
-        // connect new parent with x
-        nParent->left = x;
-    }
-
-    void rightRotate(Node *x)
-    {
-        // new parent will be node's left child
-        Node *nParent = x->left;
-
-        // update root if current node is root
-        if (x == root)
-            root = nParent;
-
-        x->moveDown(nParent);
-
-        // connect x with new parent's right element
-        x->left = nParent->right;
-        // connect new parent's right element with node
-        // if it is not null
-        if (nParent->right != NULL)
-            nParent->right->parent = x;
-
-        // connect new parent with x
-        nParent->right = x;
-    }
-
-    void swapColors(Node *x1, Node *x2)
-    {
-        COLOR temp;
-        temp = x1->color;
-        x1->color = x2->color;
-        x2->color = temp;
-    }
-
-    void swapValues(Node *u, Node *v)
-    {
-        int temp;
-        temp = u->val;
-        u->val = v->val;
-        v->val = temp;
-    }
-
-    // fix red red at given node
-    void fixRedRed(Node *x)
-    {
-        // if x is root color it black and return
-        if (x == root)
-        {
-            x->color = BLACK;
-            return;
-        }
-
-        // initialize parent, grandparent, uncle
-        Node *parent = x->parent, *grandparent = parent->parent,
-             *uncle = x->uncle();
-
-        if (parent->color != BLACK)
-        {
-            if (uncle != NULL && uncle->color == RED)
-            {
-                // uncle red, perform recoloring and recurse
-                parent->color = BLACK;
-                uncle->color = BLACK;
-                grandparent->color = RED;
-                fixRedRed(grandparent);
-            }
-            else
-            {
-                // Else perform LR, LL, RL, RR
-                if (parent->isOnLeft())
+                if (x->isOnLeft())
                 {
-                    if (x->isOnLeft())
-                    {
-                        // for left right
-                        swapColors(parent, grandparent);
-                    }
-                    else
-                    {
-                        leftRotate(parent);
-                        swapColors(x, grandparent);
-                    }
-                    // for left left and left right
-                    rightRotate(grandparent);
+                    // for left right
+                    swapColors(parent, grandparent);
                 }
                 else
                 {
-                    if (x->isOnLeft())
-                    {
-                        // for right left
-                        rightRotate(parent);
-                        swapColors(x, grandparent);
-                    }
-                    else
-                    {
-                        swapColors(parent, grandparent);
-                    }
-
-                    // for right right and right left
-                    leftRotate(grandparent);
+                    rotateLeft(parent);
+                    swapColors(x, grandparent);
                 }
+                // for left left and left right
+                rotateRight(grandparent);
+            }
+            else
+            {
+                if (x->isOnLeft())
+                {
+                    // for right left
+                    rotateRight(parent);
+                    swapColors(x, grandparent);
+                }
+                else
+                {
+                    swapColors(parent, grandparent);
+                }
+
+                // for right right and right left
+                rotateLeft(grandparent);
             }
         }
     }
+}
 
-    // find node that do not have a left child
-    // in the subtree of the given node
-    Node *successor(Node *x)
+Node *BeachLineRedBlackTree::successor(Node *x){
+    Node *temp = x;
+
+    while (temp->left != nullptr)
+        temp = temp->left;
+
+    return temp;
+}
+
+Node *BeachLineRedBlackTree::BSTreplace(Node *x){
+    // when node have 2 children
+    if (x->left != nullptr && x->right != nullptr)
+        return successor(x->right);
+
+    // when leaf
+    if (x->left == nullptr && x->right == nullptr)
+        return nullptr;
+
+    // when single child
+    if (x->left != nullptr)
+        return x->left;
+    else
+        return x->right;
+}
+
+void BeachLineRedBlackTree::deleteNode(Node *v){
+    Node *u = BSTreplace(v);
+
+    // True when u and v are both black
+    bool uvBlack = ((u == nullptr || u->color == BLACK) && (v->color == BLACK));
+    Node *parent = v->parent;
+
+    if (u == nullptr)
     {
-        Node *temp = x;
-
-        while (temp->left != NULL)
-            temp = temp->left;
-
-        return temp;
-    }
-
-    // find node that replaces a deleted node in BST
-    Node *BSTreplace(Node *x)
-    {
-        // when node have 2 children
-        if (x->left != NULL && x->right != NULL)
-            return successor(x->right);
-
-        // when leaf
-        if (x->left == NULL && x->right == NULL)
-            return NULL;
-
-        // when single child
-        if (x->left != NULL)
-            return x->left;
+        // u is NULL therefore v is leaf
+        if (v == root)
+        {
+            // v is root, making root null
+            root = nullptr;
+        }
         else
-            return x->right;
-    }
-
-    // deletes the given node
-    void deleteNode(Node *v)
-    {
-        Node *u = BSTreplace(v);
-
-        // True when u and v are both black
-        bool uvBlack = ((u == NULL || u->color == BLACK) && (v->color == BLACK));
-        Node *parent = v->parent;
-
-        if (u == NULL)
         {
-            // u is NULL therefore v is leaf
-            if (v == root)
+            if (uvBlack)
             {
-                // v is root, making root null
-                root = NULL;
+                // u and v both black
+                // v is leaf, fix double black at v
+                fixDoubleBlack(v);
             }
             else
             {
-                if (uvBlack)
-                {
-                    // u and v both black
-                    // v is leaf, fix double black at v
-                    fixDoubleBlack(v);
-                }
-                else
-                {
-                    // u or v is red
-                    if (v->sibling() != NULL)
-                        // sibling is not null, make it red"
-                        v->sibling()->color = RED;
-                }
+                // u or v is red
+                if (v->sibling() != nullptr)
+                    // sibling is not null, make it red"
+                    v->sibling()->color = RED;
+            }
 
-                // delete v from the tree
-                if (v->isOnLeft())
-                {
-                    parent->left = NULL;
-                }
-                else
-                {
-                    parent->right = NULL;
-                }
+            // delete v from the tree
+            if (v->isOnLeft())
+            {
+                parent->left = nullptr;
+            }
+            else
+            {
+                parent->right = nullptr;
+            }
+        }
+        delete v;
+        this->size--;
+        return;
+    }
+
+    if (v->left == nullptr || v->right == nullptr)
+    {
+        // v has 1 child
+        if (v == root)
+        {
+            // v is root, assign the value of u to v, and delete u
+            swapValues(v, u);
+            // v->val = u->val; // this is from when the code evaulated with a value
+            v->left = v->right = nullptr;
+            delete u;
+        }
+        else
+        {
+            // Detach v from tree and move u up
+            if (v->isOnLeft())
+            {
+                parent->left = u;
+            }
+            else
+            {
+                parent->right = u;
             }
             delete v;
-            return;
-        }
-
-        if (v->left == NULL || v->right == NULL)
-        {
-            // v has 1 child
-            if (v == root)
+            u->parent = parent;
+            if (uvBlack)
             {
-                // v is root, assign the value of u to v, and delete u
-                v->val = u->val;
-                v->left = v->right = NULL;
-                delete u;
+                // u and v both black, fix double black at u
+                fixDoubleBlack(u);
             }
             else
             {
-                // Detach v from tree and move u up
-                if (v->isOnLeft())
-                {
-                    parent->left = u;
-                }
-                else
-                {
-                    parent->right = u;
-                }
-                delete v;
-                u->parent = parent;
-                if (uvBlack)
-                {
-                    // u and v both black, fix double black at u
-                    fixDoubleBlack(u);
-                }
-                else
-                {
-                    // u or v red, color u black
-                    u->color = BLACK;
-                }
+                // u or v red, color u black
+                u->color = BLACK;
             }
-            return;
         }
-
-        // v has 2 children, swap values with successor and recurse
-        swapValues(u, v);
-        deleteNode(u);
+        return;
     }
 
-    void fixDoubleBlack(Node *x)
-    {
-        if (x == root)
-            // Reached root
-            return;
+    // v has 2 children, swap values with successor and recurse
+    swapValues(u, v);
+    deleteNode(u);
+}
 
-        Node *sibling = x->sibling(), *parent = x->parent;
-        if (sibling == NULL)
-        {
-            // No sibling, double black pushed up
-            fixDoubleBlack(parent);
+Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't return an edge, TODO add degenerate case check in insert
+    Node *temp = root;
+    while(temp != nullptr){
+        if(temp->isArc){
+            return temp;
         }
-        else
-        {
-            if (sibling->color == RED)
-            {
-                // Sibling red
-                parent->color = RED;
-                sibling->color = BLACK;
-                if (sibling->isOnLeft())
-                {
-                    // left case
-                    rightRotate(parent);
-                }
-                else
-                {
-                    // right case
-                    leftRotate(parent);
-                }
-                fixDoubleBlack(x);
+        else{
+            if(temp->getEdgeValue() == x){
+                return temp;
             }
-            else
-            {
-                // Sibling black
-                if (sibling->hasRedChild())
-                {
-                    // at least 1 red children
-                    if (sibling->left != NULL && sibling->left->color == RED)
-                    {
-                        if (sibling->isOnLeft())
-                        {
-                            // left left
-                            sibling->left->color = sibling->color;
-                            sibling->color = parent->color;
-                            rightRotate(parent);
-                        }
-                        else
-                        {
-                            // right left
-                            sibling->left->color = parent->color;
-                            rightRotate(sibling);
-                            leftRotate(parent);
-                        }
-                    }
-                    else
-                    {
-                        if (sibling->isOnLeft())
-                        {
-                            // left right
-                            sibling->right->color = parent->color;
-                            leftRotate(sibling);
-                            rightRotate(parent);
-                        }
-                        else
-                        {
-                            // right right
-                            sibling->right->color = sibling->color;
-                            sibling->color = parent->color;
-                            leftRotate(parent);
-                        }
-                    }
-                    parent->color = BLACK;
-                }
-                else
-                {
-                    // 2 black children
-                    sibling->color = RED;
-                    if (parent->color == BLACK)
-                        fixDoubleBlack(parent);
-                    else
-                        parent->color = BLACK;
-                }
+            else if(temp->getEdgeValue() < x){
+                temp = temp->right;
+            }
+            else{
+                temp = temp->left;
             }
         }
     }
+    return nullptr;
+}
 
 
+void BeachLineRedBlackTree::insert(Vertex v){
+    //this is a specialized insert for the beach line
+    //this will insert an arc into the beach line, edge creation will be handled in this function as well
 
-    // prints inorder recursively
-    void inorder(Node *x)
-    {
-        if (x == NULL)
-            return;
-        inorder(x->left);
-        std::cout << x->val << " ";
-        inorder(x->right);
-    }
-   
-
-
-
-public:
-    // constructor
-    // initialize root
-    RBTree() { root = NULL; }
-
-    Node *getRoot() { return root; }
-
-    // searches for given value
-    // if found returns the node (used for delete)
-    // else returns the last node while traversing (used in insert)
-    Node *search(int n)
-    {
-        Node *temp = root;
-        while (temp != NULL)
-        {
-            if (n < temp->val)
-            {
-                if (temp->left == NULL)
-                    break;
-                else
-                    temp = temp->left;
-            }
-            else if (n == temp->val)
-            {
-                break;
-            }
-            else
-            {
-                if (temp->right == NULL)
-                    break;
-                else
-                    temp = temp->right;
-            }
-        }
-
-        return temp;
+    //if root is null, create a new node and insert it as root
+    if(root == nullptr){
+        Node *newNode = new Node();
+        newNode->isArc = true;
+        newNode->arc = Arc(v, v.id);
+        newNode->color = BLACK;
+        root = newNode;
+        return;
     }
 
-    // inserts the given value to tree
-    void insert(int n)
-    {
-        Node *newNode = new Node(n);
-        if (root == NULL)
-        {
-            // when root is null
-            // simply insert value at root
-            newNode->color = BLACK;
-            root = newNode;
-        }
-        else
-        {
-            Node *temp = search(n);
 
-            if (temp->val == n)
-            {
-                // return if value already exists
-                return;
-            }
 
-            // if value is not found, search returns the node
-            // where the value is to be inserted
+    //search the tree for the arc that is above the point
+    Node *above = search(v.x);
 
-            // connect new node to correct node
-            newNode->parent = temp;
-
-            if (n < temp->val)
-                temp->left = newNode;
-            else
-                temp->right = newNode;
-
-            // fix red red violation if exists
-            fixRedRed(newNode);
-        }
+    //sanity check that it is an arc
+    if(above == nullptr){
+        throw "Error: The node above the point is undefined";
+    }
+    if(!above->isArc){ //TODO Replace with new edge on each intersection degenerate case
+        throw "Error: The node above the point is not an arc";
     }
 
-    // inserts the given value to tree
-    void insert(int n, Vertex *point)
-    {
-        Node *newNode = new Node(n);
-        newNode->isLeaf = 1;
-        newNode->point = point;
-        if (root == NULL)
-        {
-            // when root is null
-            // simply insert value at root
-            newNode->color = BLACK;
-            root = newNode;
-        }
-        else
-        {
-            Node *temp = search(n);
+    //Remove the arc above the point, replace it the new arc the 2 split arcs and the new edges from the split
+    Node *newArcLeft = new Node();
+    Node *newArcCenter = new Node();
+    Node *newArcRight = new Node();
+    Node *newEdgeLeft = new Node();
+    Node *newEdgeRight = new Node();
 
-            if (temp->val == n)
-            {
-                // return if value already exists
-                return;
-            }
+    //from this point forward we know that above is an arc
+    COLOR arcColor = above->color;
 
-            // if value is not found, search returns the node
-            // where the value is to be inserted
+    //Assign left and right to use the same vertex as the arc above
+    newArcLeft->isArc = true;
+    newArcLeft->arc = Arc(above->arc.focus, above->arc.id);
+    newArcRight->isArc = true;
+    newArcRight->arc = Arc(above->arc.focus, above->arc.id);
 
-            // connect new node to correct node
-            newNode->parent = temp;
+    //Assign newArcCenter to the new vertex
+    newArcCenter->isArc = true;
+    newArcCenter->arc = Arc(v, v.id);   
 
-            if (n < temp->val)
-                temp->left = newNode;
-            else
-                temp->right = newNode;
 
-            // fix red red violation if exists
-            fixRedRed(newNode);
-        }
-    }
-    // inserts the given value to tree
-    void insert(int n, Vertex *leftarc, Vertex *rightarc)
-    {
-        Node *newNode = new Node(n);
-        newNode->isLeaf = 0;
-        newNode->leftarc = leftarc;
-        newNode->rightarc = rightarc;
-        if (root == NULL)
-        {
-            // when root is null
-            // simply insert value at root
-            newNode->color = BLACK;
-            root = newNode;
-        }
-        else
-        {
-            Node *temp = search(n);
 
-            if (temp->val == n)
-            {
-                // return if value already exists
-                return;
-            }
 
-            // if value is not found, search returns the node
-            // where the value is to be inserted
 
-            // connect new node to correct node
-            newNode->parent = temp;
 
-            if (n < temp->val)
-                temp->left = newNode;
-            else
-                temp->right = newNode;
 
-            // fix red red violation if exists
-            fixRedRed(newNode);
-        }
-    }
 
-    // utility function that deletes the node with given value
-    void deleteByVal(int n)
-    {
-        if (root == NULL)
-            // Tree is empty
-            return;
+}
 
-        Node *v = search(n), *u;
-
-        u = u;
-
-        if (v->val != n)
-        {
-            std::cout << "No node found to delete with value:" << n << std::endl;
-            return;
-        }
-
-        deleteNode(v);
-    }
-
-    // prints inorder of the tree
-    void printInOrder()
-    {
-        std::cout << "Inorder: " << std::endl;
-        if (root == NULL)
-            std::cout << "Tree is empty" << std::endl;
-        else
-            inorder(root);
-        std::cout << std::endl;
-    }
-
-         //print the tree in latex forest format
-    void forest(Node *x){
-        if (x == NULL){
-            std::cout << "[" << "null" << "]" << std::endl;
-            return;
-        }
-        std::cout << "[" << x->val << ":" << (x->color == RED ? "red" : "black");
-        forest(x->left);
-        forest(x->right);
-        std::cout << "]" << std::endl;
-
-    }
-    
-
-};
-
-#endif

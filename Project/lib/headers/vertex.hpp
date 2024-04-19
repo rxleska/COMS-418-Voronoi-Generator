@@ -7,12 +7,12 @@ class Vertex{
     private:
         static int idCounter;
     public:
-        int x;
-        int y;
+        double x;
+        double y;
         int id; //unique id for each vertex
         Vertex();
-        Vertex(int x, int y);
-        Vertex(int x, int y, int id);
+        Vertex(double x, double y);
+        Vertex(double x, double y, int id);
         //overload the + operator
         Vertex operator+(const Vertex& v);
         //overload the - operator
@@ -22,7 +22,7 @@ class Vertex{
         //overload the / operator
         Vertex operator/(const int& i);
         Vertex dot (const Vertex& v);
-        int cross (const Vertex& v);
+        double cross (const Vertex& v);
 };
 
 #endif
