@@ -1,7 +1,8 @@
 #include <iostream>
 #include "headers/Vertex.hpp"
+#include "headers/ProjectCalculations.hpp"
 
-#ifndef BEACH_LINE_RBT
+#ifndef BEACH_LINE_RBT 
 #define BEACH_LINE_RBT
 
 enum COLOR
@@ -12,16 +13,30 @@ enum COLOR
 
 class Node
 {
-public: //TODO: IDEA: replace val with function call that calcuates the x value at the current height of the sweep line (new nodes have a difference of 0 in y value, so the x value is the same as the site point) (using left value can be calculated by finding the intersection with this node and its left most neighbor) 
-    //TODO OR: recalculate the x value of the nodes on every sweep line update
-    //TODO OR: Store a slope of the line being created at an arc join point
-    int val;
-    Vertex *point, *leftarc, *rightarc; 
-    int isLeaf; 
+public: 
+
+    //implementation idea let leaves be assumed to exist stored in the vertices of the arcs
+    //instead of comparing a value then updating the value, store a line that the arc left side is on, use this line to compare the arcs at the given sweep line height
+    //could always add the leaves back using val
+
+
+    float val;
+    bool isArc;
+    Vertex *leftarc, *rightarc; 
     COLOR color;
     Node *left, *right, *parent;
+    float slope, intercept;
 
-    Node(int val) : val(val)
+    Node() : val(-183484516925440.0), isArc(true) //note I am using an arbitrary value to represent the negative infinity
+    {
+        parent = left = right = NULL;
+
+        // Node is created during insertion
+        // Node is red at insertion
+        color = RED;
+    }
+
+    Node(float val) : val(val), isArc(false)
     {
         parent = left = right = NULL;
 
@@ -44,6 +59,43 @@ public: //TODO: IDEA: replace val with function call that calcuates the x value 
             // uncle on left
             return parent->parent->left;
     }
+
+    //returns pointer to next left node from the current node
+    Node *nextLeft(){
+        //if no left child, return parent, if no parent return null or if parent is right of this node (parent->left = this)
+        if(left == NULL){
+            if(parent == NULL || parent->left == this){
+                return NULL;
+            }
+            return parent;
+        }
+        //if left child exists, return the rightmost child of the left child
+        Node *temp = left;
+        while(temp->right != NULL){
+            temp = temp->right;
+        }
+        return temp;
+    }
+
+    //returns pointer to next right node from the current node
+    Node *nextRight(){
+        //if no right child, return parent, if no parent return null or if parent is left of this node (parent->right = this)
+        if(right == NULL){
+            if(parent == NULL || parent->right == this){
+                return NULL;
+            }
+            return parent;
+        }
+        //if right child exists, return the leftmost child of the right child
+        Node *temp = right;
+        while(temp->left != NULL){
+            temp = temp->left;
+        }
+        return temp;
+    }
+
+
+
 
     // check if node is left child of parent
     bool isOnLeft() { return this == parent->left; }
@@ -84,12 +136,61 @@ public: //TODO: IDEA: replace val with function call that calcuates the x value 
         return (left != NULL && left->color == RED) ||
                (right != NULL && right->color == RED);
     }
+
+
+    float getVal(){
+        if(isArc){
+            //calculate the x value of the arc at the sweep line y,
+            // y=mx + b => x = (y-b)/m
+            if(slope == 0){
+                return leftarc->x; //this is used when there is only 1 arc in the beach line
+            }
+
+            float result = (sweepLine - intercept) / slope;
+            return result;
+        }
+        else{
+            return val;
+        }
+    }
+
+    void swapStoredValues(Node* u){
+
+        //load into temp
+        Node* temp = new Node();
+        temp->slope = this->slope;
+        temp->intercept = this->intercept;
+        temp->leftarc = this->leftarc;
+        temp->rightarc = this->rightarc;
+        temp->val = this->val;
+        temp->isArc = this->isArc;
+
+        //u into this
+        this->slope = u->slope;
+        this->intercept = u->intercept;
+        this->leftarc = u->leftarc;
+        this->rightarc = u->rightarc;
+        this->val = u->val;
+        this->isArc = u->isArc;
+
+        //temp into u
+        u->slope = temp->slope;
+        u->intercept = temp->intercept;
+        u->leftarc = temp->leftarc;
+        u->rightarc = temp->rightarc;
+        u->val = temp->val;
+        u->isArc = temp->isArc;
+    }
+
+
 };
 
 class RBTree
 {
     Node *root;
     public:
+        int count = 0;
+
     // left rotates the given node
     void leftRotate(Node *x)
     {
@@ -145,10 +246,7 @@ class RBTree
 
     void swapValues(Node *u, Node *v)
     {
-        int temp;
-        temp = u->val;
-        u->val = v->val;
-        v->val = temp;
+        u->swapStoredValues(v);
     }
 
     // fix red red at given node
@@ -297,6 +395,12 @@ class RBTree
             {
                 // v is root, assign the value of u to v, and delete u
                 v->val = u->val;
+                v->isArc = u->isArc;
+                v->leftarc = u->leftarc;
+                v->rightarc = u->rightarc;
+                v->slope = u->slope;
+                v->intercept = u->intercept;
+
                 v->left = v->right = NULL;
                 delete u;
             }
@@ -426,7 +530,7 @@ class RBTree
         if (x == NULL)
             return;
         inorder(x->left);
-        std::cout << x->val << " ";
+        std::cout << x->getVal() << " ";
         inorder(x->right);
     }
    
@@ -448,14 +552,14 @@ public:
         Node *temp = root;
         while (temp != NULL)
         {
-            if (n < temp->val)
+            if (n < temp->getVal())
             {
                 if (temp->left == NULL)
                     break;
                 else
                     temp = temp->left;
             }
-            else if (n == temp->val)
+            else if (n == temp->getVal())
             {
                 break;
             }
@@ -472,7 +576,7 @@ public:
     }
 
     // inserts the given value to tree
-    void insert(int n)
+    void insert(float n)
     {
         Node *newNode = new Node(n);
         if (root == NULL)
@@ -486,7 +590,7 @@ public:
         {
             Node *temp = search(n);
 
-            if (temp->val == n)
+            if (temp->getVal() == n)
             {
                 // return if value already exists
                 return;
@@ -498,7 +602,7 @@ public:
             // connect new node to correct node
             newNode->parent = temp;
 
-            if (n < temp->val)
+            if (n < temp->getVal())
                 temp->left = newNode;
             else
                 temp->right = newNode;
@@ -508,12 +612,9 @@ public:
         }
     }
 
-    // inserts the given value to tree
-    void insert(int n, Vertex *point)
+    void insert(Vertex *newPoint) //Goal: remove the current arc at this point replacing it with 3 new arcs 
     {
-        Node *newNode = new Node(n);
-        newNode->isLeaf = 1;
-        newNode->point = point;
+        Node *newNode = new Node();
         if (root == NULL)
         {
             // when root is null
@@ -523,36 +624,46 @@ public:
         }
         else
         {
-            Node *temp = search(n);
+            Node *temp = search(newPoint->x);
 
-            if (temp->val == n)
+            if (temp->getVal() == newPoint->x)
             {
-                // return if value already exists
+                // TODO: I believe this is one of the edge cases where the new arc lands on an intersection point, will fix later
                 return;
             }
 
-            // if value is not found, search returns the node
-            // where the value is to be inserted
+            // if value is found, check if it is the left breakpoint or the right breakpoint
+            if (newPoint->x < temp->getVal()){// right breakpoint
+                //need to also get the next left arc
+                Node *nLeft = temp->nextLeft();
+                Node *nRight = temp; // for readability
 
-            // connect new node to correct node
-            newNode->parent = temp;
+                //replace nLeft right arc with newPoint
+                nLeft->rightarc = newPoint;
+                //replace nRight left arc with newPoint
+                nRight->leftarc = newPoint;
 
-            if (n < temp->val)
-                temp->left = newNode;
-            else
-                temp->right = newNode;
+
+                //create the new arcs
+                //going left and going right 
+
+
+            }
+            else{ //left breakpoint
+                //need to also get the next right arc
+                Node *nLeft = temp; // for readability
+                Node *nRight = temp->nextRight();
+                
+            }
 
             // fix red red violation if exists
             fixRedRed(newNode);
         }
     }
-    // inserts the given value to tree
-    void insert(int n, Vertex *leftarc, Vertex *rightarc)
+
+    void insert(Vertex *newPoint, float leftmostX) //special case, used to insert the first arc into the beach line
     {
-        Node *newNode = new Node(n);
-        newNode->isLeaf = 0;
-        newNode->leftarc = leftarc;
-        newNode->rightarc = rightarc;
+        Node *newNode = new Node();
         if (root == NULL)
         {
             // when root is null
@@ -564,7 +675,7 @@ public:
         {
             Node *temp = search(n);
 
-            if (temp->val == n)
+            if (temp->getVal() == n)
             {
                 // return if value already exists
                 return;
@@ -576,7 +687,7 @@ public:
             // connect new node to correct node
             newNode->parent = temp;
 
-            if (n < temp->val)
+            if (n < temp->getVal())
                 temp->left = newNode;
             else
                 temp->right = newNode;
@@ -597,7 +708,7 @@ public:
 
         u = u;
 
-        if (v->val != n)
+        if (v->getVal() != n)
         {
             std::cout << "No node found to delete with value:" << n << std::endl;
             return;
@@ -623,7 +734,7 @@ public:
             std::cout << "[" << "null" << "]" << std::endl;
             return;
         }
-        std::cout << "[" << x->val << ":" << (x->color == RED ? "red" : "black");
+        std::cout << "[" << x->getVal() << ":" << (x->color == RED ? "red" : "black");
         forest(x->left);
         forest(x->right);
         std::cout << "]" << std::endl;
@@ -632,5 +743,6 @@ public:
     
 
 };
+
 
 #endif

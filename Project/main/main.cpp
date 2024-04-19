@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
     file.close();
 
 
+
     //print out the vertices
     // for (int i = 0; i < (int) vertices.size(); i++){
     //     std::cout << "Vertex " << i << ": (" << vertices[i].x << ", " << vertices[i].y << ")" << std::endl;

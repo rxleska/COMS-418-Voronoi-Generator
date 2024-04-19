@@ -7,6 +7,8 @@
 #include "Vertex.hpp"
 #include <vector>
 
+static float sweepLine = 0;
+
 bool comparePoints(Vertex a, Vertex b);
 
 namespace ProjectCalculations{
