@@ -475,6 +475,24 @@ void BeachLineRedBlackTree::insert(Vertex v){
     newArcCenter->isArc = true;
     newArcCenter->arc = Arc(v, v.id);   
 
+    //
+    newEdgeLeft->isArc = false;
+    newEdgeRight->isArc = false;
+
+    //Calculate the new edges half edges
+    //Note arc can be found using the following formula y = (x-xFocus)^2/(2(yFocus-ySweep)) + 0.5*(yfocus + ySweep)
+    //same starting point (point on the arc at the given x for the previous arcs focus point the current sweep line y)
+    double sharedx = v.x;
+    double sharedy = (sharedx - above->arc.focus.x)*(sharedx - above->arc.focus.x)/(2*(above->arc.focus.y - sweepLine)) + 0.5*(above->arc.focus.y + sweepLine);
+    Vertex shared(sharedx, sharedy);
+    newEdgeLeft->edge.start = shared;
+    newEdgeRight->edge.start = shared;
+
+    //calculate a the left intersection after 5 (arbitrary) units 
+    //derived this formula on paper and then implemented it here
+    //
+    
+
 
 
 
