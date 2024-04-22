@@ -11,6 +11,8 @@
 
 extern double sweepLine;
 
+class Event;
+
 enum BeachLineNodeType
 {
     None, //used to confirm the value has been set
@@ -101,6 +103,7 @@ class BeachLineRedBlackTree{
         double getParabolaYAtX(double xf, double yf, double ysweep, double x); //gets the y value of a parabola at a given x value
         void insert(Vertex v, std::vector<Event> *eventQueue); //this is a specialized insert for the beach line
         void checkCircleEvent(Node *x, std::vector<Event> *eventQueue); //checks for circle events
+        void handleCircleEvent(Event *e, std::vector<Event> *eventQueue);
         void printTreeForest(Node *root);
 };
 

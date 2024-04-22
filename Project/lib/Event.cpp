@@ -4,20 +4,52 @@
 
 #include "headers/Event.hpp"
 
+CircleEvent::CircleEvent(Node *leftEdge, Node *rightEdge, Node *pinchingArc){
+    this->leftEdge = leftEdge;
+    this->rightEdge = rightEdge;
+    this->pinchingArc = pinchingArc;
+}
+
+CircleEvent::~CircleEvent(){
+    //TODO check if we want to delete any of these nodes on circle event deletion
+    //delete this->leftEdge;
+    //delete this->rightEdge;
+    //delete this->pinchingArc;
+}
+
 
 Event::Event(){
     this->type = -1;
     this->point = nullptr;
 }
 
-Event::Event(int type, Vertex *point){
-    this->type = type;
+Event::Event(Vertex *point){
+    this->type = 0;
     this->point = point;
+}
+
+Event::Event(CircleEvent *circleEvent){
+    this->type = 1;
+    this->circleEvent = circleEvent;
+}
+
+Event::Event(Vertex *point, Node *leftEdge, Node *rightEdge, Node *pinchingArc){
+    this->type = 1;
+    this->point = point;
+    this->circleEvent = new CircleEvent(leftEdge, rightEdge, pinchingArc);
 }
 
 Event::Event(Event const &event){
     this->type = event.type;
+    if(this->type == 1)
+        this->circleEvent = new CircleEvent(event.circleEvent->leftEdge, event.circleEvent->rightEdge, event.circleEvent->pinchingArc);
     this->point = event.point;
+}
+
+Event::~Event(){
+    // if(this->type == 1){
+    //     delete this->circleEvent;
+    // }
 }
 
 int Event::getType(){
@@ -28,6 +60,10 @@ Vertex* Event::getPoint(){
     return this->point;
 }
 
+CircleEvent* Event::getCircleEvent(){
+    return this->circleEvent;
+}
+
 void Event::setType(int type){
     this->type = type;
 }
@@ -36,3 +72,6 @@ void Event::setPoint(Vertex *point){
     this->point = point;
 }
 
+void Event::setCircleEvent(CircleEvent *circleEvent){
+    this->circleEvent = circleEvent;
+}

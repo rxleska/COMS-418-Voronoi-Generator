@@ -26,7 +26,7 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
 
     // Fill Event Queue with starting points (sites) // given the feed in it becomes top to bottom right to left
     for (std::vector<Vertex>::iterator it = points->begin(); it != points->end(); ++it){ 
-        eventQueue.push_back(Event(0, &(*it)));
+        eventQueue.push_back(Event(&(*it)));
         std::push_heap(eventQueue.begin(), eventQueue.end(), Compare());
     }
 
@@ -49,6 +49,11 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
             // beachline.printTreeForest(beachline.getRoot());
         }else{
             // Circle event
+            //temp print out circle event reached for now
+            std::cout << "Circle Event at: " << e.getPoint()->x << " " << e.getPoint()->y << std::endl;
+
+            beachline.handleCircleEvent(&e, &eventQueue);
+
             // Remove the circle event from the event queue
             // beachline.remove(e.getPoint());
             // Check for new circle events

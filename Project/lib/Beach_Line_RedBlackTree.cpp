@@ -840,6 +840,8 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
 
     Node *leftArc = x;
     Node *rightArc = x;
+    Node * leftEdge;
+    Node * rightEdge;
     //find the left and right arcs //if at any point we discover we cannot get either of these we return, since there would be no circle event
     //if left of parent
     if(x->isOnLeft()){ //parent is up to the right of x
@@ -852,6 +854,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
             return; //no circle event
         }
         leftArc = leftArc->parent;
+        leftEdge = leftArc;
         leftArc = leftArc->left;
         if(leftArc == nullptr){
             return; //no circle event //this generally shouldn't happen since the tree should be complete
@@ -869,6 +872,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
         if(rightArc == nullptr){
             return; //no circle event
         }
+        rightEdge = rightArc;
         rightArc = rightArc->right;
         if(rightArc == nullptr){
             return; //no circle event //this generally shouldn't happen since the tree should be complete
@@ -889,6 +893,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
         if(leftArc == nullptr){
             return; //no circle event
         }
+        leftEdge = leftArc;
         leftArc = leftArc->left;
         if(leftArc == nullptr){
             return; //no circle event //this generally shouldn't happen since the tree should be complete
@@ -910,6 +915,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
             return; //no circle event
         }
         rightArc = rightArc->parent;
+        rightEdge = rightArc;
         rightArc = rightArc->right;
         if(rightArc == nullptr){
             return; //no circle event //this generally shouldn't happen since the tree should be complete
@@ -973,7 +979,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
     else{
         //add the circle event to the event queue
         Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY);
-        Event circleEvent = Event(1, circleCenter);
+        Event circleEvent = Event(circleCenter, leftEdge, rightEdge, x);
         eventQueue->push_back(circleEvent);
         leftArc->arc.associatedCircleEvents[2] = circleEvent;
         x->arc.associatedCircleEvents[1] = circleEvent;
@@ -985,6 +991,90 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
 
     return;
 }
+
+void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *eventQueue){
+    //sanity check that the event is a circle event
+    if(e->getType() != 1){
+        throw "Error: Event is not a circle event";
+    }
+
+    CircleEvent *ce = e->getCircleEvent();
+
+    if(ce == nullptr){
+        throw "Error: Circle event is null";
+    }
+
+    //remove end the halflines (turn them into edges)
+    //remove the center arc
+    //create a new edge based on the side arcs 
+    
+    //one of the edges should have the center arc as one of its children the other edge should have the first edge as one of its children
+    bool leftEdgeIsParent = (
+        ce->leftEdge->right == ce->rightEdge && 
+        ce->rightEdge->left == ce->pinchingArc
+    );
+    bool rightEdgeIsParent = (
+        ce->rightEdge->left == ce->leftEdge && 
+        ce->leftEdge->right == ce->pinchingArc
+    );
+    if(!leftEdgeIsParent && !rightEdgeIsParent){
+        if(DEBUG) std::cout << "Left edge: " << ce->leftEdge->edge.start.x << ", " << ce->leftEdge->edge.start.y << " end: " << ce->leftEdge->edge.end.x << ", " << ce->leftEdge->edge.end.y << std::endl;
+        if(DEBUG) std::cout << "Right edge: " << ce->rightEdge->edge.start.x << ", " << ce->rightEdge->edge.start.y << " end: " << ce->rightEdge->edge.end.x << ", " << ce->rightEdge->edge.end.y << std::endl;
+        if(DEBUG) std::cout << "Pinching arc: " << ce->pinchingArc->arc.focus.x << ", " << ce->pinchingArc->arc.focus.y << std::endl;
+        if(DEBUG) printTreeForest(root);
+        throw "Error: Circle event edges are not in the correct configuration";
+    }
+
+    
+    Node *AbsoluteParent; //the parent of the top edge
+    bool isLeftOfAP = false;
+    
+    if(leftEdgeIsParent){
+        AbsoluteParent = ce->leftEdge->parent;
+        isLeftOfAP = ce->leftEdge->isOnLeft();
+    }
+    else{//rightEdgeIsParent must be true in this case
+        AbsoluteParent = ce->rightEdge->parent;
+        isLeftOfAP = ce->rightEdge->isOnLeft();
+    }
+    
+
+    Node *rightArcParent = ce->leftEdge->left;; //the right leaf of the 5 set (node, edge, arc, edge, node)
+    Node *leftArcParent = ce ->rightEdge->right;; //the left leaf of the 5 set (node, edge, arc, edge, node)
+
+    Node *rightArcPointer = rightArcParent; //the left arc of the edge
+    Node *leftArcPointer = leftArcParent; //the right arc of the edge
+
+    while(rightArcParent != nullptr && !rightArcPointer->isArc){
+        rightArcPointer = rightArcPointer->left;
+    }
+    while(leftArcParent != nullptr && !leftArcPointer->isArc){
+        leftArcPointer = leftArcPointer->right;
+    }
+    if(rightArcPointer == nullptr || leftArcPointer == nullptr || !rightArcPointer->isArc || !leftArcPointer->isArc){
+        throw "Error: Circle event edge parents are not in the correct configuration";
+    }
+
+    //create the new edge
+    
+    
+    //remove the old edges 
+    //storing them in the dcel TODO
+
+    //remove the old arc (x)
+
+    //add AbsoluteParent - [edge, leftArcParent, rightArcParent] to the tree
+    if(isLeftOfAP){
+        std::cout << "Left of AP:" << AbsoluteParent->isArc << std::endl;
+    }
+    else{
+        std::cout << "Left of AP:" << AbsoluteParent->isArc << std::endl;
+
+    }
+    
+
+}
+
 
 void BeachLineRedBlackTree::printTreeForest(Node *root){
     if(root == nullptr){
