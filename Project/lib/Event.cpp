@@ -15,6 +15,11 @@ Event::Event(int type, Vertex *point){
     this->point = point;
 }
 
+Event::Event(Event const &event){
+    this->type = event.type;
+    this->point = event.point;
+}
+
 int Event::getType(){
     return this->type;
 }

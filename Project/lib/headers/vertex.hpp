@@ -13,6 +13,10 @@ class Vertex{
         Vertex();
         Vertex(double x, double y);
         Vertex(double x, double y, int id);
+        //copy constructor
+        Vertex(const Vertex& v);
+        //overload the = operator
+        Vertex& operator=(const Vertex& v);
         //overload the + operator
         Vertex operator+(const Vertex& v);
         //overload the - operator

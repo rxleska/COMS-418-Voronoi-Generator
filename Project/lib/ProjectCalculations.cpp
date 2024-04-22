@@ -19,31 +19,34 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
     BeachLineRedBlackTree beachline = BeachLineRedBlackTree();
 
     // Initialize the event queue (PQ of points)
-    std::priority_queue<Event, std::vector<Event>, Compare> eventQueue = std::priority_queue<Event, std::vector<Event>, Compare>();
-
-    // Sort the points by y-coordinate
-    std::sort(points->begin(), points->end(), comparePoints);
+    // std::priority_queue<Event, std::vector<Event>, Compare> eventQueue = std::priority_queue<Event, std::vector<Event>, Compare>();
+    // SWTICHING FROM PRIORITY QUEUE TO VECTOR with HEAP OPERATIONS so I can remove circle events when one of their arcs is removed
+    std::vector<Event> eventQueue = std::vector<Event>();
+    std::make_heap(eventQueue.begin(), eventQueue.end(), Compare());
 
     // Fill Event Queue with starting points (sites) // given the feed in it becomes top to bottom right to left
     for (std::vector<Vertex>::iterator it = points->begin(); it != points->end(); ++it){ 
-        eventQueue.push(Event(0, &(*it)));
+        eventQueue.push_back(Event(0, &(*it)));
+        std::push_heap(eventQueue.begin(), eventQueue.end(), Compare());
     }
 
     beachline.sweepLine = points->front().y;
 
     while(!eventQueue.empty()){
-        Event e = eventQueue.top();
-        eventQueue.pop();
+        // Get the next event
+        Event e = eventQueue.front();
+        eventQueue.erase(eventQueue.begin());        
+        std::pop_heap(eventQueue.begin(), eventQueue.end(), Compare());
 
         std::cout << e.getPoint()->x << " " << e.getPoint()->y << std::endl; 
         
         beachline.sweepLine = e.getPoint()->y;
-        beachline.insert(*e.getPoint(), &eventQueue);
 
         if (e.getType() == 0){
             // Site event
             // Insert the site into the beach line
-            // beachline.insert(e.getPoint());
+            beachline.insert(*e.getPoint(), &eventQueue);
+            // beachline.printTreeForest(beachline.getRoot());
         }else{
             // Circle event
             // Remove the circle event from the event queue

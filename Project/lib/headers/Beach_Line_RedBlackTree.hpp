@@ -2,6 +2,7 @@
 #include "Vertex.hpp"
 #include <cmath>
 #include "Debug.hpp"
+#include <vector>
 #include <queue>
 #include "Event_Queue.hpp"
 
@@ -27,8 +28,14 @@ class Arc{
     public:
     Vertex focus;
     int id;
+    Event* associatedCircleEvents;
     Arc();
     Arc(Vertex f, int i);
+    ~Arc();
+    //copy constructor
+    Arc(const Arc& a);
+    //overload the = operator
+    Arc& operator=(const Arc& a);
 };
 
 class HalfLine{
@@ -40,6 +47,11 @@ class HalfLine{
     Arc *rightArc;
     HalfLine();
     HalfLine(Vertex s, Vertex e, bool ex, Arc *l, Arc *r);
+    ~HalfLine();
+    //copy constructor
+    HalfLine(const HalfLine& h);
+    //overload the = operator
+    HalfLine& operator=(const HalfLine& h);
 };
 
 
@@ -53,6 +65,7 @@ class Node{
     COLOR color;
     Node *left, *right, *parent;
     Node();
+    ~Node();
     void SetLeft(Node *n);
     void SetRight(Node *n);
     void SetParent(Node *n);
@@ -86,8 +99,9 @@ class BeachLineRedBlackTree{
         Node *search(double x); //returns an edge
         void getParabolaSides(double x1, double x2, double y1, double y2, double sweep, double *left, double *right); //gets the left and right intersection of 2 parabolas, (a,c) is parabola 1 focus, (b,d) is parabola 2 focus, s is the sweep line
         double getParabolaYAtX(double xf, double yf, double ysweep, double x); //gets the y value of a parabola at a given x value
-        void insert(Vertex v, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue); //this is a specialized insert for the beach line
-        void checkCircleEvent(Node *x, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue); //checks for circle events
+        void insert(Vertex v, std::vector<Event> *eventQueue); //this is a specialized insert for the beach line
+        void checkCircleEvent(Node *x, std::vector<Event> *eventQueue); //checks for circle events
+        void printTreeForest(Node *root);
 };
 
 #endif //BEACH_LINE_RBT

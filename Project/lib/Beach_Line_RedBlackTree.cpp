@@ -9,11 +9,33 @@
 Arc::Arc(){
     focus = Vertex();
     id = -1;
+    associatedCircleEvents = new Event[3];
 }
 
 Arc::Arc(Vertex f, int i){
     focus = f;
     id = i;
+    associatedCircleEvents = new Event[3];
+}
+
+Arc::~Arc(){
+    delete[] associatedCircleEvents;
+}
+
+Arc::Arc(const Arc& a){
+    focus = a.focus;
+    id = a.id;
+    associatedCircleEvents = a.associatedCircleEvents;
+}
+
+Arc& Arc::operator=(const Arc& a){
+    focus = a.focus;
+    id = a.id;
+    associatedCircleEvents = new Event[3];
+    for(int i = 0; i < 3; i++){
+        associatedCircleEvents[i] = a.associatedCircleEvents[i];
+    }
+    return *this;
 }
 
 // ------------------------------------------------------------
@@ -23,7 +45,7 @@ Arc::Arc(Vertex f, int i){
 HalfLine::HalfLine(){
     start = Vertex();
     end = Vertex();
-    pointsUp = false;
+    pointsUp = true; //default to true
     leftArc = nullptr;
     rightArc = nullptr;
 }
@@ -36,6 +58,23 @@ HalfLine::HalfLine(Vertex s, Vertex e, bool ex, Arc *l, Arc *r){
     rightArc = r;
 }
 
+HalfLine::HalfLine(const HalfLine& h){
+    start = h.start;
+    end = h.end;
+    pointsUp = h.pointsUp;
+    leftArc = h.leftArc;
+    rightArc = h.rightArc;
+}
+
+HalfLine& HalfLine::operator=(const HalfLine& h){
+    start = h.start;
+    end = h.end;
+    pointsUp = h.pointsUp;
+    leftArc = h.leftArc;
+    rightArc = h.rightArc;
+    return *this;
+}
+
 // ------------------------------------------------------------
 // -------------------------- Node ----------------------------
 // ------------------------------------------------------------
@@ -46,6 +85,10 @@ Node::Node(){
     left = nullptr;
     right = nullptr;
     parent = nullptr;
+}
+
+Node::~Node(){
+
 }
 
 //these are public but for ease of reading they are here as functions
@@ -518,10 +561,12 @@ Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't retur
                     }else{
                         //if right child of parent return left, else return right
                         if(temp->isOnLeft()){
-                            temp = temp->parent->right;
+                            throw "Error: Edge is pointing up, should not be in the tree";
+                            // temp = temp->parent->right;
                         }
                         else{
-                            temp = temp->parent->left;
+                            throw "Error: Edge is pointing up, should not be in the tree";
+                            // temp = temp->parent->left;
                         }
                     }
 
@@ -583,7 +628,7 @@ double BeachLineRedBlackTree::getParabolaYAtX(double xf, double yf, double yswee
 
 }
 
-void BeachLineRedBlackTree::insert(Vertex v, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue){
+void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
     //this is a specialized insert for the beach line
     //this will insert an arc into the beach line, edge creation will be handled in this function as well
 
@@ -759,6 +804,22 @@ void BeachLineRedBlackTree::insert(Vertex v, std::priority_queue<Event, std::vec
         fixRedRed(newEdgeLeft);
     }
 
+    //remove any circle events associated with the above node from the event queue
+    for(int i = 0; i < 3; i++){
+        if(above->arc.associatedCircleEvents[i].getPoint() != nullptr){
+            //remove the event from the event queue
+            for(std::vector<Event>::iterator it = eventQueue->begin(); it != eventQueue->end(); ++it){
+                if(it->getPoint() == above->arc.associatedCircleEvents[i].getPoint()){
+                    eventQueue->erase(it);
+                    break;
+                }
+            }
+        }
+    }
+    //heapify the event queue
+    //TODO: check if this is necessary
+    std::make_heap(eventQueue->begin(), eventQueue->end(), Compare());
+
     //delete the above node
     delete above;
     size+=4;
@@ -770,6 +831,172 @@ void BeachLineRedBlackTree::insert(Vertex v, std::priority_queue<Event, std::vec
 }
 
 
-void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue){
+void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQueue){
+    //check if the node x has a left and right arcs
+
+    if(x->parent == nullptr){
+        return;
+    }
+
+    Node *leftArc = x;
+    Node *rightArc = x;
+    //find the left and right arcs //if at any point we discover we cannot get either of these we return, since there would be no circle event
+    //if left of parent
+    if(x->isOnLeft()){ //parent is up to the right of x
+        //left
+        //find the first parent that is right of its parent
+        while(leftArc->parent != nullptr && leftArc->isOnLeft()){
+            leftArc = leftArc->parent;
+        }
+        if(leftArc->parent == nullptr){
+            return; //no circle event
+        }
+        leftArc = leftArc->parent;
+        leftArc = leftArc->left;
+        if(leftArc == nullptr){
+            return; //no circle event //this generally shouldn't happen since the tree should be complete
+        }
+        //get the right most child of the left arc
+        while(leftArc->right != nullptr){
+            leftArc = leftArc->right;
+        }
+        if(!leftArc->isArc){
+            return; //no circle event //this generally shouldn't happen since a leaf should be an arc
+        }
+
+        //right
+        rightArc = x->parent;
+        if(rightArc == nullptr){
+            return; //no circle event
+        }
+        rightArc = rightArc->right;
+        if(rightArc == nullptr){
+            return; //no circle event //this generally shouldn't happen since the tree should be complete
+        }
+        //get the left most child of the right arc
+        while(rightArc->left != nullptr){
+            rightArc = rightArc->left;
+        }
+        if(!rightArc->isArc){
+            return; //no circle event //this generally shouldn't happen since a leaf should be an arc
+        }
+
+        
+    }
+    else{ //parent is up to the left of x
+        //left
+        leftArc = x->parent;
+        if(leftArc == nullptr){
+            return; //no circle event
+        }
+        leftArc = leftArc->left;
+        if(leftArc == nullptr){
+            return; //no circle event //this generally shouldn't happen since the tree should be complete
+        }
+        //get the right most child of the left arc
+        while(leftArc->right != nullptr){
+            leftArc = leftArc->right;
+        }
+        if(!leftArc->isArc){
+            return; //no circle event //this generally shouldn't happen since a leaf should be an arc
+        }
+
+        //right
+        //find the first parent that is left of its parent
+        while(rightArc->parent != nullptr && !rightArc->isOnLeft()){
+            rightArc = rightArc->parent;
+        }
+        if(rightArc->parent == nullptr){
+            return; //no circle event
+        }
+        rightArc = rightArc->parent;
+        rightArc = rightArc->right;
+        if(rightArc == nullptr){
+            return; //no circle event //this generally shouldn't happen since the tree should be complete
+        }
+        //get the left most child of the right arc
+        while(rightArc->left != nullptr){
+            rightArc = rightArc->left;
+        }
+        if(!rightArc->isArc){
+            return; //no circle event //this generally shouldn't happen since a leaf should be an arc
+        }
+    }
+    //if we made it this far, we have the left and right arcs
+
+    //let Apt, Bpt, Cpt be the points defining the arcs left, x, and right respectively
+    Vertex Apt = leftArc->arc.focus;
+    Vertex Bpt = x->arc.focus;
+    Vertex Cpt = rightArc->arc.focus;
+
+    //apt and cpt should not be the same check for this
+    if(Apt.x == Cpt.x && Apt.y == Cpt.y){
+        return;
+    }
+
+    //find the circumcenter of the circle defined by these 3 points
+
+    //find the slope of Apt to Bpt
+    double mAB = (Apt.y - Bpt.y) / (Apt.x - Bpt.x);
+    //find the center point of the line between Apt and Bpt
+    Vertex midAB = Vertex((Apt.x + Bpt.x) / 2, (Apt.y + Bpt.y) / 2);
+    double mPerpAB = -1.0 / mAB;
+    //find the y intercept of a line perpendicular to AB that goes through midAB
+    double bPerpAB = midAB.y - mPerpAB * midAB.x;
+
+    //find the slope of Bpt to Cpt
+    double mBC = (Bpt.y - Cpt.y) / (Bpt.x - Cpt.x);
+    //find the center point of the line between Bpt and Cpt
+    Vertex midBC = Vertex((Bpt.x + Cpt.x) / 2, (Bpt.y + Cpt.y) / 2);
+    double mPerpBC = -1.0 / mBC;
+    //find the y intercept of a line perpendicular to BC that goes through midBC
+    double bPerpBC = midBC.y - mPerpBC * midBC.x;
+
+    //find the intersection of the two lines 
+    double circumcenterX = (bPerpBC - bPerpAB) / (mPerpAB - mPerpBC);
+    double circumcenterY = mPerpAB * circumcenterX + bPerpAB;
+
+    //find the distance between the circumcenter and any of the points //its the same for all 3 points
+    double radius = sqrt((Apt.x - circumcenterX)*(Apt.x - circumcenterX) + (Apt.y - circumcenterY)*(Apt.y - circumcenterY));
+
+    //if event already exists return
+    for(int i = 0; i < 3; i++){
+        if(x->arc.associatedCircleEvents[i].getPoint() != nullptr && x->arc.associatedCircleEvents[i].getPoint()->x == circumcenterX && x->arc.associatedCircleEvents[i].getPoint()->y == circumcenterY){
+            return;
+        }
+    }
+
+    //check if the bottom of the circle is below the sweep line 
+    if(circumcenterY - radius > sweepLine){ //note using - since we are sweeping from top to bottom
+        return;
+    } //TODO check if its an edge case where the circle touches the sweep line
+    else{
+        //add the circle event to the event queue
+        Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY);
+        Event circleEvent = Event(1, circleCenter);
+        eventQueue->push_back(circleEvent);
+        leftArc->arc.associatedCircleEvents[2] = circleEvent;
+        x->arc.associatedCircleEvents[1] = circleEvent;
+        rightArc->arc.associatedCircleEvents[0] = circleEvent;
+        std::push_heap(eventQueue->begin(), eventQueue->end(), Compare());
+
+        if(DEBUG) std::cout << "Circle event added: (" << circumcenterX << ", " << circumcenterY << ")" << " on points: (" << Apt.x << ", " << Apt.y << ") (" << Bpt.x << ", " << Bpt.y << ") (" << Cpt.x << ", " << Cpt.y << ")" << std::endl;
+    }
+
     return;
+}
+
+void BeachLineRedBlackTree::printTreeForest(Node *root){
+    if(root == nullptr){
+        return;
+    }
+    if(root->isArc){
+        std::cout << "[\\textbf{Arc: " << root->arc.focus.x << ", " << root->arc.focus.y << "}" << std::endl;
+    }
+    else{
+        std::cout << "[\\textbf{Edge: start: " << root->edge.start.x << ", " << root->edge.start.y << " end: " << root->edge.end.x << ", " << root->edge.end.y << "}" << std::endl;
+    }
+    printTreeForest(root->left);
+    printTreeForest(root->right);
+    std::cout << "]" << std::endl;
 }

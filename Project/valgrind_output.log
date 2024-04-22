@@ -1,0 +1,61 @@
+==2716== Memcheck, a memory error detector
+==2716== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==2716== Using Valgrind-3.19.0 and LibVEX; rerun with -h for copyright info
+==2716== Command: ./run
+==2716== Parent PID: 2715
+==2716== 
+==2716== Conditional jump or move depends on uninitialised value(s)
+==2716==    at 0x10D3B0: BeachLineRedBlackTree::search(double) (Beach_Line_RedBlackTree.cpp:551)
+==2716==    by 0x10D8E8: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:649)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== Conditional jump or move depends on uninitialised value(s)
+==2716==    at 0x10C893: Node::getEdgeValue() (Beach_Line_RedBlackTree.cpp:162)
+==2716==    by 0x10D463: BeachLineRedBlackTree::search(double) (Beach_Line_RedBlackTree.cpp:574)
+==2716==    by 0x10D8E8: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:649)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== Conditional jump or move depends on uninitialised value(s)
+==2716==    at 0x10C893: Node::getEdgeValue() (Beach_Line_RedBlackTree.cpp:162)
+==2716==    by 0x10D49F: BeachLineRedBlackTree::search(double) (Beach_Line_RedBlackTree.cpp:577)
+==2716==    by 0x10D8E8: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:649)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== 
+==2716== HEAP SUMMARY:
+==2716==     in use at exit: 1,368 bytes in 20 blocks
+==2716==   total heap usage: 42 allocs, 22 frees, 85,040 bytes allocated
+==2716== 
+==2716== 48 bytes in 1 blocks are definitely lost in loss record 5 of 14
+==2716==    at 0x484220F: operator new[](unsigned long) (vg_replace_malloc.c:640)
+==2716==    by 0x10C315: Arc::operator=(Arc const&) (Beach_Line_RedBlackTree.cpp:34)
+==2716==    by 0x10D889: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:639)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== 72 (48 direct, 24 indirect) bytes in 1 blocks are definitely lost in loss record 6 of 14
+==2716==    at 0x484220F: operator new[](unsigned long) (vg_replace_malloc.c:640)
+==2716==    by 0x10C315: Arc::operator=(Arc const&) (Beach_Line_RedBlackTree.cpp:34)
+==2716==    by 0x10DAFB: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:677)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== 1,248 (104 direct, 1,144 indirect) bytes in 1 blocks are definitely lost in loss record 14 of 14
+==2716==    at 0x4840F2F: operator new(unsigned long) (vg_replace_malloc.c:422)
+==2716==    by 0x10D962: BeachLineRedBlackTree::insert(Vertex, std::vector<Event, std::allocator<Event> >*) (Beach_Line_RedBlackTree.cpp:660)
+==2716==    by 0x1108A4: ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex, std::allocator<Vertex> >*) (ProjectCalculations.cpp:48)
+==2716==    by 0x10A79B: main (main.cpp:77)
+==2716== 
+==2716== LEAK SUMMARY:
+==2716==    definitely lost: 200 bytes in 3 blocks
+==2716==    indirectly lost: 1,168 bytes in 17 blocks
+==2716==      possibly lost: 0 bytes in 0 blocks
+==2716==    still reachable: 0 bytes in 0 blocks
+==2716==         suppressed: 0 bytes in 0 blocks
+==2716== 
+==2716== Use --track-origins=yes to see where uninitialised values come from
+==2716== For lists of detected and suppressed errors, rerun with: -s
+==2716== ERROR SUMMARY: 9 errors from 6 contexts (suppressed: 0 from 0)

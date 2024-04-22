@@ -5,7 +5,6 @@
 #ifndef EVENT_HPP
 #define EVENT_HPP
 
-
 class Event{
     private:
         int type; // 0 if site event, 1 if circle event
@@ -13,6 +12,7 @@ class Event{
     public:
         Event();
         Event(int type, Vertex *point);
+        Event(Event const &event);
         int getType();
         Vertex* getPoint();
         void setType(int type);

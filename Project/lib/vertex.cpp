@@ -23,6 +23,21 @@ Vertex::Vertex(double x, double y, int id){
     this->id = id;
 }
 
+//copy constructor
+Vertex::Vertex(const Vertex& v){
+    this->x = v.x;
+    this->y = v.y;
+    this->id = v.id;
+}
+
+//overload the = operator
+Vertex& Vertex::operator=(const Vertex& v){
+    this->x = v.x;
+    this->y = v.y;
+    this->id = v.id;
+    return *this;
+}
+
 //overload the + operator
 Vertex Vertex::operator+(const Vertex& v){
     Vertex result;
