@@ -1,10 +1,14 @@
 // Header file for the BeachLineRedBlackTree class (lib/Beach_Line_RedBlackTree.cpp)
 #include "Vertex.hpp"
+#include <cmath>
+#include "Debug.hpp"
+#include <queue>
+#include "Event_Queue.hpp"
 
 #ifndef BEACH_LINE_RBT
 #define BEACH_LINE_RBT
 
-static double sweepLine = 0.0;
+extern double sweepLine;
 
 enum BeachLineNodeType
 {
@@ -65,6 +69,7 @@ class BeachLineRedBlackTree{
     private:
         Node *root;
     public:
+        double sweepLine;
         int size;
         BeachLineRedBlackTree();
         Node *getRoot();
@@ -79,7 +84,10 @@ class BeachLineRedBlackTree{
         void deleteNode(Node *v);
         void fixDoubleBlack(Node *x);
         Node *search(double x); //returns an edge
-        void insert(Vertex v); //this is a specialized insert for the beach line
+        void getParabolaSides(double x1, double x2, double y1, double y2, double sweep, double *left, double *right); //gets the left and right intersection of 2 parabolas, (a,c) is parabola 1 focus, (b,d) is parabola 2 focus, s is the sweep line
+        double getParabolaYAtX(double xf, double yf, double ysweep, double x); //gets the y value of a parabola at a given x value
+        void insert(Vertex v, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue); //this is a specialized insert for the beach line
+        void checkCircleEvent(Node *x, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue); //checks for circle events
 };
 
-#endif 
+#endif //BEACH_LINE_RBT

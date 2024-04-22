@@ -1,4 +1,5 @@
 #include "headers/Beach_Line_RedBlackTree.hpp"
+#include <iostream>
 
 
 // ------------------------------------------------------------
@@ -78,6 +79,10 @@ Node *Node::uncle(){
 }
 
 bool Node::isOnLeft(){
+    //if root return false
+    if(parent == nullptr){
+        return false;
+    }
     return this == parent->left;
 }
 
@@ -130,6 +135,7 @@ double Node::getEdgeValue(){ //assumes that the node has been checked to be an e
 BeachLineRedBlackTree::BeachLineRedBlackTree(){
     root = nullptr;
     size = 0;
+    sweepLine = 0;
 }
 
 Node *BeachLineRedBlackTree::getRoot(){
@@ -229,6 +235,92 @@ void BeachLineRedBlackTree::swapValues(Node *u, Node *v)
         v->isArc = false;
         v->edge = temp.edge;
         v->color = temp.color;
+    }
+}
+
+void BeachLineRedBlackTree::fixDoubleBlack(Node *x)
+{
+    if (x == root)
+        // Reached root
+        return;
+
+    Node *sibling = x->sibling(), *parent = x->parent;
+    if (sibling == NULL)
+    {
+        // No sibling, double black pushed up
+        fixDoubleBlack(parent);
+    }
+    else
+    {
+        if (sibling->color == RED)
+        {
+            // Sibling red
+            parent->color = RED;
+            sibling->color = BLACK;
+            if (sibling->isOnLeft())
+            {
+                // left case
+                rotateRight(parent);
+            }
+            else
+            {
+                // right case
+                rotateLeft(parent);
+            }
+            fixDoubleBlack(x);
+        }
+        else
+        {
+            // Sibling black
+            if (sibling->hasRedChild())
+            {
+                // at least 1 red children
+                if (sibling->left != NULL && sibling->left->color == RED)
+                {
+                    if (sibling->isOnLeft())
+                    {
+                        // left left
+                        sibling->left->color = sibling->color;
+                        sibling->color = parent->color;
+                        rotateRight(parent);
+                    }
+                    else
+                    {
+                        // right left
+                        sibling->left->color = parent->color;
+                        rotateRight(sibling);
+                        rotateLeft(parent);
+                    }
+                }
+                else
+                {
+                    if (sibling->isOnLeft())
+                    {
+                        // left right
+                        sibling->right->color = parent->color;
+                        rotateLeft(sibling);
+                        rotateRight(parent);
+                    }
+                    else
+                    {
+                        // right right
+                        sibling->right->color = sibling->color;
+                        sibling->color = parent->color;
+                        rotateLeft(parent);
+                    }
+                }
+                parent->color = BLACK;
+            }
+            else
+            {
+                // 2 black children
+                sibling->color = RED;
+                if (parent->color == BLACK)
+                    fixDoubleBlack(parent);
+                else
+                    parent->color = BLACK;
+            }
+        }
     }
 }
 
@@ -413,22 +505,85 @@ Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't retur
             return temp;
         }
         else{
-            if(temp->getEdgeValue() == x){
-                return temp;
-            }
-            else if(temp->getEdgeValue() < x){
-                temp = temp->right;
-            }
-            else{
-                temp = temp->left;
-            }
+                if(temp->edge.pointsUp){
+                    //if temp is root only one side should be valid, if so return that side
+                    if(temp->parent == nullptr){
+                        if(temp->left != nullptr){
+                            temp = temp->left;
+                        }
+                        else{
+                            temp = temp->right;
+                        }
+                    
+                    }else{
+                        //if right child of parent return left, else return right
+                        if(temp->isOnLeft()){
+                            temp = temp->parent->right;
+                        }
+                        else{
+                            temp = temp->parent->left;
+                        }
+                    }
+
+                }
+                else if(temp->getEdgeValue() == x){
+                    return temp;
+                }
+                else if(temp->getEdgeValue() < x){
+                    temp = temp->right;
+                }
+                else{
+                    temp = temp->left;
+                }
+            
         }
     }
     return nullptr;
 }
 
+void BeachLineRedBlackTree::getParabolaSides(double x1, double x2, double y1, double y2, double sweep, double *left, double *right){
+    //Check if points are colinear parallel to the x axis and if so return no intersection
+    if(y1 == y2){
+        // std::cout << "no intersection" << std::endl;
+        left = nullptr;
+        right = nullptr;
+        return;
+    }
 
-void BeachLineRedBlackTree::insert(Vertex v){
+
+    double a = 1.0 / (y1-sweep) - 1.0 / (y2-sweep);
+    double b  = -2.0 * x1/(y1-sweep) + 2.0 * x2/(y2-sweep);
+    double c = x1*x1/(y1-sweep) - x2*x2/(y2-sweep) + y1 - y2;
+
+    // std::cout << "a: " << a << " b: " << b << " c: " << c << std::endl;
+
+    // test for no intersection
+    if(b*b - 4*a*c < 0){
+        // std::cout << "no intersection" << std::endl;
+        left = nullptr;
+        right = nullptr;
+        return;
+    }
+
+    //else calculate the intersections 
+    double xIntersection1 = (-b + sqrt(b*b - 4*a*c)) / (2*a);
+    double xIntersection2 = (-b - sqrt(b*b - 4*a*c)) / (2*a);
+    if(xIntersection1 < xIntersection2){
+        *left = xIntersection1;
+        *right = xIntersection2;
+    }else{
+        *left = xIntersection2;
+        *right = xIntersection1;
+    }
+    return;
+}
+
+double BeachLineRedBlackTree::getParabolaYAtX(double xf, double yf, double ysweep, double x){ //gets the y value of a parabola at a given x value
+    return (x-xf)*(x-xf)/(2*(yf-ysweep)) + 0.5*(yf+ysweep);
+
+}
+
+void BeachLineRedBlackTree::insert(Vertex v, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue){
     //this is a specialized insert for the beach line
     //this will insert an arc into the beach line, edge creation will be handled in this function as well
 
@@ -439,6 +594,7 @@ void BeachLineRedBlackTree::insert(Vertex v){
         newNode->arc = Arc(v, v.id);
         newNode->color = BLACK;
         root = newNode;
+        size = 1;
         return;
     }
 
@@ -463,7 +619,7 @@ void BeachLineRedBlackTree::insert(Vertex v){
     Node *newEdgeRight = new Node();
 
     //from this point forward we know that above is an arc
-    COLOR arcColor = above->color;
+    // COLOR arcColor = above->color;
 
     //Assign left and right to use the same vertex as the arc above
     newArcLeft->isArc = true;
@@ -490,15 +646,130 @@ void BeachLineRedBlackTree::insert(Vertex v){
 
     //calculate a the left intersection after 5 (arbitrary) units 
     //derived this formula on paper and then implemented it here
-    //
+    double sweepApprox = sweepLine - 1;
+    double leftX;
+    double rightX;
+    getParabolaSides(above->arc.focus.x, v.x, above->arc.focus.y, v.y, sweepApprox, &leftX, &rightX);
+    double leftY = getParabolaYAtX(above->arc.focus.x, above->arc.focus.y, sweepApprox, leftX);
+    double rightY = getParabolaYAtX(above->arc.focus.x, above->arc.focus.y, sweepApprox, rightX);
+    newEdgeLeft->edge.end = Vertex(leftX, leftY);  
+    newEdgeRight->edge.end = Vertex(rightX, rightY);
+    
+    //test if either edge points up 
+    if(newEdgeLeft->edge.start.y < newEdgeLeft->edge.end.y){
+        if(DEBUG) std::cout << "Edge points up: start: (" << newEdgeLeft->edge.start.x << ", " << newEdgeLeft->edge.start.y << ") end: (" << newEdgeLeft->edge.end.x << ", " << newEdgeLeft->edge.end.y << ")" << std::endl;
+        newEdgeLeft->edge.pointsUp = true;
+    }
+    if(newEdgeRight->edge.start.y < newEdgeRight->edge.end.y){
+        if(DEBUG) std::cout << "Edge points up: start: (" << newEdgeRight->edge.start.x << ", " << newEdgeRight->edge.start.y << ") end: (" << newEdgeRight->edge.end.x << ", " << newEdgeRight->edge.end.y << ")" << std::endl;
+        newEdgeRight->edge.pointsUp = true;
+    }
+    if(DEBUG) std::cout << "Edge start: (" << newEdgeLeft->edge.start.x << ", " << newEdgeLeft->edge.start.y << ") end: (" << newEdgeLeft->edge.end.x << ", " << newEdgeLeft->edge.end.y << ")" << std::endl;
     
 
 
+    //if node being replace is left of its parent
+    // place this tree [rightEdge [leftEdge newArcLeft newArcCenter] newArcRight]
+    if(above->parent == nullptr && above != root){ throw "found node with null parent that is not the root, during insert";}
+    else if(above->parent == nullptr){
+        //this implies that the above node is the root, and therefore we don't need to worry about the parent
+        root = newEdgeRight;
 
+        newEdgeRight->SetLeft(newEdgeLeft);
+        newEdgeRight->SetRight(newArcRight);
+        newEdgeRight->color = RED;
+        
+        //left
+        newEdgeLeft->SetLeft(newArcLeft);
+        newEdgeLeft->SetRight(newArcCenter);
+        newEdgeLeft->SetParent(newEdgeRight);
+        newEdgeLeft->color = BLACK;
 
+        //right
+        newArcRight->SetParent(newEdgeRight);
+        newArcRight->color = BLACK;
 
+        //left left
+        newArcLeft->SetParent(newEdgeLeft);
+        newArcLeft->color = RED;
 
+        //left right
+        newArcCenter->SetParent(newEdgeLeft);      
+        newArcCenter->color = RED;  
 
+    }
+    else if(above->isOnLeft()){
+        Node *parent = above->parent;
+        parent->SetLeft(newEdgeRight);
 
+        //top
+        newEdgeRight->SetLeft(newEdgeLeft);
+        newEdgeRight->SetRight(newArcRight);
+        newEdgeRight->SetParent(parent);
+        newEdgeRight->color = RED;
+        
+        //left
+        newEdgeLeft->SetLeft(newArcLeft);
+        newEdgeLeft->SetRight(newArcCenter);
+        newEdgeLeft->SetParent(newEdgeRight);
+        newEdgeLeft->color = BLACK;
+
+        //right
+        newArcRight->SetParent(newEdgeRight);
+        newArcRight->color = BLACK;
+
+        //left left
+        newArcLeft->SetParent(newEdgeLeft);
+        newArcLeft->color = RED;
+
+        //left right
+        newArcCenter->SetParent(newEdgeLeft);      
+        newArcCenter->color = RED;  
+
+        fixRedRed(newEdgeRight);
+    }
+    else{ //place this tree [leftEdge newArcLeft [rightEdge  newArcCenter newArcRight]]
+        Node *parent = above->parent;
+        parent->SetRight(newEdgeLeft);
+
+        //top
+        newEdgeLeft->SetRight(newEdgeRight);
+        newEdgeLeft->SetLeft(newArcLeft);
+        newEdgeLeft->SetParent(parent);
+        newEdgeLeft->color = RED;
+
+        //left
+        newArcLeft->SetParent(newEdgeLeft);
+        newArcLeft->color = BLACK;
+
+        //right
+        newEdgeRight->SetLeft(newArcCenter);
+        newEdgeRight->SetRight(newArcRight);
+        newEdgeRight->SetParent(newEdgeLeft);
+        newEdgeRight->color = BLACK;
+
+        //right left
+        newArcCenter->SetParent(newEdgeRight);
+        newArcCenter->color = RED;
+
+        //right right
+        newArcRight->SetParent(newEdgeRight);
+        newArcRight->color = RED;
+
+        fixRedRed(newEdgeLeft);
+    }
+
+    //delete the above node
+    delete above;
+    size+=4;
+
+    //check for circle events
+    checkCircleEvent(newArcLeft, eventQueue);
+    checkCircleEvent(newArcRight, eventQueue);
+    checkCircleEvent(newArcCenter, eventQueue);
 }
 
+
+void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::priority_queue<Event, std::vector<Event>, Compare> *eventQueue){
+    return;
+}

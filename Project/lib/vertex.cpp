@@ -1,7 +1,6 @@
 // Vertex Class Definition (just 2 ints with some functions and naming conventions)
 
 #include "headers/Vertex.hpp"
-#include "Beach_Line_RedBlackTree.cpp"
 
 //initialize the id counter
 int Vertex::idCounter = 0;

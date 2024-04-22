@@ -3,10 +3,12 @@
 #include <string>
 #include <vector>
 #include "../lib/headers/Vertex.hpp"
-#include "../lib/Beach_Line_RedBlackTree.cpp"
+#include "../lib/headers/Beach_Line_RedBlackTree.hpp"
 #include "../lib/headers/ProjectCalculations.hpp"
 
 // This is the main file for the project. It will hopefully read in the data from sites.txt, calculate the voronoi diagram, the delaunay triangulation of the voronoi diagram, and then display the results in a window.
+
+double sweepLine;
 
 
 //string to int function
@@ -68,9 +70,15 @@ int main(int argc, char* argv[])
     //     std::cout << "Vertex " << i << ": (" << vertices[i].x << ", " << vertices[i].y << ")" << std::endl;
     // }
 
+    
 
     // Calculate the voronoi diagram of the sites
-    ProjectCalculations::calculateVoronoiDiagram(&vertices);
+    try{
+        ProjectCalculations::calculateVoronoiDiagram(&vertices);
+    }
+    catch(const char* msg){
+        std::cerr << msg << std::endl;
+    }
 
     
 

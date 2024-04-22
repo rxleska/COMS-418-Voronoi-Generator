@@ -6,6 +6,9 @@
 #include "DCEL.hpp"
 #include "Vertex.hpp"
 #include <vector>
+#include <queue>
+#include "Event.hpp"
+#include "Event_Queue.hpp"
 
 bool comparePoints(Vertex a, Vertex b);
 
