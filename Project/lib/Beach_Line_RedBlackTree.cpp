@@ -166,6 +166,9 @@ double Node::getEdgeValue(){ //assumes that the node has been checked to be an e
     }
     else{
         //calculate where the line intersects the sweep line 
+        //TODO Adjust this to use where the line intersects the arc (the arc at the sweep line)
+        //TODO START HERE: using the intersection allows for use to find the x value of upwards edges a well (unless the line points straight up, in which case we can just return the x value of the start point)
+        //TODO IF this is fixed insert could be modifed to insert the new arcs as children of the main arc then insert the edges after to help with the balancing of the tree
         double slToStart = sweepLine - this->edge.start.y;
         double scaling = slToStart / (this->edge.end.y - this->edge.start.y);
         double xValue = this->edge.start.x + (scaling * (this->edge.end.x - this->edge.start.x));
@@ -382,9 +385,10 @@ void BeachLineRedBlackTree::fixRedRed(Node *x){
             *uncle = x->uncle();
 
     if(grandparent == nullptr){
-        if(DEBUG) std::cout << "node: " << x->edge.start.x << " " << x->edge.start.y << " " << x->edge.end.x << " " << x->edge.end.y << std::endl;
-        if(DEBUG) std::cout << "parent: " << parent->edge.start.x << " " << parent->edge.start.y << " " << parent->edge.end.x << " " << parent->edge.end.y << std::endl;
-        if(DEBUG) printTreeForest(root);
+        return;
+        // if(DEBUG) std::cout << "node: " << x->edge.start.x << " " << x->edge.start.y << " " << x->edge.end.x << " " << x->edge.end.y << std::endl;
+        // if(DEBUG) std::cout << "parent: " << parent->edge.start.x << " " << parent->edge.start.y << " " << parent->edge.end.x << " " << parent->edge.end.y << std::endl;
+        // if(DEBUG) printTreeForest(root);
     }
 
     if (parent->color != BLACK)
@@ -1080,6 +1084,13 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
 
     //delete the center arc
     deleteNode(centerArc);
+
+    if(PRINTEDGE){
+            std::cout << std::endl;
+            std::cout << "Edge End2: start: (" << leftEdge->edge.start.x << ", " << leftEdge->edge.start.y << ") end: (" << sweepLine << ", " << leftEdge->getEdgeValue() << ")" << std::endl;
+            std::cout << "Edge End2: start: (" << rightEdge->edge.start.x << ", " << rightEdge->edge.start.y << ") end: (" << sweepLine << ", " << rightEdge->getEdgeValue() << ")" << std::endl;
+            std::cout << std::endl;
+    }
 
 
     if(edgeToReplace == leftEdge){

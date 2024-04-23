@@ -63,6 +63,8 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
         }
     }
 
+    // beachline.printTreeForest(beachline.getRoot());
+
 
 
 
