@@ -160,7 +160,9 @@ double Node::getEdgeValue(){ //assumes that the node has been checked to be an e
         throw "Node is not an edge, cannot get edge value";
     }
     else if(this->edge.pointsUp){
-        throw "Edge is not downwards, cannot get edge value";
+        return this->edge.start.x; //filler TODO replace with degenerate case check
+
+        // throw "Edge is not downwards, cannot get edge value";
     }
     else{
         //calculate where the line intersects the sweep line 
@@ -379,6 +381,12 @@ void BeachLineRedBlackTree::fixRedRed(Node *x){
     Node *parent = x->parent, *grandparent = parent->parent,
             *uncle = x->uncle();
 
+    if(grandparent == nullptr){
+        if(DEBUG) std::cout << "node: " << x->edge.start.x << " " << x->edge.start.y << " " << x->edge.end.x << " " << x->edge.end.y << std::endl;
+        if(DEBUG) std::cout << "parent: " << parent->edge.start.x << " " << parent->edge.start.y << " " << parent->edge.end.x << " " << parent->edge.end.y << std::endl;
+        if(DEBUG) printTreeForest(root);
+    }
+
     if (parent->color != BLACK)
     {
         if (uncle != nullptr && uncle->color == RED)
@@ -548,7 +556,7 @@ Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't retur
             return temp;
         }
         else{
-                if(temp->edge.pointsUp){
+                if(false && temp->edge.pointsUp){
                     //if temp is root only one side should be valid, if so return that side
                     if(temp->parent == nullptr){
                         if(temp->left != nullptr){
@@ -562,11 +570,13 @@ Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't retur
                         //if right child of parent return left, else return right
                         if(temp->isOnLeft()){
                             if(DEBUG) std::cout << "Edge: start:" << temp->edge.start.x << " " << temp->edge.start.y << " end: " << temp->edge.end.x << " " << temp->edge.end.y << std::endl;
+                            if(DEBUG) printTreeForest(root);
                             throw "Error: Edge is pointing up, should not be in the tree";
                             // temp = temp->parent->right;
                         }
                         else{
                             if(DEBUG) std::cout << "Edge: start:" << temp->edge.start.x << " " << temp->edge.start.y << " end: " << temp->edge.end.x << " " << temp->edge.end.y << std::endl;
+                            if(DEBUG) printTreeForest(root);
                             throw "Error: Edge is pointing up, should not be in the tree";
                             // temp = temp->parent->left;
                         }
@@ -830,6 +840,7 @@ void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
     checkCircleEvent(newArcLeft, eventQueue);
     checkCircleEvent(newArcRight, eventQueue);
     checkCircleEvent(newArcCenter, eventQueue);
+
 }
 
 
@@ -1112,6 +1123,24 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
     }
 
     newEdge->color = edgeColor;
+
+    //TODO remove the circle events associated with the center arc
+    for(int i = 0; i < 3; i++){
+        if(centerArc->arc.associatedCircleEvents[i].getPoint() != nullptr){
+            //remove the event from the event queue
+            for(std::vector<Event>::iterator it = eventQueue->begin(); it != eventQueue->end(); ++it){
+                if(it->getPoint() == centerArc->arc.associatedCircleEvents[i].getPoint()){
+                    eventQueue->erase(it);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    //test for new circle events and add them to the event queue
+    checkCircleEvent(edgeToReplaceLeft, eventQueue);
+    checkCircleEvent(edgeToReplaceRight, eventQueue);
 }
 
 
