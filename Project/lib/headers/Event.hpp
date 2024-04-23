@@ -12,7 +12,10 @@ class CircleEvent{
         Node *leftEdge;
         Node *rightEdge;
         Node *pinchingArc;
-        CircleEvent(Node *leftEdge, Node *rightEdge, Node *pinchingArc);
+        Node *leftArc;
+        Node *rightArc;
+        CircleEvent(Node *leftA, Node *leftE, Node *pinchingA, Node *rightE, Node *rightA);
+        // CircleEvent(Node *leftEdge, Node *rightEdge, Node *pinchingArc);
         ~CircleEvent();
 
 };
@@ -26,7 +29,7 @@ class Event{
         Event();
         Event(Vertex *point);
         Event(CircleEvent *circleEvent);
-        Event(Vertex *point, Node *leftEdge, Node *rightEdge, Node *pinchingArc);
+        Event(Vertex *point, Node *leftA, Node *leftE, Node *pinchingA, Node *rightE, Node *rightA);
         Event(Event const &event);
         ~Event();
         int getType();

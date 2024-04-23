@@ -4,10 +4,12 @@
 
 #include "headers/Event.hpp"
 
-CircleEvent::CircleEvent(Node *leftEdge, Node *rightEdge, Node *pinchingArc){
-    this->leftEdge = leftEdge;
-    this->rightEdge = rightEdge;
-    this->pinchingArc = pinchingArc;
+CircleEvent::CircleEvent(Node *leftA, Node *leftE, Node *pinchingA, Node *rightE, Node *rightA){
+    this->leftArc = leftA;
+    this->leftEdge = leftE;
+    this->pinchingArc = pinchingA;
+    this->rightEdge = rightE;
+    this->rightArc = rightA;
 }
 
 CircleEvent::~CircleEvent(){
@@ -33,16 +35,16 @@ Event::Event(CircleEvent *circleEvent){
     this->circleEvent = circleEvent;
 }
 
-Event::Event(Vertex *point, Node *leftEdge, Node *rightEdge, Node *pinchingArc){
+Event::Event(Vertex *point, Node *leftA, Node *leftE, Node *pinchingA, Node *rightE, Node *rightA){
     this->type = 1;
     this->point = point;
-    this->circleEvent = new CircleEvent(leftEdge, rightEdge, pinchingArc);
+    this->circleEvent = new CircleEvent(leftA, leftE, pinchingA, rightE, rightA);
 }
 
 Event::Event(Event const &event){
     this->type = event.type;
     if(this->type == 1)
-        this->circleEvent = new CircleEvent(event.circleEvent->leftEdge, event.circleEvent->rightEdge, event.circleEvent->pinchingArc);
+        this->circleEvent = new CircleEvent(event.circleEvent->leftArc, event.circleEvent->leftEdge, event.circleEvent->pinchingArc, event.circleEvent->rightEdge, event.circleEvent->rightArc);
     this->point = event.point;
 }
 

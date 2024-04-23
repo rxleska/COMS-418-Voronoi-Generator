@@ -561,10 +561,12 @@ Node *BeachLineRedBlackTree::search(double x){ //returns an arc, shouldn't retur
                     }else{
                         //if right child of parent return left, else return right
                         if(temp->isOnLeft()){
+                            if(DEBUG) std::cout << "Edge: start:" << temp->edge.start.x << " " << temp->edge.start.y << " end: " << temp->edge.end.x << " " << temp->edge.end.y << std::endl;
                             throw "Error: Edge is pointing up, should not be in the tree";
                             // temp = temp->parent->right;
                         }
                         else{
+                            if(DEBUG) std::cout << "Edge: start:" << temp->edge.start.x << " " << temp->edge.start.y << " end: " << temp->edge.end.x << " " << temp->edge.end.y << std::endl;
                             throw "Error: Edge is pointing up, should not be in the tree";
                             // temp = temp->parent->left;
                         }
@@ -979,7 +981,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
     else{
         //add the circle event to the event queue
         Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY);
-        Event circleEvent = Event(circleCenter, leftEdge, rightEdge, x);
+        Event circleEvent = Event(circleCenter, leftArc, leftEdge, x, rightEdge, rightArc);
         eventQueue->push_back(circleEvent);
         leftArc->arc.associatedCircleEvents[2] = circleEvent;
         x->arc.associatedCircleEvents[1] = circleEvent;
@@ -1003,76 +1005,113 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
     if(ce == nullptr){
         throw "Error: Circle event is null";
     }
+    Node* leftArc = ce->leftArc;
+    Node* leftEdge = ce->leftEdge;
+    Node* centerArc = ce->pinchingArc;
+    Node* rightEdge = ce->rightEdge;
+    Node* rightArc = ce->rightArc;
 
-    //remove end the halflines (turn them into edges)
-    //remove the center arc
-    //create a new edge based on the side arcs 
+
+    //calculate a new edge from the left arc to the right arc
     
-    //one of the edges should have the center arc as one of its children the other edge should have the first edge as one of its children
-    bool leftEdgeIsParent = (
-        ce->leftEdge->right == ce->rightEdge && 
-        ce->rightEdge->left == ce->pinchingArc
-    );
-    bool rightEdgeIsParent = (
-        ce->rightEdge->left == ce->leftEdge && 
-        ce->leftEdge->right == ce->pinchingArc
-    );
-    if(!leftEdgeIsParent && !rightEdgeIsParent){
-        if(DEBUG) std::cout << "Left edge: " << ce->leftEdge->edge.start.x << ", " << ce->leftEdge->edge.start.y << " end: " << ce->leftEdge->edge.end.x << ", " << ce->leftEdge->edge.end.y << std::endl;
-        if(DEBUG) std::cout << "Right edge: " << ce->rightEdge->edge.start.x << ", " << ce->rightEdge->edge.start.y << " end: " << ce->rightEdge->edge.end.x << ", " << ce->rightEdge->edge.end.y << std::endl;
-        if(DEBUG) std::cout << "Pinching arc: " << ce->pinchingArc->arc.focus.x << ", " << ce->pinchingArc->arc.focus.y << std::endl;
-        if(DEBUG) printTreeForest(root);
-        throw "Error: Circle event edges are not in the correct configuration";
-    }
+    //get the parabola intersections
+    double startLeftX = 0.0;
+    double startRightX = 0.0;
+    getParabolaSides(leftArc->arc.focus.x, rightArc->arc.focus.x, leftArc->arc.focus.y, rightArc->arc.focus.y, sweepLine, &startLeftX, &startRightX);
 
-    
-    Node *AbsoluteParent; //the parent of the top edge
-    bool isLeftOfAP = false;
-    
-    if(leftEdgeIsParent){
-        AbsoluteParent = ce->leftEdge->parent;
-        isLeftOfAP = ce->leftEdge->isOnLeft();
-    }
-    else{//rightEdgeIsParent must be true in this case
-        AbsoluteParent = ce->rightEdge->parent;
-        isLeftOfAP = ce->rightEdge->isOnLeft();
-    }
-    
-
-    Node *rightArcParent = ce->leftEdge->left;; //the right leaf of the 5 set (node, edge, arc, edge, node)
-    Node *leftArcParent = ce ->rightEdge->right;; //the left leaf of the 5 set (node, edge, arc, edge, node)
-
-    Node *rightArcPointer = rightArcParent; //the left arc of the edge
-    Node *leftArcPointer = leftArcParent; //the right arc of the edge
-
-    while(rightArcParent != nullptr && !rightArcPointer->isArc){
-        rightArcPointer = rightArcPointer->left;
-    }
-    while(leftArcParent != nullptr && !leftArcPointer->isArc){
-        leftArcPointer = leftArcPointer->right;
-    }
-    if(rightArcPointer == nullptr || leftArcPointer == nullptr || !rightArcPointer->isArc || !leftArcPointer->isArc){
-        throw "Error: Circle event edge parents are not in the correct configuration";
-    }
-
-    //create the new edge
-    
-    
-    //remove the old edges 
-    //storing them in the dcel TODO
-
-    //remove the old arc (x)
-
-    //add AbsoluteParent - [edge, leftArcParent, rightArcParent] to the tree
-    if(isLeftOfAP){
-        std::cout << "Left of AP:" << AbsoluteParent->isArc << std::endl;
+    //select the proper intersection
+    double startX = 0.0;
+    if(leftArc->arc.focus.y < rightArc->arc.focus.y){
+        startX = startRightX;
     }
     else{
-        std::cout << "Left of AP:" << AbsoluteParent->isArc << std::endl;
+        startX = startLeftX;
+    }
+
+    double startY = getParabolaYAtX(leftArc->arc.focus.x, leftArc->arc.focus.y, sweepLine, startX);
+
+    double endLeftX = 0.0;
+    double endRightX = 0.0;
+    getParabolaSides(leftArc->arc.focus.x, rightArc->arc.focus.x, leftArc->arc.focus.y, rightArc->arc.focus.y, sweepLine+5, &endLeftX, &endRightX);
+
+    //select the proper intersection
+    double endX = 0.0;
+    if(leftArc->arc.focus.y < rightArc->arc.focus.y){
+        endX = endRightX;
+    }
+    else{
+        endX = endLeftX;
+    }
+
+    double endY = getParabolaYAtX(leftArc->arc.focus.x, leftArc->arc.focus.y, sweepLine+5, endX);
+
+    //test if it points up
+    bool pointsUp = endY > startY; //this really shouldn't happen
+
+    //create edge 
+    Node *newEdge = new Node();
+    newEdge->isArc = false;
+    newEdge->edge.start = Vertex(startX, startY);
+    newEdge->edge.end = Vertex(endX, endY);
+    newEdge->edge.pointsUp = pointsUp;
+
+
+    //TODO ADD the edges to the DCEL
+    
+    //discover which edge should be replaced, 
+    Node *edgeToReplace = centerArc;
+    while(edgeToReplace != leftEdge && edgeToReplace != rightEdge && edgeToReplace != nullptr){
+        edgeToReplace = edgeToReplace->parent;
+    } 
+    if(edgeToReplace == nullptr){
+        throw "Error: Edge to replace is null";
+    }
+
+    //delete the center arc
+    deleteNode(centerArc);
+
+
+    if(edgeToReplace == leftEdge){
+        //replace right edge // sounds weird but we want the edge is not connected to the center to be replaced
+        deleteNode(leftEdge);
+         edgeToReplace = rightEdge;
+    }
+    else{
+        //replace left edge
+        deleteNode(rightEdge);
+        edgeToReplace = leftEdge;
+    }
+
+    Node * edgeToReplaceLeft = edgeToReplace->left;
+    Node * edgeToReplaceRight = edgeToReplace->right;
+    COLOR edgeColor = edgeToReplace->color;
+
+    if(root == edgeToReplace){
+        root = newEdge;
+    }
+    else{
+        newEdge->parent = edgeToReplace->parent;
+        if(edgeToReplace->isOnLeft()){
+            edgeToReplace->parent->SetLeft(newEdge);
+        }
+        else{
+            edgeToReplace->parent->SetRight(newEdge);
+        }
 
     }
-    
+    newEdge->SetLeft(edgeToReplaceLeft);
+    newEdge->SetRight(edgeToReplaceRight);
+    newEdge->SetParent(nullptr);
 
+    //set the parent of the children
+    if(edgeToReplaceLeft != nullptr){
+        edgeToReplaceLeft->SetParent(newEdge);
+    }
+    if(edgeToReplaceRight != nullptr){
+        edgeToReplaceRight->SetParent(newEdge);
+    }
+
+    newEdge->color = edgeColor;
 }
 
 

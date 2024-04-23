@@ -51,8 +51,10 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
             // Circle event
             //temp print out circle event reached for now
             std::cout << "Circle Event at: " << e.getPoint()->x << " " << e.getPoint()->y << std::endl;
-
+            // beachline.printTreeForest(beachline.getRoot());
             beachline.handleCircleEvent(&e, &eventQueue);
+            // beachline.printTreeForest(beachline.getRoot());
+
 
             // Remove the circle event from the event queue
             // beachline.remove(e.getPoint());
