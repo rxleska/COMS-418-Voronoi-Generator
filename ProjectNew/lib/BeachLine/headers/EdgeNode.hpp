@@ -1,4 +1,5 @@
-
+#include "../../CONST.hpp"
+#include "Arc.hpp"
 
 #ifndef EDGE_NODE_HPP
 #define EDGE_NODE_HPP
@@ -10,6 +11,7 @@ class EdgeNode {
         double y;
         double angle; //given in radians from 0 to 2pi
         EdgeNode *left, *right, *parent;
+        Arc *leftArc, *rightArc;
     public:
         //getters and setters
         EdgeNode *getLeft();
@@ -29,6 +31,7 @@ class EdgeNode {
         EdgeNode();
         EdgeNode(double x, double y, double angle);
         EdgeNode(double x, double y, double angle, EdgeNode *left, EdgeNode *right);
+        EdgeNode(Arc *left, Arc *right, double sweepline);
 
         //copyers
         EdgeNode(const EdgeNode &e);

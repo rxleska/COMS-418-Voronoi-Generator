@@ -90,12 +90,30 @@ void BeachLine::splay(EdgeNode *node) {
 
 
 EdgeNode *BeachLine::search(double searchX) {
-    //TODO return the node that is closest to the searchX
+    //now returns the node that is closest to the searchX
     EdgeNode *current = this->root;
     while (current != nullptr) {
         double value = current->getValue(this->sweepLine);
-        if (searchX < value) current = current->getLeft();
-        else if (searchX > value) current = current->getRight();
+        if (searchX < value) {
+            //if left is null return current
+            if(current->getLeft() == nullptr){
+                splay(current);
+                return current;
+            }
+            else{
+                current = current->getLeft();
+            }
+        }
+        else if (searchX > value) {
+            //if right is null return current
+            if(current->getRight() == nullptr){
+                splay(current);
+                return current;
+            }
+            else{
+                current = current->getRight();
+            }
+        }
         else {
             splay(current);
             return current;

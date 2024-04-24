@@ -97,6 +97,9 @@ void EdgeNode::setAngle(double angle) {
 
 //value functions
 
+/**
+ * Gets where the edge intersects the arcs at the given sweepline height
+*/
 double EdgeNode::getValue(double sweepline) {
     return 0.0; //TODO implement this
 }

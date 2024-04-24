@@ -1,4 +1,4 @@
-
+#include "../../CONST.hpp"
 #include "EdgeNode.hpp"
 
 #ifndef BEACH_LINE_HPP
