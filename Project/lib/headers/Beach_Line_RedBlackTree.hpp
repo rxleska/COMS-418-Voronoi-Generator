@@ -10,6 +10,10 @@
 #define BEACH_LINE_RBT
 
 extern double sweepLine;
+extern double leftBound;
+extern double rightBound;
+extern double topBound;
+extern double bottomBound;
 
 class Event;
 
@@ -99,8 +103,8 @@ class BeachLineRedBlackTree{
         void deleteNode(Node *v);
         void fixDoubleBlack(Node *x);
         Node *search(double x); //returns an edge
-        void getParabolaSides(double x1, double x2, double y1, double y2, double sweep, double *left, double *right); //gets the left and right intersection of 2 parabolas, (a,c) is parabola 1 focus, (b,d) is parabola 2 focus, s is the sweep line
-        double getParabolaYAtX(double xf, double yf, double ysweep, double x); //gets the y value of a parabola at a given x value
+        static void getParabolaSides(double x1, double x2, double y1, double y2, double sweep, double *left, double *right); //gets the left and right intersection of 2 parabolas, (a,c) is parabola 1 focus, (b,d) is parabola 2 focus, s is the sweep line
+        static double getParabolaYAtX(double xf, double yf, double ysweep, double x); //gets the y value of a parabola at a given x value
         void insert(Vertex v, std::vector<Event> *eventQueue); //this is a specialized insert for the beach line
         void checkCircleEvent(Node *x, std::vector<Event> *eventQueue); //checks for circle events
         void handleCircleEvent(Event *e, std::vector<Event> *eventQueue);

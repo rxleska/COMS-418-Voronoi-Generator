@@ -38,19 +38,20 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
         eventQueue.erase(eventQueue.begin());        
         std::pop_heap(eventQueue.begin(), eventQueue.end(), Compare());
 
-        std::cout << e.getPoint()->x << " " << e.getPoint()->y << std::endl; 
+        // std::cout << e.getPoint()->x << " " << e.getPoint()->y << std::endl; 
         
         beachline.sweepLine = e.getPoint()->y;
 
         if (e.getType() == 0){
             // Site event
             // Insert the site into the beach line
+            // std::cout << "\\textbf{Site Event at: " << e.getPoint()->x << " " << e.getPoint()->y << "}" << std::endl << std::endl;
             beachline.insert(*e.getPoint(), &eventQueue);
             // beachline.printTreeForest(beachline.getRoot());
         }else{
             // Circle event
             //temp print out circle event reached for now
-            std::cout << "Circle Event at: " << e.getPoint()->x << " " << e.getPoint()->y << std::endl;
+            // std::cout << "\\textbf{Circle Event at: " << e.getPoint()->x << " " << e.getPoint()->y << "}" << std::endl << std::endl;
             // beachline.printTreeForest(beachline.getRoot());
             beachline.handleCircleEvent(&e, &eventQueue);
             // beachline.printTreeForest(beachline.getRoot());
@@ -61,6 +62,13 @@ DCEL ProjectCalculations::calculateVoronoiDiagram(std::vector<Vertex> *points){
             // Check for new circle events
             // Insert new circle events into the event queue
         }
+
+        // std::cout << "\\begin{forest}for tree = {grow=south,edge={->}}" << std::endl;
+        // beachline.printTreeForest(beachline.getRoot());
+        // std::cout << "\\end{forest}" << std::endl;
+        // std::cout << "\n\\pagebreak\n" << std::endl;
+
+
     }
 
     // beachline.printTreeForest(beachline.getRoot());

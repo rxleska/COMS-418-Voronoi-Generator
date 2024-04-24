@@ -159,21 +159,24 @@ double Node::getEdgeValue(){ //assumes that the node has been checked to be an e
     if(this->isArc){
         throw "Node is not an edge, cannot get edge value";
     }
-    else if(this->edge.pointsUp){
-        return this->edge.start.x; //filler TODO replace with degenerate case check
-
-        // throw "Edge is not downwards, cannot get edge value";
-    }
     else{
-        //calculate where the line intersects the sweep line 
-        //TODO Adjust this to use where the line intersects the arc (the arc at the sweep line)
-        //TODO START HERE: using the intersection allows for use to find the x value of upwards edges a well (unless the line points straight up, in which case we can just return the x value of the start point)
-        //TODO IF this is fixed insert could be modifed to insert the new arcs as children of the main arc then insert the edges after to help with the balancing of the tree
-        double slToStart = sweepLine - this->edge.start.y;
-        double scaling = slToStart / (this->edge.end.y - this->edge.start.y);
-        double xValue = this->edge.start.x + (scaling * (this->edge.end.x - this->edge.start.x));
-        return xValue;
+        double leftinterceptX;
+        double rightinterceptX;
+        BeachLineRedBlackTree::getParabolaSides(this->edge.leftArc->focus.x, this->edge.rightArc->focus.x, this->edge.leftArc->focus.y, this->edge.rightArc->focus.y, sweepLine, &leftinterceptX, &rightinterceptX);
+
+        // if(DEBUG) std::cout << "sweep" << sweepLine << std::endl;
+        // if(DEBUG) std::cout << "leftFocus" << this->edge.leftArc->focus.x << " " << this->edge.leftArc->focus.y << " rightFocus: " << this->edge.rightArc->focus.x << " " << this->edge.rightArc->focus.y << std::endl;
+        // if(DEBUG) std::cout << "edgevalue: left: " << leftinterceptX << " right: " << rightinterceptX << std::endl;
+        // if(DEBUG) std::cout << "edgevalue: left: " << leftinterceptX << " right: " << rightinterceptX << std::endl;
+
+        if(this->edge.leftArc->focus.y < this->edge.rightArc->focus.y){ //left below right, get right intersection
+            return rightinterceptX;
+        }
+        else{ //right below left, get left intersection
+            return leftinterceptX;
+        }
     }
+
 }
 
 // ------------------------------------------------------------
@@ -379,6 +382,19 @@ void BeachLineRedBlackTree::fixRedRed(Node *x){
         x->color = BLACK;
         return;
     }
+
+    if(x->parent == nullptr){
+        printTreeForest(root);
+        if(DEBUG){
+            if(x->isArc){
+                std::cout << "Arc: " << x->arc.focus.x << " " << x->arc.focus.y << std::endl;
+            }
+            else{
+                std::cout << "Edge: start: " << x->edge.start.x << " " << x->edge.start.y << " end: " << x->edge.end.x << " " << x->edge.end.y << std::endl;
+            }
+        }
+    }
+
 
     // initialize parent, grandparent, uncle
     Node *parent = x->parent, *grandparent = parent->parent,
@@ -611,6 +627,18 @@ void BeachLineRedBlackTree::getParabolaSides(double x1, double x2, double y1, do
         return;
     }
 
+    //if one point is touching the sweep line
+    if(y1 == sweep){
+        *left = x1;
+        *right = x1;
+        return;
+    }
+    if(y2 == sweep){
+        *left = x2;
+        *right = x2;
+        return;
+    }
+
 
     double a = 1.0 / (y1-sweep) - 1.0 / (y2-sweep);
     double b  = -2.0 * x1/(y1-sweep) + 2.0 * x2/(y2-sweep);
@@ -694,7 +722,11 @@ void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
 
     //
     newEdgeLeft->isArc = false;
+    newEdgeLeft->edge.leftArc = &newArcLeft->arc;
+    newEdgeLeft->edge.rightArc = &newArcCenter->arc;
     newEdgeRight->isArc = false;
+    newEdgeRight->edge.leftArc = &newArcCenter->arc;
+    newEdgeRight->edge.rightArc = &newArcRight->arc;
 
     //Calculate the new edges half edges
     //Note arc can be found using the following formula y = (x-xFocus)^2/(2(yFocus-ySweep)) + 0.5*(yfocus + ySweep)
@@ -714,7 +746,11 @@ void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
     double leftY = getParabolaYAtX(above->arc.focus.x, above->arc.focus.y, sweepApprox, leftX);
     double rightY = getParabolaYAtX(above->arc.focus.x, above->arc.focus.y, sweepApprox, rightX);
     newEdgeLeft->edge.end = Vertex(leftX, leftY);  
+    //Debug write the edge
+    if(DEBUG) std::cout << "Edge start: (" << newEdgeLeft->edge.start.x << ", " << newEdgeLeft->edge.start.y << ") end: (" << newEdgeLeft->edge.end.x << ", " << newEdgeLeft->edge.end.y << ")" << "quadtuple: (" << newEdgeLeft->edge.start.x << ", " << newEdgeLeft->edge.start.y << ", " << newEdgeLeft->edge.end.x << ", " << newEdgeLeft->edge.end.y << ")" << std::endl;
     newEdgeRight->edge.end = Vertex(rightX, rightY);
+    //Debug write the edge
+    if(DEBUG) std::cout << "Edge start: (" << newEdgeRight->edge.start.x << ", " << newEdgeRight->edge.start.y << ") end: (" << newEdgeRight->edge.end.x << ", " << newEdgeRight->edge.end.y << ")" << "quadtuple: (" << newEdgeRight->edge.start.x << ", " << newEdgeRight->edge.start.y << ", " << newEdgeRight->edge.end.x << ", " << newEdgeRight->edge.end.y << ")" << std::endl;
     
     //test if either edge points up 
     if(newEdgeLeft->edge.start.y < newEdgeLeft->edge.end.y){
@@ -995,7 +1031,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
     } //TODO check if its an edge case where the circle touches the sweep line
     else{
         //add the circle event to the event queue
-        Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY);
+        Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY-radius);
         Event circleEvent = Event(circleCenter, leftArc, leftEdge, x, rightEdge, rightArc);
         eventQueue->push_back(circleEvent);
         leftArc->arc.associatedCircleEvents[2] = circleEvent;
@@ -1036,7 +1072,7 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
 
     //select the proper intersection
     double startX = 0.0;
-    if(leftArc->arc.focus.y < rightArc->arc.focus.y){
+    if(leftArc->arc.focus.y > rightArc->arc.focus.y){
         startX = startRightX;
     }
     else{
@@ -1060,6 +1096,13 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
 
     double endY = getParabolaYAtX(leftArc->arc.focus.x, leftArc->arc.focus.y, sweepLine+5, endX);
 
+    //LOG the 2 side arcs and log the sweep line height
+    // std::cout << "Left arc:" << leftArc->arc.focus.x << " " << leftArc->arc.focus.y << std::endl;
+    // std::cout << "Right arc:" << rightArc->arc.focus.x << " " << rightArc->arc.focus.y << std::endl;
+    std::cout << "Sweep line: " << sweepLine << std::endl;
+    std::cout << "Start: (" << startX << ", " << startY << ")" << std::endl;
+    std::cout << "arcs: " << leftArc->arc.focus.x << " " << leftArc->arc.focus.y << " " << rightArc->arc.focus.x << " " << rightArc->arc.focus.y << std::endl;
+
     //test if it points up
     bool pointsUp = endY > startY; //this really shouldn't happen
 
@@ -1068,6 +1111,8 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
     newEdge->isArc = false;
     newEdge->edge.start = Vertex(startX, startY);
     newEdge->edge.end = Vertex(endX, endY);
+    newEdge->edge.leftArc = &leftArc->arc;
+    newEdge->edge.rightArc = &rightArc->arc;
     newEdge->edge.pointsUp = pointsUp;
 
 
@@ -1087,8 +1132,8 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
 
     if(PRINTEDGE){
             std::cout << std::endl;
-            std::cout << "Edge End2: start: (" << leftEdge->edge.start.x << ", " << leftEdge->edge.start.y << ") end: (" << sweepLine << ", " << leftEdge->getEdgeValue() << ")" << std::endl;
-            std::cout << "Edge End2: start: (" << rightEdge->edge.start.x << ", " << rightEdge->edge.start.y << ") end: (" << sweepLine << ", " << rightEdge->getEdgeValue() << ")" << std::endl;
+            std::cout << "Edge End: start: (" << leftEdge->edge.start.x << ", " << leftEdge->edge.start.y << ", " << getParabolaYAtX(leftEdge->edge.leftArc->focus.x, leftEdge->edge.leftArc->focus.y, sweepLine, leftEdge->getEdgeValue()) << ", " << leftEdge->getEdgeValue() << ")" << std::endl;
+            std::cout << "Edge End: start: (" << rightEdge->edge.start.x << ", " << rightEdge->edge.start.y << ", " << getParabolaYAtX(rightEdge->edge.leftArc->focus.x, rightEdge->edge.leftArc->focus.y, sweepLine, rightEdge->getEdgeValue()) << ", " << rightEdge->getEdgeValue() << ")" << std::endl;
             std::cout << std::endl;
     }
 
@@ -1123,7 +1168,6 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
     }
     newEdge->SetLeft(edgeToReplaceLeft);
     newEdge->SetRight(edgeToReplaceRight);
-    newEdge->SetParent(nullptr);
 
     //set the parent of the children
     if(edgeToReplaceLeft != nullptr){
@@ -1140,7 +1184,12 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
         if(centerArc->arc.associatedCircleEvents[i].getPoint() != nullptr){
             //remove the event from the event queue
             for(std::vector<Event>::iterator it = eventQueue->begin(); it != eventQueue->end(); ++it){
-                if(it->getPoint() == centerArc->arc.associatedCircleEvents[i].getPoint()){
+                // Should not compare points directly, since the points could be the same but have different addresses
+                // if(it->getPoint() == centerArc->arc.associatedCircleEvents[i].getPoint()){
+                //     eventQueue->erase(it);
+                //     break;
+                // }
+                if(it->getPoint()->x == centerArc->arc.associatedCircleEvents[i].getPoint()->x && it->getPoint()->y == centerArc->arc.associatedCircleEvents[i].getPoint()->y && it->getType() == 1){
                     eventQueue->erase(it);
                     break;
                 }
