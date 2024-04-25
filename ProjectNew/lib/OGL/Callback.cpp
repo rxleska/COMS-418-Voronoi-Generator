@@ -5,12 +5,14 @@
 #include "headers/DrawObjects.hpp"
 
 bool isPaused;
+bool drawAllArcs;
 
 // bool isPaused{ true }; // Whether the simulation is paused
 namespace OGLcallbacks{
     void initOpenGL() {
         glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
         isPaused = true;
+        drawAllArcs = false;
     }
 
     void update(int value) {
@@ -30,6 +32,9 @@ namespace OGLcallbacks{
                     SweepAnimationHeight -= 0.5;
                     glutPostRedisplay(); // Redraw the scene immediately
                 }
+                break;
+            case 'a': // Draw all arcs
+                drawAllArcs = !drawAllArcs;
                 break;
             default:
                 break;
@@ -54,6 +59,18 @@ namespace OGLcallbacks{
         //switch color to green and draw the beachline
         glColor3f(0.0, 1.0, 0.0);
         DrawObjects::drawBeachLine();
+
+        if(drawAllArcs){
+            //switch color to yellow and draw all the arcs
+            glColor3f(1.0, 1.0, 0.0);
+            DrawObjects::drawAllArcs();
+        }
+
+        if(drawAllArcs){
+            //switch color to white and draw all the half edges
+            glColor3f(1.0, 1.0, 1.0);
+            DrawObjects::drawAllHalfEdges();
+        }
 
 
         glutSwapBuffers(); // Swap the front and back buffers

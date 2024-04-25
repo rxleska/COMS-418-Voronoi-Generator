@@ -68,6 +68,12 @@ double EdgeNode::getY() {
 }
 
 double EdgeNode::getAngle() {
+    if(this->angle < 0){
+        while(this->angle < 0){
+            this->angle += 2*PI;
+        }
+    }
+
     return this->angle;
 }
 

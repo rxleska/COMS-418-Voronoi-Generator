@@ -64,7 +64,7 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
         *ey2 = getParabolaYatX(*ex2, x1, y1, swpln);
     }
 
-    swpln = swpln - 5; //move the directrix down a bit to calculate the edge angles
+    swpln = swpln - 20; //move the directrix down a bit to calculate the edge angles
     a = 1.0 / (y1-swpln) - 1.0 / (y2-swpln);
     b  = -2.0 * x1/(y1-swpln) + 2.0 * x2/(y2-swpln);
     c = x1*x1/(y1-swpln) - x2*x2/(y2-swpln) + y1 - y2;

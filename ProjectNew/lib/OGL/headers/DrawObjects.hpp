@@ -17,6 +17,13 @@ namespace DrawObjects
     void drawSites();
     void drawSweepLine(double y);
     void drawBeachLine();
+
+    void drawArc(Arc *arc);
+    void drawAllArcs();
+
+    void drawHalfEdge(EdgeNode *edge);
+    void drawAllHalfEdges();
+    void drawAllHalfEdgesRec(EdgeNode *edge);
     
 } // namespace DrawObjects
 

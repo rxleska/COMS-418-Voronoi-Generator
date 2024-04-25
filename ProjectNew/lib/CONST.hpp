@@ -27,6 +27,7 @@ extern bool isPaused; // Whether the simulation is paused
 extern double SweepAnimationHeight;
 extern double windowWidth;
 extern double windowHeight;
+extern bool drawAllArcs;
 
 
 #endif
