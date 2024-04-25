@@ -1,9 +1,9 @@
 
-#include "EdgeNode.hpp"
 
 #ifndef BEACH_LINE_HPP
 #define BEACH_LINE_HPP
 
+#include "EdgeNode.hpp"
 #include "../../CONST.hpp"
 class EdgeNode; //forward declaration
 

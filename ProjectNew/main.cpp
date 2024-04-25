@@ -1,5 +1,7 @@
 #include "lib/CONST.hpp"
 #include "lib/BeachLine/headers/BeachLine.hpp"
+#include "lib/BeachLine/headers/ParabolaMath.hpp"
+#include "lib/EventQueue/headers/EQueue.hpp"
 #include "lib/BeachLine/headers/EdgeNode.hpp"
 #include "lib/BeachLine/headers/Arc.hpp"
 #include "lib/DCEL/headers/Vertex.hpp"
@@ -9,10 +11,13 @@
 #include "lib/OGL/headers/Callback.hpp"
 
 
+// Global variables (extern in CONST.hpp)
 std::vector<Vertex> vertices;
 BeachLine *beachLine;
+EventQueue *eventQueue;
 double windowWidth;
 double windowHeight;
+double SweepAnimationHeight;
     
 //string to int function
 int stringToInt(std::string str){
@@ -67,8 +72,8 @@ void readSites(std::vector<Vertex> *vertices){
 }
 
 int main(int argc, char *argv[]) {
+    //init beach line 
     beachLine = new BeachLine();
-    beachLine->getRoot();
 
 
     //read in the sites from the file
@@ -87,6 +92,28 @@ int main(int argc, char *argv[]) {
             std::cout << "Vertex " << i << ": (" << vertices[i].getX() << ", " << vertices[i].getY() << ")" << std::endl;
         }
         std::cout << std::endl << std::endl;
+    }
+
+    //init event queue 
+    eventQueue = new EventQueue(vertices.size()*2);
+
+    //create site events for the event queue
+    for(int i = 0; i < (int) vertices.size(); i++){
+        eventQueue->insert(new SiteEvent(vertices[i].getX(), vertices[i].getY()));
+    }
+
+    if(DEBUG){
+        //read the heap
+        std::cout << "Heap: " << std::endl;
+        while(!eventQueue->isEmpty()){
+            Event *e = eventQueue->pop();
+            std::cout << "Event: " << e->getX() << " " << e->getY() << std::endl;
+        }
+    }
+
+    //create site events for the event queue
+    for(int i = 0; i < (int) vertices.size(); i++){
+        eventQueue->insert(new SiteEvent(vertices[i].getX(), vertices[i].getY()));
     }
 
 
@@ -129,6 +156,39 @@ int main(int argc, char *argv[]) {
     //set the window width and height
     windowWidth = dx;
     windowHeight = dy;
+
+    //initialize the sweep line height
+    SweepAnimationHeight = maxY;
+
+
+    //proc the first 2 sites 
+    SiteEvent *site1 = (SiteEvent *) eventQueue->pop();
+    Arc *arc1 = new Arc(site1->getX(), site1->getY());
+    SiteEvent *site2 = (SiteEvent *) eventQueue->pop();
+    Arc *arc2 = new Arc(site2->getX(), site2->getY());
+    beachLine->setSweepLine(site2->getY());
+    EdgeNode *leftEdge = new EdgeNode();
+    leftEdge->setLeftArc(arc1);
+    leftEdge->setRightArc(arc2);
+    EdgeNode *rightEdge = new EdgeNode();
+    rightEdge->setLeftArc(arc2);
+    rightEdge->setRightArc(arc1);
+    ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
+    //insert the edges into the beach line
+    beachLine->insert(leftEdge);
+    beachLine->insert(rightEdge);
+
+    if(DEBUG){
+        //write the edges to the console
+        std::cout << "Left Edge: " << std::endl;
+        std::cout << "X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+        std::cout << "Right Edge: " << std::endl;
+        std::cout << "X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+    }
+
+    //set animation sweepline to the second site
+    SweepAnimationHeight = site2->getY();
+
     
     glutInit(&argc, argv); // Initialize GLUT
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // Set the display mode

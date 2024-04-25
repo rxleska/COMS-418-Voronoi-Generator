@@ -23,12 +23,16 @@ class EdgeNode {
         double getX();
         double getY();
         double getAngle();
+        Arc *getLeftArc();
+        Arc *getRightArc();
         void setLeft(EdgeNode *left);
         void setRight(EdgeNode *right);
         void setParent(EdgeNode *parent);
         void setX(double x);
         void setY(double y);
         void setAngle(double angle);
+        void setLeftArc(Arc *leftArc);
+        void setRightArc(Arc *rightArc);
         
         //constructors
         EdgeNode();

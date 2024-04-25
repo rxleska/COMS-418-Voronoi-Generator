@@ -15,6 +15,8 @@
 namespace DrawObjects
 {
     void drawSites();
+    void drawSweepLine(double y);
+    void drawBeachLine();
     
 } // namespace DrawObjects
 

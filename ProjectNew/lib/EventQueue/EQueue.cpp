@@ -30,58 +30,46 @@ int EventQueue::right(int i){
 }
 
 void EventQueue::shiftUp(int i){
-    //if the node is not the root and the node is greater than its parent
     while(i > 0 && compare(events[i], events[parent(i)])){
-        //swap the node with its parent
         swap(i, parent(i));
-        //set the node to its parent
-        shiftUp(parent(i));
+        i = parent(i);  // Move up to the next parent level
     }
 }
+
 
 void EventQueue::shiftDown(int i){
-    //if the node has a left child 
-    if(left(i) < size){
-        //if the node has a right child 
-        if(right(i) < size){
-            //if the left is greater than the right 
-            if(compare(events[right(i)], events[left(i)])){
-                //if the left is greater than the node
-                if(compare(events[left(i)], events[i])){
-                    //swap the left with the node
-                    swap(i, left(i));
-                    //set the node to the left
-                    shiftDown(left(i));
-                }
-            }
-            //if the right is greater than the left
-            else{
-                //if the right is greater than the node
-                if(compare(events[right(i)], events[i])){
-                    //swap the right with the node
-                    swap(i, right(i));
-                    //set the node to the right
-                    shiftDown(right(i));
-                }
-            }
+    while(left(i) < size){  // ensure loop continues until no left child
+        int largest = left(i);
+        int rightIndex = right(i);
+
+        if(rightIndex < size && compare(events[rightIndex], events[largest])){
+            largest = rightIndex;
         }
-        else{
-            //if the left is greater than the node
-            if(compare(events[left(i)], events[i])){
-                //swap the left with the node
-                swap(i, left(i));
-                //set the node to the left
-                shiftDown(left(i));
-            }
+        if(compare(events[largest], events[i])){
+            swap(i, largest);
+            i = largest;  // Continue down the tree from the largest child
+        } else {
+            break;  // If no swap needed, the heap property is restored
         }
     }
 }
 
+
 void EventQueue::heapify(int i){
-    //shift the node up
-    shiftUp(i);
-    //shift the node down
-    shiftDown(i);
+    if (i == 0) {
+        // Only shift down if it's the root node, since there's no parent to compare.
+        shiftDown(i);
+    } else {
+        int parentIdx = parent(i);
+        // Decide to shift up or down based on comparison with the parent
+        if (compare(events[i], events[parentIdx])) {
+            // If current is greater than parent in a max heap, shift up
+            shiftUp(i);
+        } else {
+            // Otherwise, potentially shift down
+            shiftDown(i);
+        }
+    }
 }
 
 void EventQueue::swap(int i, int j){
@@ -92,16 +80,16 @@ void EventQueue::swap(int i, int j){
 }
 
 bool EventQueue::compare(Event *a, Event *b){
-    //if y values are the same 
-    if(ParabolaMath::areSameDouble(a->getY(), b->getY())){
-        //return the smaller x value
-        return ParabolaMath::isLessThanDouble(a->getX(), b->getX());
-    }
-    else if(ParabolaMath::isLessThanDouble(a->getY(), b->getY())){
+    // Prioritize by y value, larger y is better
+    if (ParabolaMath::isGreaterThanDouble(a->getY(), b->getY())) {
         return true;
+    } else if (ParabolaMath::areSameDouble(a->getY(), b->getY())) {
+        // If y is the same, use x value, smaller x is better
+        return ParabolaMath::isLessThanDouble(a->getX(), b->getX());
     }
     return false;
 }
+
 
 // public methods
 

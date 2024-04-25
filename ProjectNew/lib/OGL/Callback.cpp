@@ -27,6 +27,7 @@ namespace OGLcallbacks{
                 break;
             case 's': // Step through the simulation one frame at a time
                 if (isPaused) {
+                    SweepAnimationHeight -= 0.5;
                     glutPostRedisplay(); // Redraw the scene immediately
                 }
                 break;
@@ -45,6 +46,14 @@ namespace OGLcallbacks{
         //switch color to blue and draw the points
         glColor3f(0.0, 0.0, 1.0);
         DrawObjects::drawSites();
+
+        //swithc color to red and draw the sweepline
+        glColor3f(1.0, 0.0, 0.0);
+        DrawObjects::drawSweepLine(SweepAnimationHeight);
+
+        //switch color to green and draw the beachline
+        glColor3f(0.0, 1.0, 0.0);
+        DrawObjects::drawBeachLine();
 
 
         glutSwapBuffers(); // Swap the front and back buffers

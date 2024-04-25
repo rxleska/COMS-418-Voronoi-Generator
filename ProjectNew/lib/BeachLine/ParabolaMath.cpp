@@ -82,8 +82,40 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
     double leftY = getParabolaYatX(leftX, x1, y1, swpln);
     double rightY = getParabolaYatX(rightX, x1, y1, swpln);
     *er1 = atan2((*ex1) - leftX, (*ey1) - leftY);
+    if(DEBUG){
+        //er1 is nan or -nan 
+        if(std::isnan(*er1)){
+            std::cout << "er1 is nan" << std::endl;
+            std::cout << "x1: " << x1 << " y1: " << y1 << " x2: " << x2 << " y2: " << y2 << " swpln: " << swpln << std::endl;
+            std::cout << "ex1: " << *ex1 << " ey1: " << *ey1 << " er1: " << *er1 << " ex2: " << *ex2 << " ey2: " << *ey2 << " er2: " << *er2 << std::endl;
+            std::cout << "a: " << a << " b: " << b << " c: " << c << " discriminant: " << discriminant << std::endl;
+            std::cout << "xminus: " << xminus << " xplus: " << xplus << std::endl;
+            std::cout << "leftX: " << leftX << " leftY: " << leftY << " rightX: " << rightX << " rightY: " << rightY << std::endl;
+        }
+    }
     *er2 = atan2((*ex2) - rightX, (*ey2) - rightY);
 
+    return;
+}
+
+void ParabolaMath::getParabolaEdges(Arc a, Arc b, double swpln, EdgeNode *left, EdgeNode *right){
+    double x1 = a.getX();
+    double y1 = a.getY();
+    double x2 = b.getX();
+    double y2 = b.getY();
+    double ex1;
+    double ey1;
+    double er1;
+    double ex2;
+    double ey2;
+    double er2;
+    getParabolaEdges(x1, y1, x2, y2, swpln, &ex1, &ey1, &er1, &ex2, &ey2, &er2);
+    left->setX(ex1);
+    left->setY(ey1);
+    left->setAngle(er1);
+    right->setX(ex2);
+    right->setY(ey2);
+    right->setAngle(er2);
     return;
 }
 

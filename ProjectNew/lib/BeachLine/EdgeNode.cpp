@@ -1,5 +1,6 @@
 
 #include "headers/EdgeNode.hpp"
+#include "headers/ParabolaMath.hpp"
 
 
 //constructors
@@ -70,6 +71,14 @@ double EdgeNode::getAngle() {
     return this->angle;
 }
 
+Arc *EdgeNode::getLeftArc() {
+    return this->leftArc;
+}
+
+Arc *EdgeNode::getRightArc() {
+    return this->rightArc;
+}
+
 void EdgeNode::setLeft(EdgeNode *left) {
     this->left = left;
 }
@@ -94,6 +103,14 @@ void EdgeNode::setAngle(double angle) {
     this->angle = angle;
 }
 
+void EdgeNode::setLeftArc(Arc *leftArc) {
+    this->leftArc = leftArc;
+}
+
+void EdgeNode::setRightArc(Arc *rightArc) {
+    this->rightArc = rightArc;
+}
+
 
 //value functions
 
@@ -101,6 +118,15 @@ void EdgeNode::setAngle(double angle) {
  * Gets where the edge intersects the arcs at the given sweepline height
 */
 double EdgeNode::getValue(double sweepline) {
-    return 0.0; //TODO implement this
+    double x;
+    double y;
+    if(ParabolaMath::doesLineIntersectParabolaOO(this->leftArc, sweepline, this, &x, &y)){
+        return x;
+    }
+    else{
+        ParabolaMath::doesLineIntersectParabolaOO(this->rightArc, sweepline, this, &x, &y);
+        return x;
+    }
+    
 }
 
