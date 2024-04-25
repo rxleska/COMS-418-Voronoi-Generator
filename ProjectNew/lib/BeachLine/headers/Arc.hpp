@@ -1,7 +1,9 @@
-#include "../../CONST.hpp"
 
 #ifndef ARC_HPP
 #define ARC_HPP
+
+
+#include "../../CONST.hpp"
 
 class Arc {
     private: //just stores the focal point of the parabola

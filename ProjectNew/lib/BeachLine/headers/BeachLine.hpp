@@ -1,8 +1,11 @@
-#include "../../CONST.hpp"
+
 #include "EdgeNode.hpp"
 
 #ifndef BEACH_LINE_HPP
 #define BEACH_LINE_HPP
+
+#include "../../CONST.hpp"
+class EdgeNode; //forward declaration
 
 class BeachLine {
     private:

@@ -1,9 +1,12 @@
-#include "../../CONST.hpp"
+
 #include "Arc.hpp"
 
 #ifndef EDGE_NODE_HPP
 #define EDGE_NODE_HPP
 
+#include "../../CONST.hpp"
+
+class Arc; // forward declaration
 
 class EdgeNode {
     private:

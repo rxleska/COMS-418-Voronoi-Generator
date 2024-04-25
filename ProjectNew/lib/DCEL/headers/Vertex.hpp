@@ -1,8 +1,9 @@
 
-#include "../../CONST.hpp"
 
 #ifndef VERTEX_HPP
 #define VERTEX_HPP
+
+#include "../../CONST.hpp"
 
 class Vertex {
     private:
