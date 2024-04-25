@@ -6,8 +6,8 @@ GPPAF = g++ -Wall -Werror -ggdb
 
 LINKERFLAGS =  -lGL -lGLU -lglut 
 
-run: main.o EdgeNode.o Arc.o BeachLine.o ParabolaMath.o Vertex.o Callback.o DrawObjects.o
-	$(GPPAF) bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o -o run $(LINKERFLAGS)
+run: main.o EdgeNode.o Arc.o BeachLine.o ParabolaMath.o Vertex.o Callback.o DrawObjects.o EQueue.o Event.o
+	$(GPPAF) bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o bin/EQueue.o bin/Event.o -o run $(LINKERFLAGS)
 
 
 main.o: main.cpp
@@ -47,6 +47,11 @@ DrawObjects.o: lib/OGL/DrawObjects.cpp lib/OGL/headers/DrawObjects.hpp
 
 #Event Queue files
 
+EQueue.o: lib/EventQueue/EQueue.cpp lib/EventQueue/headers/EQueue.hpp
+	$(GPPAF) -c lib/EventQueue/EQueue.cpp -o bin/EQueue.o $(LINKERFLAGS)
+
+Event.o: lib/EventQueue/Event.cpp lib/EventQueue/headers/Event.hpp lib/BeachLine/headers/ParabolaMath.hpp
+	$(GPPAF) -c lib/EventQueue/Event.cpp -o bin/Event.o $(LINKERFLAGS)
 
 
 clean:
