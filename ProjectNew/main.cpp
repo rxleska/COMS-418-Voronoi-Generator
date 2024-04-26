@@ -5,6 +5,7 @@
 #include "lib/BeachLine/headers/EdgeNode.hpp"
 #include "lib/BeachLine/headers/Arc.hpp"
 #include "lib/DCEL/headers/Vertex.hpp"
+#include "lib/DCEL/headers/Edge.hpp"
 #include <fstream>
 #include <GL/glut.h>
 #include "lib/OGL/headers/DrawObjects.hpp"
@@ -13,6 +14,7 @@
 
 // Global variables (extern in CONST.hpp)
 std::vector<Vertex> vertices;
+std::vector<Edge *> finishedEdges;
 BeachLine *beachLine;
 EventQueue *eventQueue;
 double windowWidth;

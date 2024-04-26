@@ -265,6 +265,14 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             event->setIntersectionY(evty);
             event->setLeftEdge(nextLeft);
             event->setRightEdge(leftedge);
+            //before inserting sanity check that the edges do intersect eventually 
+            //TODO add this check
+            //could also be due to the fact that I am not removing circle events whoms arcs have been deleted (will check later, this check is easier to implement and makes more sense in my head implementation wise)
+
+            //idea get the angle the two edges starting points if both angles are less than perpendicular to the line between the two points then they will intersect eventually
+            //TODO move this to a function in ParabolaMath, (DRY)
+
+
             eventQueue->insert(event);
         }
     }
@@ -281,6 +289,9 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             event->setIntersectionY(evty);
             event->setLeftEdge(leftedge);
             event->setRightEdge(rightedge);
+            //before inserting sanity check that the edges do intersect eventually 
+            //TODO add this check
+
             eventQueue->insert(event);
         }
     }
@@ -298,6 +309,9 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             event->setIntersectionY(evty);
             event->setLeftEdge(rightedge);
             event->setRightEdge(nextRight);
+            //before inserting sanity check that the edges do intersect eventually 
+            //TODO add this check
+
             eventQueue->insert(event);
         }
 

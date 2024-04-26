@@ -6,8 +6,8 @@ GPPAF = g++ -Wall -Werror -ggdb
 
 LINKERFLAGS =  -lGL -lGLU -lglut 
 
-run: bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o bin/EQueue.o bin/Event.o
-	$(GPPAF) bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o bin/EQueue.o bin/Event.o -o run $(LINKERFLAGS)
+run: bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o bin/EQueue.o bin/Event.o bin/Edge.o
+	$(GPPAF) bin/main.o bin/EdgeNode.o bin/Arc.o bin/BeachLine.o bin/ParabolaMath.o bin/Vertex.o bin/Callback.o bin/DrawObjects.o bin/EQueue.o bin/Event.o bin/Edge.o -o run $(LINKERFLAGS)
 
 
 bin/main.o: main.cpp
@@ -34,6 +34,8 @@ bin/ParabolaMath.o: lib/BeachLine/ParabolaMath.cpp lib/BeachLine/headers/Parabol
 bin/Vertex.o: lib/DCEL/Vertex.cpp lib/DCEL/headers/Vertex.hpp
 	$(GPPAF) -c lib/DCEL/Vertex.cpp -o bin/Vertex.o $(LINKERFLAGS)
 
+bin/Edge.o: lib/DCEL/Edge.cpp lib/DCEL/headers/Edge.hpp
+	$(GPPAF) -c lib/DCEL/Edge.cpp -o bin/Edge.o $(LINKERFLAGS)
 
 #OGL files
 

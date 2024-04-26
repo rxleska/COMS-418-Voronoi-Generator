@@ -5,11 +5,13 @@
 #include "BeachLine/headers/BeachLine.hpp"
 #include "EventQueue/headers/EQueue.hpp"
 #include "DCEL/headers/Vertex.hpp"
+#include "DCEL/headers/Edge.hpp"
 
 // Forward declarations
 class BeachLine;
 class EventQueue;
 class Vertex;
+class Edge;
 
 #define PI 3.14159265358979323846
 #define DEBUG 1
@@ -24,6 +26,7 @@ class Vertex;
 
 extern BeachLine *beachLine;
 extern std::vector<Vertex> vertices;
+extern std::vector<Edge *> finishedEdges; //will be replaced with extern DCEL
 extern EventQueue *eventQueue;
 extern bool isPaused; // Whether the simulation is paused
 extern double SweepAnimationHeight;

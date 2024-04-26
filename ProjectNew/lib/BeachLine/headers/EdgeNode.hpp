@@ -39,6 +39,8 @@ class EdgeNode {
         EdgeNode(double x, double y, double angle);
         EdgeNode(double x, double y, double angle, EdgeNode *left, EdgeNode *right);
         EdgeNode(Arc *left, Arc *right, double sweepline);
+        //destructor
+        ~EdgeNode();
 
         //copyers
         EdgeNode(const EdgeNode &e);

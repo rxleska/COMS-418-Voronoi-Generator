@@ -8,6 +8,7 @@
 #include "../../DCEL/headers/Vertex.hpp"
 
 class EdgeNode; //forward declaration
+class Vertex; //forward declaration
 
 class BeachLine {
     private:

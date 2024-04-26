@@ -27,27 +27,6 @@ namespace DrawObjects
         glVertex2f(-1, y*heightScale/windowHeight);
         glVertex2f(1, y*heightScale/windowHeight);
         glEnd();
-
-
-        // glBegin(GL_LINES);
-        // glVertex2f(-3.8*widthScale/windowWidth, -1);
-        // glVertex2f(-3.8*widthScale/windowWidth, 1);
-        // glEnd();
-
-        // glBegin(GL_LINES);
-        // glVertex2f(0.0*widthScale/windowWidth, -1);
-        // glVertex2f(0.0*widthScale/windowWidth, 1);
-        // glEnd();
-
-        // // glBegin(GL_LINES);
-        // // glVertex2f(3.64161*widthScale/windowWidth, -1);
-        // // glVertex2f(3.64161*widthScale/windowWidth, 1);
-        // // glEnd();
-
-        // // glBegin(GL_LINES);
-        // // glVertex2f(-4.97251*widthScale/windowWidth, -1);
-        // // glVertex2f(-4.97251*widthScale/windowWidth, 1);
-        // // glEnd();
     }
 
     void drawBeachLine(){
@@ -60,7 +39,7 @@ namespace DrawObjects
             edge = beachLine->search(i*windowWidth/widthScale, SweepAnimationHeight);
 
             //DEBUG LOG edge choice at i
-            if(DEBUG) std::cout << "i: " << i << " edge: x:" << edge->getX() << " y:" << edge->getY() << " value: " << edge->getValue(SweepAnimationHeight) << " scaled i: " << i*windowWidth/widthScale << std::endl;
+            //if(DEBUG) std::cout << "i: " << i << " edge: x:" << edge->getX() << " y:" << edge->getY() << " value: " << edge->getValue(SweepAnimationHeight) << " scaled i: " << i*windowWidth/widthScale << std::endl;
 
             //fix floating point error
             if(ParabolaMath::areSameDouble(i, 0.0)){
@@ -70,12 +49,12 @@ namespace DrawObjects
             if(edge != nullptr){
                 if(i*windowWidth/widthScale < edge->getValue(SweepAnimationHeight)){
                     arc = edge->getLeftArc();
-                    if(DEBUG) std::cout << arc->getX() << std::endl;
+                    //if(DEBUG) std::cout << arc->getX() << std::endl;
                 }
                 else{
                     // if(DEBUG) std::cout << "right arc" << std::endl;
                     arc = edge->getRightArc();
-                    if(DEBUG) std::cout << arc->getX() << std::endl;
+                    //if(DEBUG) std::cout << arc->getX() << std::endl;
 
                 }
                 
@@ -127,6 +106,15 @@ namespace DrawObjects
         drawHalfEdge(edge);
         drawAllHalfEdgesRec(edge->getLeft());
         drawAllHalfEdgesRec(edge->getRight());
+    }
+
+    void drawFinishedEdges(){
+        for(Edge * edge : finishedEdges){
+            glBegin(GL_LINES);
+            glVertex2f(edge->getOrigin()->getX()*widthScale/windowWidth, edge->getOrigin()->getY()*heightScale/windowHeight);
+            glVertex2f(edge->getTwin()->getOrigin()->getX()*widthScale/windowWidth, edge->getTwin()->getOrigin()->getY()*heightScale/windowHeight);
+            glEnd();
+        }
     }
 
 } // namespace DrawObjects

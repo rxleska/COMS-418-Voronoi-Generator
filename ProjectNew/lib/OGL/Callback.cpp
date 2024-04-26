@@ -19,7 +19,7 @@ namespace OGLcallbacks{
 
     void update(int value) {
         if (!isPaused) {
-            SweepAnimationHeight -= 0.005;
+            SweepAnimationHeight -= 0.05;
             glutPostRedisplay(); // Redraw the window
         }
         glutTimerFunc(16, update, 0); // Schedule next update
@@ -60,9 +60,21 @@ namespace OGLcallbacks{
             eventQueue->pop();
             topEvent->handleEvent();
         }
+        else if(topEvent == nullptr){
+            isPaused = true;
+        }
 
+        //if Animated sweep line is below the height of the bounding box
+        // if(SweepAnimationHeight < -1.25 * windowHeight/heightScale){
+        //     isPaused = true;
 
-
+        //     //run the rest of the queue
+        //     while(!eventQueue->isEmpty()){
+        //         topEvent = eventQueue->peek();
+        //         eventQueue->pop();
+        //         topEvent->handleEvent();
+        //     }
+        // }
 
 
         glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
@@ -93,6 +105,11 @@ namespace OGLcallbacks{
             glColor3f(1.0, 1.0, 1.0);
             DrawObjects::drawAllHalfEdges();
         }
+
+        
+        //set color to blue and draw finished edges
+        glColor3f(0.0, 0.0, 1.0);
+        DrawObjects::drawFinishedEdges();
 
 
         glutSwapBuffers(); // Swap the front and back buffers

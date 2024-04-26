@@ -28,6 +28,11 @@ EdgeNode::EdgeNode(double x, double y, double angle, EdgeNode *left, EdgeNode *r
     this->right = right;
 }
 
+//destructor
+EdgeNode::~EdgeNode() {
+    //nothing to do
+}
+
 //copyers
 EdgeNode::EdgeNode(const EdgeNode &e) {
     this->x = e.x;

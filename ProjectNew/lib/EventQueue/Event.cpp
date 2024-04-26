@@ -1,6 +1,7 @@
 #include "headers/Event.hpp"
 #include "../BeachLine/headers/BeachLine.hpp"
 #include "../BeachLine/headers/ParabolaMath.hpp"
+#include "../DCEL/headers/Edge.hpp"
 
 
 //###############
@@ -185,6 +186,37 @@ void CircleEvent::handleEvent(){
     Arc *leftArc = leftEdge->getLeftArc();
     Arc *rightArc = rightEdge->getRightArc();
 
+    //TODO REPLACE WITH DCEL
+
+    // //for each edgenode create 2 edges twinned together
+    Edge * edge1 = new Edge();
+    Edge * edge2 = new Edge();
+    Edge * edge3 = new Edge();
+    Edge * edge4 = new Edge(); 
+
+    edge1->setOrigin(new Vertex(leftEdge->getX(), leftEdge->getY()));
+    edge2->setOrigin(new Vertex(rightEdge->getX(), rightEdge->getY()));
+    edge3->setOrigin(new Vertex(this->getX(), this->getIntersectionY()));
+    edge4->setOrigin(new Vertex(this->getX(), this->getIntersectionY()));
+
+    edge1->setNext(edge3);
+    edge2->setNext(edge4);
+    edge3->setNext(edge1);
+    edge4->setNext(edge2);
+    edge1->setPrev(edge3);
+    edge2->setPrev(edge4);
+    edge3->setPrev(edge1);
+    edge4->setPrev(edge2);
+    edge1->setTwin(edge3);
+    edge2->setTwin(edge4);
+    edge3->setTwin(edge1);
+    edge4->setTwin(edge2);
+
+    //add edges to edge list 
+    finishedEdges.push_back(edge1);
+    finishedEdges.push_back(edge2);
+
+
     beachLine->remove(leftEdge);
     beachLine->remove(rightEdge);
 
@@ -261,6 +293,25 @@ void SiteEvent::handleEvent(){
             ParabolaMath::getParabolaEdges(*searchResult->getLeftArc(), *newArc, beachLine->getSweepLine(), leftEdge, &temp);
             ParabolaMath::getParabolaEdges(*newArc, *searchResult->getRightArc(), beachLine->getSweepLine(), &temp,  rightEdge);
             
+
+            //TODO REPLACE WITH DCEL
+            Edge * edge1 = new Edge();
+            Edge * edge2 = new Edge();
+
+            edge1->setOrigin(new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY()));
+            edge2->setOrigin(new Vertex(newArc->getX(), newArc->getY()));
+
+            edge1->setNext(edge2);
+            edge2->setNext(edge1);
+            edge1->setPrev(edge2);
+            edge2->setPrev(edge1);
+            edge1->setTwin(edge2);
+            edge2->setTwin(edge1);
+
+            //add edges to edge list
+            finishedEdges.push_back(edge1);
+
+
             beachLine->remove(searchResult);
         }
         else{ 
