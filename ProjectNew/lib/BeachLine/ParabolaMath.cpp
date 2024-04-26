@@ -64,7 +64,7 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
         *ey2 = getParabolaYatX(*ex2, x1, y1, swpln);
     }
 
-    swpln = swpln - 20; //move the directrix down a bit to calculate the edge angles
+    swpln = swpln - 0.5; //move the directrix down a bit to calculate the edge angles
     a = 1.0 / (y1-swpln) - 1.0 / (y2-swpln);
     b  = -2.0 * x1/(y1-swpln) + 2.0 * x2/(y2-swpln);
     c = x1*x1/(y1-swpln) - x2*x2/(y2-swpln) + y1 - y2;
@@ -81,7 +81,10 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
     double rightX = fmax(xminus, xplus);
     double leftY = getParabolaYatX(leftX, x1, y1, swpln);
     double rightY = getParabolaYatX(rightX, x1, y1, swpln);
-    *er1 = atan2((*ex1) - leftX, (*ey1) - leftY);
+    *er1 = atan2((*ey2) - rightY, (*ex2) - rightX); //note had x and y swappped at one point
+    *er2 = atan2((*ey1) - leftY, (*ex1) - leftX); 
+
+
     if(DEBUG){
         //er1 is nan or -nan 
         if(std::isnan(*er1)){
@@ -93,7 +96,8 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
             std::cout << "leftX: " << leftX << " leftY: " << leftY << " rightX: " << rightX << " rightY: " << rightY << std::endl;
         }
     }
-    *er2 = atan2((*ex2) - rightX, (*ey2) - rightY);
+    
+
 
     return;
 }
@@ -132,9 +136,24 @@ void ParabolaMath::getParabolaEdges(Arc a, Arc b, double swpln, EdgeNode *left, 
  * @param y pointer to the y coordinate of the intersection point
 */
 bool ParabolaMath::doesLineIntersectParabolaDO(double xf, double yf, double directrix, double xe, double ye, double re, double *x, double *y){
+
+    //handle line parabola (degenerate case) //xf = directrix
+    if(areSameDouble(yf, directrix)){
+        *x = xf;
+        //use the line to get the y value
+        double xdiff = xe - xf;
+        double unit = xdiff / cosf(re);
+        *y = ye - unit * sinf(re);
+
+        // if(DEBUG) std::cout << "vertical parabola" << " x: " << *x << " y: " << *y << std::endl;
+
+
+        return true;
+    }
+
     //handle vertical line degenerate case
-    if(areSameDouble(sin(re), 0.0)){
-        if(areSameDouble(cos(re), 1.0)){
+    if(areSameDouble(cos(re), 0.0)){
+        if(areSameDouble(sin(re), 1.0)){
             return false;
         }
         else{
@@ -148,29 +167,46 @@ bool ParabolaMath::doesLineIntersectParabolaDO(double xf, double yf, double dire
             return true;
         }
     }
-    double slope = cos(re) / sin(re);
+    double slope = sin(re) / cos(re);
     double yint = ye - slope * xe;
 
     double a = 1.0 / (2.0* (yf - directrix));
     double b = -1.0 * xf / (yf - directrix) - slope;
     double c = xf * xf / (2.0 * (yf - directrix)) + (yf + directrix) / 2 - yint;
 
+
     double discriminant = b * b - 4 * a * c;
+    if(areSameDouble(discriminant, 0.0)){
+        discriminant = 0.0;
+    }
+
     if(isLessThanDouble(discriminant, 0.0)){
         return false;
     }
 
-    double x1 = (-b + sqrt(discriminant)) / (2.0 * a);
-    double x2 = (-b - sqrt(discriminant)) / (2.0 * a);
+    double x1 = (-b + (discriminant == 0.0 ? 0.0 : sqrt(discriminant))) / (2.0 * a);
+    double x2 = (-b - (discriminant == 0.0 ? 0.0 : sqrt(discriminant))) / (2.0 * a);
 
     //if the edge angle is to the right get the max x
-    if((isLessThanDouble(re, PI/2) && isGreaterThanDouble(re,0)) || (isGreaterThanDouble(re, 3*PI/2) && isLessThanDouble(re, 2*PI))){
-        *x = fmax(x1, x2);
+    if(isGreaterThanDouble(re, PI/2) && isLessThanDouble(re, 3*PI/2)){ //left
+        *x = fmin(x1, x2);
     }
     else{
-        *x = fmin(x1, x2);
+        *x = fmax(x1, x2);
 
     }
+
+    //if x is nan or -nan return false
+    if(std::isnan(*x)){
+        //print out method parameters
+        std::cout << "xf: " << xf << " yf: " << yf << " directrix: " << directrix << " xe: " << xe << " ye: " << ye << " re: " << re << std::endl;
+
+        //print out a,b,c 
+        std::cout << x1 << " " << x2 << std::endl;
+        std::cout << "a: " << a << " b: " << b << " c: " << c << std::endl;
+        throw "here";
+    }
+
 
     *y = slope * (*x) + yint;
     return true;

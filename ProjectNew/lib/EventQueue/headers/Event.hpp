@@ -49,14 +49,17 @@ class CircleEvent : public Event{
     private:
         EdgeNode *leftEdge; 
         EdgeNode *rightEdge;
+        double intersectionY;
     public: 
         CircleEvent();
-        CircleEvent(double x, double y, EdgeNode *leftEdge, EdgeNode *rightEdge);
+        CircleEvent(double x, double y, double isy, EdgeNode *leftEdge, EdgeNode *rightEdge);
         ~CircleEvent();
         EdgeNode *getLeftEdge();
         EdgeNode *getRightEdge();
+        double getIntersectionY();
         void setLeftEdge(EdgeNode *leftEdge);
         void setRightEdge(EdgeNode *rightEdge);
+        void setIntersectionY(double intersectionY);
         void handleEvent();
 };
 

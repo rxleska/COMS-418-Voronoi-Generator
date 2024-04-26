@@ -15,7 +15,7 @@ namespace DrawObjects
         glBegin(GL_POINTS);
         for (Vertex v : vertices)
         {
-            glVertex2f(v.getX()/windowWidth, v.getY()/windowHeight);
+            glVertex2f(v.getX()*widthScale/windowWidth, v.getY()*heightScale/windowHeight);
         }
         glEnd();
     }
@@ -24,9 +24,30 @@ namespace DrawObjects
     {
         //draw a horizontal line at y
         glBegin(GL_LINES);
-        glVertex2f(-1, y/windowHeight);
-        glVertex2f(1, y/windowHeight);
+        glVertex2f(-1, y*heightScale/windowHeight);
+        glVertex2f(1, y*heightScale/windowHeight);
         glEnd();
+
+
+        // glBegin(GL_LINES);
+        // glVertex2f(-3.8*widthScale/windowWidth, -1);
+        // glVertex2f(-3.8*widthScale/windowWidth, 1);
+        // glEnd();
+
+        // glBegin(GL_LINES);
+        // glVertex2f(0.0*widthScale/windowWidth, -1);
+        // glVertex2f(0.0*widthScale/windowWidth, 1);
+        // glEnd();
+
+        // // glBegin(GL_LINES);
+        // // glVertex2f(3.64161*widthScale/windowWidth, -1);
+        // // glVertex2f(3.64161*widthScale/windowWidth, 1);
+        // // glEnd();
+
+        // // glBegin(GL_LINES);
+        // // glVertex2f(-4.97251*widthScale/windowWidth, -1);
+        // // glVertex2f(-4.97251*widthScale/windowWidth, 1);
+        // // glEnd();
     }
 
     void drawBeachLine(){
@@ -35,27 +56,35 @@ namespace DrawObjects
         Arc *arc;
 
         glBegin(GL_LINE_STRIP);
-        for(double i = -1; i <= 1; i += 0.001){
-            edge = beachLine->search(i);
+        for(double i = -1; i <= 1; i += 0.01){
+            edge = beachLine->search(i*windowWidth/widthScale, SweepAnimationHeight);
 
+            //DEBUG LOG edge choice at i
+            if(DEBUG) std::cout << "i: " << i << " edge: x:" << edge->getX() << " y:" << edge->getY() << " value: " << edge->getValue(SweepAnimationHeight) << " scaled i: " << i*windowWidth/widthScale << std::endl;
+
+            //fix floating point error
             if(ParabolaMath::areSameDouble(i, 0.0)){
-                y = 0.0;
+                i = 0.0;
             }
 
             if(edge != nullptr){
-                if(i*windowWidth < edge->getValue(SweepAnimationHeight)){
+                if(i*windowWidth/widthScale < edge->getValue(SweepAnimationHeight)){
                     arc = edge->getLeftArc();
+                    if(DEBUG) std::cout << arc->getX() << std::endl;
                 }
                 else{
+                    // if(DEBUG) std::cout << "right arc" << std::endl;
                     arc = edge->getRightArc();
+                    if(DEBUG) std::cout << arc->getX() << std::endl;
+
                 }
                 
 
-                y = ParabolaMath::getParabolaYatX(i*windowWidth, arc->getX(), arc->getY(), SweepAnimationHeight);     
+                y = ParabolaMath::getParabolaYatX(i*windowWidth/widthScale, arc->getX(), arc->getY(), SweepAnimationHeight);     
 
             }
             //place the point 
-            glVertex2f(i, y/windowHeight);
+            glVertex2f(i, y*heightScale/windowHeight);
         }
         glEnd();
     }
@@ -64,9 +93,9 @@ namespace DrawObjects
         double y;
         glBegin(GL_LINE_STRIP);
         for(double i = -1; i <= 1; i += 0.01){
-            y = ParabolaMath::getParabolaYatX(i*windowWidth, arc->getX(), arc->getY(), SweepAnimationHeight); 
+            y = ParabolaMath::getParabolaYatX(i*windowWidth/widthScale, arc->getX(), arc->getY(), SweepAnimationHeight); 
             //place the point 
-            glVertex2f(i, y/windowHeight);
+            glVertex2f(i, y*heightScale/windowHeight);
         }
         glEnd();
     }
@@ -81,8 +110,8 @@ namespace DrawObjects
 
     void drawHalfEdge(EdgeNode *edge){
         glBegin(GL_LINES);
-        glVertex2f(edge->getX()/windowWidth, edge->getY()/windowHeight);
-        glVertex2f((edge->getX() + cos(edge->getAngle())*100)/windowWidth, (edge->getY() + sin(edge->getAngle())*100)/windowHeight);
+        glVertex2f(edge->getX()*widthScale/windowWidth, edge->getY()*heightScale/windowHeight);
+        glVertex2f((edge->getX() + cos(edge->getAngle())*100)*widthScale/windowWidth, (edge->getY() + sin(edge->getAngle())*100)*heightScale/windowHeight);
         glEnd();
     }
 

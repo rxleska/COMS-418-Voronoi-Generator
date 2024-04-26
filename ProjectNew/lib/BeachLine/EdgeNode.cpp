@@ -124,14 +124,39 @@ void EdgeNode::setRightArc(Arc *rightArc) {
  * Gets where the edge intersects the arcs at the given sweepline height
 */
 double EdgeNode::getValue(double sweepline) {
+    //begin testing
+    // double x1;
+    // double y1;
+    // double x2;
+    // double y2;
+    // ParabolaMath::doesLineIntersectParabolaOO(this->leftArc, sweepline, this, &x1, &y1);
+    // ParabolaMath::doesLineIntersectParabolaOO(this->rightArc, sweepline, this, &x2, &y2);
+
+    // if(!ParabolaMath::areSameDouble(x1, x2) || !ParabolaMath::areSameDouble(y1, y2)){
+    //     //log error
+    //     std::cout << "Error: EdgeNode::getValue() - Intersections are not the same" << std::endl;
+    //     //log info
+    //     std::cout << "x1: " << x1 << " y1: " << y1 << " x2: " << x2 << " y2: " << y2 << std::endl;
+    // }
+
+
+
+    //end testing
+
+
+
     double x;
     double y;
     if(ParabolaMath::doesLineIntersectParabolaOO(this->leftArc, sweepline, this, &x, &y)){
         return x;
     }
     else{
-        ParabolaMath::doesLineIntersectParabolaOO(this->rightArc, sweepline, this, &x, &y);
-        return x;
+        if(ParabolaMath::doesLineIntersectParabolaOO(this->rightArc, sweepline, this, &x, &y)){
+            return x;
+        }
+        else{
+            return this->getX();
+        }
     }
     
 }

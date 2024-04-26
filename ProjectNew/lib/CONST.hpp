@@ -13,7 +13,9 @@ class Vertex;
 
 #define PI 3.14159265358979323846
 #define DEBUG 1
-#define EPSILON 0.0000001
+#define EPSILON 0.000001
+
+#define boundingScale 0.1
 
 #include <iostream>
 #include <vector>
@@ -27,6 +29,8 @@ extern bool isPaused; // Whether the simulation is paused
 extern double SweepAnimationHeight;
 extern double windowWidth;
 extern double windowHeight;
+extern double widthScale;   
+extern double heightScale;
 extern bool drawAllArcs;
 
 

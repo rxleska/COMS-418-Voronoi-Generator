@@ -5,6 +5,8 @@
 
 #include "EdgeNode.hpp"
 #include "../../CONST.hpp"
+#include "../../DCEL/headers/Vertex.hpp"
+
 class EdgeNode; //forward declaration
 
 class BeachLine {
@@ -27,7 +29,18 @@ class BeachLine {
         void leftRotate(EdgeNode *node);
         void splay(EdgeNode *node);
         EdgeNode *search(double searchX);
+        EdgeNode *search(double searchX, double altSweepline);
         void insert(EdgeNode *node);
+        void remove(EdgeNode *node);
+
+        //beach line specific functions
+        void checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge);
+        bool circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, double *x, double *y, double *r);
+        EdgeNode * getNextLeftEdge(EdgeNode *node);
+        EdgeNode * getNextRightEdge(EdgeNode *node);
+
+        void printTree(EdgeNode * node);
+        void printTree(EdgeNode * node, double altSweepline);
 };
     
 

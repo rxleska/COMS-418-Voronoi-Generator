@@ -3,9 +3,11 @@
 #include <GL/glut.h>
 #include "headers/Callback.hpp"
 #include "headers/DrawObjects.hpp"
+#include "../BeachLine/headers/BeachLine.hpp"
 
 bool isPaused;
 bool drawAllArcs;
+// BeachLine *beachLine;
 
 // bool isPaused{ true }; // Whether the simulation is paused
 namespace OGLcallbacks{
@@ -17,6 +19,7 @@ namespace OGLcallbacks{
 
     void update(int value) {
         if (!isPaused) {
+            SweepAnimationHeight -= 0.005;
             glutPostRedisplay(); // Redraw the window
         }
         glutTimerFunc(16, update, 0); // Schedule next update
@@ -27,9 +30,17 @@ namespace OGLcallbacks{
             case 'p': // Pause or unpause the simulation
                 isPaused = !isPaused;
                 break;
+            case 'w':
+                if(isPaused){
+                    SweepAnimationHeight += 0.1;
+                    // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
+                    glutPostRedisplay(); // Redraw the scene immediately
+                }
+                break;
             case 's': // Step through the simulation one frame at a time
                 if (isPaused) {
-                    SweepAnimationHeight -= 0.5;
+                    SweepAnimationHeight -= 0.1;
+                    // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
                     glutPostRedisplay(); // Redraw the scene immediately
                 }
                 break;
@@ -43,6 +54,17 @@ namespace OGLcallbacks{
     }
 
     void display() {
+        //check if the Animated sweep line has passed the top event
+        Event * topEvent = eventQueue->peek();
+        if(topEvent != nullptr && SweepAnimationHeight < topEvent->getY()){
+            eventQueue->pop();
+            topEvent->handleEvent();
+        }
+
+
+
+
+
         glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
         glLoadIdentity(); // Load the identity matrix to reset transformations
 

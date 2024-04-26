@@ -17,6 +17,8 @@ BeachLine *beachLine;
 EventQueue *eventQueue;
 double windowWidth;
 double windowHeight;
+double widthScale;
+double heightScale;
 double SweepAnimationHeight;
     
 //string to int function
@@ -102,20 +104,6 @@ int main(int argc, char *argv[]) {
         eventQueue->insert(new SiteEvent(vertices[i].getX(), vertices[i].getY()));
     }
 
-    if(DEBUG){
-        //read the heap
-        std::cout << "Heap: " << std::endl;
-        while(!eventQueue->isEmpty()){
-            Event *e = eventQueue->pop();
-            std::cout << "Event: " << e->getX() << " " << e->getY() << std::endl;
-        }
-    }
-
-    //create site events for the event queue
-    for(int i = 0; i < (int) vertices.size(); i++){
-        eventQueue->insert(new SiteEvent(vertices[i].getX(), vertices[i].getY()));
-    }
-
 
     //calculate the bounding box
     double minX = vertices[0].getX();
@@ -141,31 +129,36 @@ int main(int argc, char *argv[]) {
     //add 5% to each side
     double dx = maxX - minX;
     double dy = maxY - minY;
-    minX -= dx * 0.05;
-    maxX += dx * 0.05;
-    minY -= dy * 0.05;
-    maxY += dy * 0.05;
+    minX -= dx * boundingScale;
+    maxX += dx * boundingScale;
+    minY -= dy * boundingScale;
+    maxY += dy * boundingScale;
 
-    if(dx < 100){
-        dx = 100;
+
+    //if width to height ratio is greater than 16x9, scale by width, else scale by height 
+    //max width is 1280 and max height is 720
+    if((maxX - minX) / (maxY - minY) > 16.0/9.0){
+        windowWidth = 1280;
+        windowHeight = 1280 * (maxY - minY) / (maxX - minX);
+        widthScale = 1280 / (maxX - minX);
+        heightScale = windowHeight / (maxY - minY);
+    }else{
+        windowHeight = 720;
+        windowWidth = 720 * (maxX - minX) / (maxY - minY);
+        widthScale = windowWidth / (maxX - minX);
+        heightScale = 720 / (maxY - minY);
     }
-    if(dy < 100){
-        dy = 100;
-    }
 
-    //set the window width and height
-    windowWidth = dx;
-    windowHeight = dy;
 
-    //initialize the sweep line height
-    SweepAnimationHeight = maxY;
 
 
     //proc the first 2 sites 
     SiteEvent *site1 = (SiteEvent *) eventQueue->pop();
     Arc *arc1 = new Arc(site1->getX(), site1->getY());
+    if(DEBUG) std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
     SiteEvent *site2 = (SiteEvent *) eventQueue->pop();
     Arc *arc2 = new Arc(site2->getX(), site2->getY());
+    if(DEBUG) std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
     beachLine->setSweepLine(site2->getY());
     EdgeNode *leftEdge = new EdgeNode();
     leftEdge->setLeftArc(arc1);
@@ -174,6 +167,10 @@ int main(int argc, char *argv[]) {
     rightEdge->setLeftArc(arc2);
     rightEdge->setRightArc(arc1);
     ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
+
+    // leftEdge->setAngle(3.97934);
+    // rightEdge->setAngle(0.83775);
+
     //insert the edges into the beach line
     beachLine->insert(leftEdge);
     beachLine->insert(rightEdge);
@@ -186,13 +183,16 @@ int main(int argc, char *argv[]) {
         std::cout << "X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
     }
 
+    beachLine->printTree(beachLine->getRoot());
+
+
     //set animation sweepline to the second site
     SweepAnimationHeight = site2->getY();
 
     
     glutInit(&argc, argv); // Initialize GLUT
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // Set the display mode
-    glutInitWindowSize(dx*1.05, dy*1.05); // Set the window size
+    glutInitWindowSize(windowWidth, windowHeight); // Set the window size
     glutCreateWindow("Fortune's Algorithm"); // Create the window
 
     OGLcallbacks::initOpenGL(); // Initialize OpenGL
