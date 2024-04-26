@@ -13,7 +13,7 @@ CircleEvent::CircleEvent(Node *leftA, Node *leftE, Node *pinchingA, Node *rightE
 }
 
 CircleEvent::~CircleEvent(){
-    //TODO check if we want to delete any of these nodes on circle event deletion
+    //check if we want to delete any of these nodes on circle event deletion
     //delete this->leftEdge;
     //delete this->rightEdge;
     //delete this->pinchingArc;

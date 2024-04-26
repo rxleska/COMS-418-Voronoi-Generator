@@ -696,7 +696,7 @@ void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
     if(above == nullptr){
         throw "Error: The node above the point is undefined";
     }
-    if(!above->isArc){ //TODO Replace with new edge on each intersection degenerate case
+    if(!above->isArc){ // Replace with new edge on each intersection degenerate case
         throw "Error: The node above the point is not an arc";
     }
 
@@ -869,7 +869,7 @@ void BeachLineRedBlackTree::insert(Vertex v, std::vector<Event> *eventQueue){
         }
     }
     //heapify the event queue
-    //TODO: check if this is necessary
+    // check if this is necessary
     std::make_heap(eventQueue->begin(), eventQueue->end(), Compare());
 
     //delete the above node
@@ -1028,7 +1028,7 @@ void BeachLineRedBlackTree::checkCircleEvent(Node *x, std::vector<Event> *eventQ
     //check if the bottom of the circle is below the sweep line 
     if(circumcenterY - radius > sweepLine){ //note using - since we are sweeping from top to bottom
         return;
-    } //TODO check if its an edge case where the circle touches the sweep line
+    } //check if its an edge case where the circle touches the sweep line
     else{
         //add the circle event to the event queue
         Vertex *circleCenter = new Vertex(circumcenterX, circumcenterY-radius);
@@ -1116,7 +1116,7 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
     newEdge->edge.pointsUp = pointsUp;
 
 
-    //TODO ADD the edges to the DCEL
+    //ADD the edges to the DCEL
     
     //discover which edge should be replaced, 
     Node *edgeToReplace = centerArc;
@@ -1179,7 +1179,7 @@ void BeachLineRedBlackTree::handleCircleEvent(Event *e, std::vector<Event> *even
 
     newEdge->color = edgeColor;
 
-    //TODO remove the circle events associated with the center arc
+    //remove the circle events associated with the center arc
     for(int i = 0; i < 3; i++){
         if(centerArc->arc.associatedCircleEvents[i].getPoint() != nullptr){
             //remove the event from the event queue
