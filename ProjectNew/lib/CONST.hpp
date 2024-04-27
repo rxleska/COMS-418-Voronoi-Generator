@@ -15,7 +15,8 @@ class Edge;
 
 #define PI 3.14159265358979323846
 #define DEBUG 1
-#define EPSILON 0.000001
+#define DENOTEHANDLE 1
+#define EPSILON 0.00001
 
 #define boundingScale 0.1
 
@@ -35,6 +36,8 @@ extern double windowHeight;
 extern double widthScale;   
 extern double heightScale;
 extern bool drawAllArcs;
+extern bool drawAllHalfEdges;
+extern std::vector<CircleEvent *> circleEvents; //used for removing circle events that are no longer valid
 
 
 #endif

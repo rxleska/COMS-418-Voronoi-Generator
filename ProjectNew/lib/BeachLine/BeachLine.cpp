@@ -3,6 +3,8 @@
 #include "headers/BeachLine.hpp"
 #include "headers/ParabolaMath.hpp"
 
+//forward declarations
+std::vector<CircleEvent *> circleEvents;
 
 BeachLine::BeachLine() {
     this->root = nullptr;
@@ -235,22 +237,168 @@ void BeachLine::remove(EdgeNode *node) {
 
 //beach line specific functions
 void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
+
     EdgeNode *nextLeft = getNextLeftEdge(leftedge);
     EdgeNode *nextRight = getNextRightEdge(rightedge);
 
-    Arc *a1, *a2, *a3, *a4, *a5;
+
+    // switching to q p- p+ r method, p- is left edge, p+ is right edge, q is next left edge, r is next right edge
+    double p1x;
+    double p1y;
+    CircleEvent * event;
+    if(nextLeft != nullptr && ParabolaMath::doEdgesIntersect(nextLeft, leftedge, &p1x, &p1y)){
+        double radius = sqrtf((p1x - leftedge->getRightArc()->getX())*(p1x - leftedge->getRightArc()->getX()) + (p1y - leftedge->getRightArc()->getY())*(p1y - leftedge->getRightArc()->getY()));
+        event = new CircleEvent();
+        event->setX(p1x);
+        event->setY(p1y - radius);
+        event->setIntersectionY(p1y);
+        event->setLeftEdge(nextLeft);
+        event->setRightEdge(leftedge);
+        //sanity check that the edges do intersect at that point
+        if(ParabolaMath::isLessThanOrEqualDouble(p1y-radius, beachLine->getSweepLine()) && ParabolaMath::doEdgesIntersectAtEvent(nextLeft, leftedge, p1x, p1y)){
+            eventQueue->insert(event);
+            circleEvents.push_back(event);
+            if(DEBUG) std::cout << "inserted circle event: " << p1x << " " << p1y - radius << std::endl;
+        }
+        else{
+            // log p1y-radius << " " << beachLine->getSweepLine() << std::endl;
+            if(DEBUG) std::cout << "did not insert circle event: " << p1y - radius << " " << beachLine->getSweepLine() << std::endl;
+            delete event;
+        }
+    }
+
+    double p2x;
+    double p2y;
+    if(nextRight != nullptr && ParabolaMath::doEdgesIntersect(rightedge, nextRight, &p2x, &p2y)){
+        double radius = sqrtf((p2x - rightedge->getLeftArc()->getX())*(p2x - rightedge->getLeftArc()->getX()) + (p2y - rightedge->getLeftArc()->getY())*(p2y - rightedge->getLeftArc()->getY()));
+        event = new CircleEvent();
+        event->setX(p2x);
+        event->setY(p2y - radius);
+        event->setIntersectionY(p2y);
+        event->setLeftEdge(rightedge);
+        event->setRightEdge(nextRight);
+        //sanity check that the edges do intersect at that point
+        if(ParabolaMath::isLessThanOrEqualDouble(p2y-radius, beachLine->getSweepLine()) && ParabolaMath::doEdgesIntersectAtEvent(rightedge, nextRight, p2x, p2y)){
+            eventQueue->insert(event);
+            circleEvents.push_back(event);
+            if(DEBUG) std::cout << "inserted circle event: " << p2x << " " << p2y - radius << std::endl;
+        }
+        else{
+            if(DEBUG) std::cout << "did not insert circle event: " << p1y - radius << " " << beachLine->getSweepLine() << std::endl;
+            delete event;
+        }
+    }
+
+    if(nextLeft != nullptr && nextRight != nullptr){
+        //search for circle event with nextLeft and nextRight
+        for(CircleEvent * event : circleEvents){
+            if(event->getLeftEdge() == nextLeft && event->getRightEdge() == nextRight){
+                //remove from circle events
+                std::remove(circleEvents.begin(), circleEvents.end(), event);
+                eventQueue->remove(event);
+                break;
+            }
+        }
+    }
+
+
+    //old method
+    // Arc *a1, *a2, *a3, *a4, *a5;
+    // if(nextLeft != nullptr){
+    //     a1 = nextLeft->getLeftArc();
+    // }
+    // a2 = leftedge->getLeftArc(); //same as nextLeft->getRightArc()
+    // a3 = leftedge->getRightArc(); //same as rightedge->getLeftArc()
+    // a4 = rightedge->getRightArc(); //same as nextRight->getLeftArc()
+    // if(nextRight != nullptr){
+    //     a5 = nextRight->getRightArc();
+    // }
+
+    // //3 checks for circle event (a1,a2,a3) (a2,a3,a4) (a3,a4,a5) 
+    // //ignore a check if any of the arcs are the same proceed to next check
+    // double evtx, evty, evtr;
+    // if(nextLeft != nullptr &&
+    //     !(
+    //     a1 == a2 ||
+    //     a2 == a3 ||
+    //     a3 == a1
+    // )){ // test 1st circle
+    //     if(circleIntersectsBeachLine(Vertex(a1->getX(), a1->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
+    //         CircleEvent * event = new CircleEvent();
+    //         event->setX(evtx);
+    //         event->setY(evty- evtr);
+    //         event->setIntersectionY(evty);
+    //         event->setLeftEdge(nextLeft);
+    //         event->setRightEdge(leftedge);
+    //         //before inserting sanity check that the edges do intersect eventually 
+    //         //could also be due to the fact that I am not removing circle events whoms arcs have been deleted (will check later, this check is easier to implement and makes more sense in my head implementation wise)
+
+    //         if(ParabolaMath::doEdgesIntersectAtEvent(nextLeft, leftedge, evtx, evty)){
+    //             eventQueue->insert(event);
+    //             if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
+    //         }        
+    //     }
+    // }
+
+    // if(!(
+    //     a2 == a3 ||
+    //     a3 == a4 ||
+    //     a4 == a2
+    // )){ // test 2nd circle
+    //     if(circleIntersectsBeachLine(Vertex(a4->getX(), a4->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
+    //         CircleEvent * event = new CircleEvent();
+    //         event->setX(evtx);
+    //         event->setY(evty - evtr);
+    //         event->setIntersectionY(evty);
+    //         event->setLeftEdge(leftedge);
+    //         event->setRightEdge(rightedge);
+    //         //before inserting sanity check that the edges do intersect eventually 
+    //         if(ParabolaMath::doEdgesIntersectAtEvent(leftedge, rightedge, evtx, evty)){
+    //             eventQueue->insert(event);
+    //             if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
+    //         }
+    //     }
+    // }
+
+    // if(nextRight != nullptr &&
+    //     !(
+    //     a3 == a4 ||
+    //     a4 == a5 ||
+    //     a5 == a3
+    // )){ // test 3rd circle
+    //     if(circleIntersectsBeachLine(Vertex(a3->getX(), a3->getY()), Vertex(a4->getX(), a4->getY()), Vertex(a5->getX(), a5->getY()), &evtx, &evty, &evtr)){
+    //         CircleEvent * event = new CircleEvent();
+    //         event->setX(evtx);
+    //         event->setY(evty - evtr);
+    //         event->setIntersectionY(evty);
+    //         event->setLeftEdge(rightedge);
+    //         event->setRightEdge(nextRight);
+    //         //before inserting sanity check that the edges do intersect eventually 
+    //         if(ParabolaMath::doEdgesIntersectAtEvent(rightedge, nextRight, evtx, evty)){
+    //             eventQueue->insert(event);
+    //             if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
+    //         }
+    //     }
+
+    // }
+
+    
+}
+void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
+    EdgeNode *nextLeft = getNextLeftEdge(centerEdge);
+    EdgeNode *nextRight = getNextRightEdge(centerEdge);
+
+    Arc *a1, *a2, *a3, *a4;
     if(nextLeft != nullptr){
         a1 = nextLeft->getLeftArc();
     }
-    a2 = leftedge->getLeftArc(); //same as nextLeft->getRightArc()
-    a3 = leftedge->getRightArc(); //same as rightedge->getLeftArc()
-    a4 = rightedge->getRightArc(); //same as nextRight->getLeftArc()
+    a2 = centerEdge->getLeftArc(); //same as nextLeft->getRightArc()
+    a3 = centerEdge->getRightArc(); //same as rightedge->getLeftArc()
     if(nextRight != nullptr){
-        a5 = nextRight->getRightArc();
+        a4 = nextRight->getRightArc();
     }
 
-    //3 checks for circle event (a1,a2,a3) (a2,a3,a4) (a3,a4,a5) 
-    //ignore a check if any of the arcs are the same proceed to next check
+    CircleEvent * event;
     double evtx, evty, evtr;
     if(nextLeft != nullptr &&
         !(
@@ -259,66 +407,51 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
         a3 == a1
     )){ // test 1st circle
         if(circleIntersectsBeachLine(Vertex(a1->getX(), a1->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
-            CircleEvent * event = new CircleEvent();
+            event = new CircleEvent();
             event->setX(evtx);
             event->setY(evty- evtr);
             event->setIntersectionY(evty);
             event->setLeftEdge(nextLeft);
-            event->setRightEdge(leftedge);
+            event->setRightEdge(centerEdge);
             //before inserting sanity check that the edges do intersect eventually 
-            //TODO add this check
             //could also be due to the fact that I am not removing circle events whoms arcs have been deleted (will check later, this check is easier to implement and makes more sense in my head implementation wise)
 
-            //idea get the angle the two edges starting points if both angles are less than perpendicular to the line between the two points then they will intersect eventually
-            //TODO move this to a function in ParabolaMath, (DRY)
-
-
-            eventQueue->insert(event);
+            if(ParabolaMath::doEdgesIntersectAtEvent(nextLeft, centerEdge, evtx, evty)){
+                eventQueue->insert(event);
+                circleEvents.push_back(event);
+                if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
+            }
+            else{
+                delete event;
+            }        
         }
     }
 
-    if(!(
+    if(nextRight != nullptr && !(
         a2 == a3 ||
         a3 == a4 ||
         a4 == a2
     )){ // test 2nd circle
         if(circleIntersectsBeachLine(Vertex(a4->getX(), a4->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
-            CircleEvent * event = new CircleEvent();
+            event = new CircleEvent();
             event->setX(evtx);
             event->setY(evty - evtr);
             event->setIntersectionY(evty);
-            event->setLeftEdge(leftedge);
-            event->setRightEdge(rightedge);
-            //before inserting sanity check that the edges do intersect eventually 
-            //TODO add this check
-
-            eventQueue->insert(event);
-        }
-    }
-
-    if(nextRight != nullptr &&
-        !(
-        a3 == a4 ||
-        a4 == a5 ||
-        a5 == a3
-    )){ // test 3rd circle
-        if(circleIntersectsBeachLine(Vertex(a3->getX(), a3->getY()), Vertex(a4->getX(), a4->getY()), Vertex(a5->getX(), a5->getY()), &evtx, &evty, &evtr)){
-            CircleEvent * event = new CircleEvent();
-            event->setX(evtx);
-            event->setY(evty - evtr);
-            event->setIntersectionY(evty);
-            event->setLeftEdge(rightedge);
+            event->setLeftEdge(centerEdge);
             event->setRightEdge(nextRight);
             //before inserting sanity check that the edges do intersect eventually 
-            //TODO add this check
-
-            eventQueue->insert(event);
+            if(ParabolaMath::doEdgesIntersectAtEvent(centerEdge, nextRight, evtx, evty)){
+                eventQueue->insert(event);
+                circleEvents.push_back(event);
+                if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
+            }
+            else{
+                delete event;
+            }
         }
-
     }
-
-    
 }
+
 
 bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, double *x, double *y, double *r){
     //find the slope of Apt to Bpt
@@ -402,3 +535,9 @@ void BeachLine::printTree(EdgeNode *node, double altSweepline){
 }
 
 
+void BeachLine::printEdgesInOrder(EdgeNode *node){
+    if(node == nullptr) return;
+    printEdgesInOrder(node->getLeft());
+    std::cout << "x: " << node->getX() << " y: " << node->getY() << " r: " << node->getAngle() << " value: " << node->getValue(this->sweepLine) << std::endl  << " left arc x:" << node->getLeftArc()->getX() << " y:" << node->getLeftArc()->getY() << std::endl << " right arc x:" << node->getRightArc()->getX() << " y:" << node->getRightArc()->getY() << std::endl;
+    printEdgesInOrder(node->getRight());
+}

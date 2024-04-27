@@ -157,10 +157,10 @@ int main(int argc, char *argv[]) {
     //proc the first 2 sites 
     SiteEvent *site1 = (SiteEvent *) eventQueue->pop();
     Arc *arc1 = new Arc(site1->getX(), site1->getY());
-    if(DEBUG) std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
+    // if(DEBUG) std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
     SiteEvent *site2 = (SiteEvent *) eventQueue->pop();
     Arc *arc2 = new Arc(site2->getX(), site2->getY());
-    if(DEBUG) std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
+    // if(DEBUG) std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
     beachLine->setSweepLine(site2->getY());
     EdgeNode *leftEdge = new EdgeNode();
     leftEdge->setLeftArc(arc1);
@@ -174,16 +174,18 @@ int main(int argc, char *argv[]) {
     // rightEdge->setAngle(0.83775);
 
     //insert the edges into the beach line
+
+    //insert the new edges
     beachLine->insert(leftEdge);
     beachLine->insert(rightEdge);
 
-    if(DEBUG){
-        //write the edges to the console
-        std::cout << "Left Edge: " << std::endl;
-        std::cout << "X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
-        std::cout << "Right Edge: " << std::endl;
-        std::cout << "X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
-    }
+    // if(DEBUG){
+    //     //write the edges to the console
+    //     std::cout << "Left Edge: " << std::endl;
+    //     std::cout << "X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+    //     std::cout << "Right Edge: " << std::endl;
+    //     std::cout << "X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+    // }
 
     beachLine->printTree(beachLine->getRoot());
 

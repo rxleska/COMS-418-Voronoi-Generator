@@ -7,6 +7,7 @@
 
 bool isPaused;
 bool drawAllArcs;
+bool drawAllHalfEdges;
 // BeachLine *beachLine;
 
 // bool isPaused{ true }; // Whether the simulation is paused
@@ -15,6 +16,7 @@ namespace OGLcallbacks{
         glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
         isPaused = true;
         drawAllArcs = false;
+        drawAllHalfEdges = true;
     }
 
     void update(int value) {
@@ -47,6 +49,16 @@ namespace OGLcallbacks{
             case 'a': // Draw all arcs
                 drawAllArcs = !drawAllArcs;
                 break;
+            case 'e': // Draw all half edges
+                drawAllHalfEdges = !drawAllHalfEdges;
+                break;
+            case 'l':
+                std::cout << std::endl;
+                std::cout << std::endl;
+                std::cout << "Printing Beach Line" << std::endl;
+                std::cout << "y: " << beachLine->getSweepLine() << std::endl;
+                beachLine->printEdgesInOrder(beachLine->getRoot());
+                break;
             default:
                 break;
         }
@@ -65,16 +77,16 @@ namespace OGLcallbacks{
         }
 
         //if Animated sweep line is below the height of the bounding box
-        // if(SweepAnimationHeight < -1.25 * windowHeight/heightScale){
-        //     isPaused = true;
+        if(SweepAnimationHeight < -1.25 * windowHeight/heightScale){
+            isPaused = true;
 
-        //     //run the rest of the queue
-        //     while(!eventQueue->isEmpty()){
-        //         topEvent = eventQueue->peek();
-        //         eventQueue->pop();
-        //         topEvent->handleEvent();
-        //     }
-        // }
+            //run the rest of the queue
+            while(!eventQueue->isEmpty()){
+                topEvent = eventQueue->peek();
+                eventQueue->pop();
+                topEvent->handleEvent();
+            }
+        }
 
 
         glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
@@ -100,7 +112,7 @@ namespace OGLcallbacks{
             DrawObjects::drawAllArcs();
         }
 
-        if(drawAllArcs){
+        if(drawAllHalfEdges){
             //switch color to white and draw all the half edges
             glColor3f(1.0, 1.0, 1.0);
             DrawObjects::drawAllHalfEdges();

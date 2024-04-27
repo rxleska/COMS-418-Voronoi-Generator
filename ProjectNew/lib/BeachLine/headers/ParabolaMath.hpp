@@ -27,6 +27,12 @@ namespace ParabolaMath{
 
     bool isGreaterThanOrEqualDouble(double a, double b); //a >= b
 
+    bool doRaysIntersectAtEvent(double x1, double y1, double r1, double x2, double y2, double r2, double x, double y); //checks if two rays intersect
+
+    bool doEdgesIntersectAtEvent(EdgeNode *a, EdgeNode *b, double x, double y); //checks if two edges intersect
+
+    bool doEdgesIntersect(EdgeNode *a, EdgeNode *b, double *x, double *y); //checks if two edges intersect
+
 
 }
 

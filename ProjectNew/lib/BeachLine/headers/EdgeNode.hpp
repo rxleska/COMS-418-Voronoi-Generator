@@ -33,6 +33,8 @@ class EdgeNode {
         void setAngle(double angle);
         void setLeftArc(Arc *leftArc);
         void setRightArc(Arc *rightArc);
+        bool pointsDown();
+        bool pointsUp();
         
         //constructors
         EdgeNode();

@@ -253,3 +253,38 @@ bool ParabolaMath::isLessThanOrEqualDouble(double a, double b){
 bool ParabolaMath::isGreaterThanOrEqualDouble(double a, double b){
     return a > b - EPSILON;
 }
+
+
+bool ParabolaMath::doRaysIntersectAtEvent(double x1, double y1, double r1, double x2, double y2, double r2, double x, double y){
+    double t1a = (x - x1)/cos(r1);
+    double t1b = (y - y1)/sin(r1);
+    double t2a = (x - x2)/cos(r2);
+    double t2b = (y - y2)/sin(r2);
+
+    if(areSameDouble(t1a, t1b) && areSameDouble(t2a, t2b)){
+        return isGreaterThanDouble(t1a, 0.0) && isGreaterThanDouble(t2a, 0.0);
+    }
+    return false;
+}
+
+
+bool ParabolaMath::doEdgesIntersectAtEvent(EdgeNode *a, EdgeNode *b, double x, double y){
+    return doRaysIntersectAtEvent(a->getX(), a->getY(), a->getAngle(), b->getX(), b->getY(), b->getAngle(), x, y);
+}
+
+
+bool ParabolaMath::doEdgesIntersect(EdgeNode *a, EdgeNode *b, double *x, double *y){
+    double leftslope = tanf(a->getAngle());
+    double leftInt = a->getY() - leftslope * a->getX();
+    double rightslope = tanf(b->getAngle());
+    double rightInt = b->getY() - rightslope * b->getX();
+    if(areSameDouble(leftslope, rightslope)){
+        return false;
+    }
+    double xa = (rightInt - leftInt) / (leftslope - rightslope);
+    double ya = leftslope * xa + leftInt;
+    *x = xa;
+    *y = ya;
+    return doEdgesIntersectAtEvent(a, b, xa, ya);
+    
+}

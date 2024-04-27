@@ -122,6 +122,14 @@ void EdgeNode::setRightArc(Arc *rightArc) {
     this->rightArc = rightArc;
 }
 
+bool EdgeNode::pointsDown() {
+    return this->getAngle() > PI;
+}
+
+bool EdgeNode::pointsUp() {
+    return this->getAngle() < PI;
+}
+
 
 //value functions
 

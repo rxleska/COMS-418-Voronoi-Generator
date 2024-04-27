@@ -53,7 +53,7 @@ class CircleEvent : public Event{
     public: 
         CircleEvent();
         CircleEvent(double x, double y, double isy, EdgeNode *leftEdge, EdgeNode *rightEdge);
-        ~CircleEvent();
+        virtual ~CircleEvent();
         EdgeNode *getLeftEdge();
         EdgeNode *getRightEdge();
         double getIntersectionY();
@@ -69,7 +69,7 @@ class SiteEvent : public Event{
     public: 
         SiteEvent();
         SiteEvent(double x, double y);
-        ~SiteEvent();
+        virtual ~SiteEvent();
         void handleEvent();
 };
         

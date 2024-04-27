@@ -36,12 +36,15 @@ class BeachLine {
 
         //beach line specific functions
         void checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge);
+        void checkCircleEvent(EdgeNode *centerEdge);
         bool circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, double *x, double *y, double *r);
         EdgeNode * getNextLeftEdge(EdgeNode *node);
         EdgeNode * getNextRightEdge(EdgeNode *node);
 
         void printTree(EdgeNode * node);
         void printTree(EdgeNode * node, double altSweepline);
+
+        void printEdgesInOrder(EdgeNode *node);
 };
     
 

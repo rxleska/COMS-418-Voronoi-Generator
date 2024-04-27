@@ -27,6 +27,19 @@ namespace DrawObjects
         glVertex2f(-1, y*heightScale/windowHeight);
         glVertex2f(1, y*heightScale/windowHeight);
         glEnd();
+
+
+        //draw a vertical line at -4.79231
+        glBegin(GL_LINES);
+        glVertex2f(-4.79231*widthScale/windowWidth, -1);
+        glVertex2f(-4.79231*widthScale/windowWidth, 1);
+        glEnd();
+
+        //draw horizontal line at 4.50263
+        glBegin(GL_LINES);
+        glVertex2f(-1, 4.50263*heightScale/windowHeight);
+        glVertex2f(1, 4.50263*heightScale/windowHeight);
+        glEnd();
     }
 
     void drawBeachLine(){

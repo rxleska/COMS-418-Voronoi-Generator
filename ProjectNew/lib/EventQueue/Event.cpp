@@ -180,8 +180,15 @@ void CircleEvent::setIntersectionY(double intersectionY){
 
 //handle the event
 void CircleEvent::handleEvent(){
+    if(DEBUG) std::cout << "Circle Event Handled at " << this->getX() << " " << this->getY() << std::endl;
+
+    if(leftEdge == nullptr || rightEdge == nullptr){
+        return; 
+    }
+
+
     //set the sweep line
-    beachLine->setSweepLine(this->getY());
+    beachLine->setSweepLine(this->getY());\
 
     Arc *leftArc = leftEdge->getLeftArc();
     Arc *rightArc = rightEdge->getRightArc();
@@ -217,6 +224,34 @@ void CircleEvent::handleEvent(){
     finishedEdges.push_back(edge2);
 
 
+    //remove other intersections
+    EdgeNode * nextLeft = beachLine->getNextLeftEdge(leftEdge);
+    EdgeNode * nextRight = beachLine->getNextRightEdge(rightEdge);
+
+    if(nextLeft != nullptr){
+        for(CircleEvent * event : circleEvents){
+            if(event->getLeftEdge() == nextLeft && event->getRightEdge() == leftEdge){
+                //remove from circle events
+                std::remove(circleEvents.begin(), circleEvents.end(), event);
+                eventQueue->remove(event);
+                break;
+            }
+        }
+    }
+
+    if(nextRight != nullptr){
+        for(CircleEvent * event : circleEvents){
+            if(event->getLeftEdge() == rightEdge && event->getRightEdge() == nextRight){
+                //remove from circle events
+                std::remove(circleEvents.begin(), circleEvents.end(), event);
+                eventQueue->remove(event);
+                break;
+            }
+        }
+    }
+
+
+
     beachLine->remove(leftEdge);
     beachLine->remove(rightEdge);
 
@@ -225,17 +260,50 @@ void CircleEvent::handleEvent(){
     newEdge->setLeftArc(leftArc);
     newEdge->setRightArc(rightArc);
 
-    EdgeNode temp;
-    if(ParabolaMath::isLessThanDouble(leftArc->getY(), rightArc->getY())){ //use right intersection
-        ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), &temp, newEdge);
+    
+    if(ParabolaMath::areSameDouble(leftArc->getX(), rightArc->getX())){
+        newEdge->setX(this->getX());
+        newEdge->setY(this->getIntersectionY());
+        newEdge->setAngle(3 * PI / 2);
     }
-    else{ //use left intersection
-        ParabolaMath::getParabolaEdges(*rightArc, *leftArc, beachLine->getSweepLine(), newEdge, &temp);
-    }
+    else{
+        EdgeNode temp;
+        Arc * higherArc;
+        if(ParabolaMath::isGreaterThanDouble(leftArc->getY(), rightArc->getY())){
+            higherArc = leftArc;
+        } else {
+            higherArc = rightArc;
+        }
 
+        if(ParabolaMath::isGreaterThanDouble(this->getX(), higherArc->getX())){ //use right intersection
+            ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), newEdge, &temp);
+            //FIXME - this is a hack to fix the position
+            newEdge->setX(this->getX());
+            newEdge->setY(this->getIntersectionY());
+            if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
+
+        }
+        else{ //use left intersection
+            ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), &temp, newEdge);
+            //FIXME - this is a hack to fix the position
+            newEdge->setX(this->getX());
+            newEdge->setY(this->getIntersectionY());
+            if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
+
+        }
+    }
+    
+
+    //debug new edges info
+    // if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
+    
+    //insert the new edge
     beachLine->insert(newEdge);
 
-    //todo check for more circle events 
+    //check for more circle events 
+    beachLine->checkCircleEvent(newEdge);
+
+
 }
 
 //###############
@@ -269,6 +337,8 @@ SiteEvent::~SiteEvent(){
 
 //handle the event
 void SiteEvent::handleEvent(){
+    if(DENOTEHANDLE) std::cout << "Site Event at " << this->getX() << " " << this->getY() << std::endl;
+
     beachLine->setSweepLine(this->getY());
     EdgeNode * searchResult = beachLine->search(this->getX());
     if(searchResult == nullptr){
@@ -333,9 +403,11 @@ void SiteEvent::handleEvent(){
             ParabolaMath::getParabolaEdges(*aboveArc, *newArc, beachLine->getSweepLine(), leftEdge, rightEdge);
 
         }
+
         //insert the new edges
         beachLine->insert(leftEdge);
         beachLine->insert(rightEdge);
+
 
         beachLine->checkCircleEvent(leftEdge, rightEdge);
     }
