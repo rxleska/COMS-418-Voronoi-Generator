@@ -269,21 +269,13 @@ void CircleEvent::handleEvent(){
     else{
         EdgeNode temp;
         Arc * higherArc;
-        if(ParabolaMath::isGreaterThanDouble(leftArc->getY(), rightArc->getY())){
+        if(ParabolaMath::isLessThanDouble(leftArc->getY(), rightArc->getY())){
             higherArc = leftArc;
         } else {
             higherArc = rightArc;
         }
 
         if(ParabolaMath::isGreaterThanDouble(this->getX(), higherArc->getX())){ //use right intersection
-            ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), newEdge, &temp);
-            //FIXME - this is a hack to fix the position
-            newEdge->setX(this->getX());
-            newEdge->setY(this->getIntersectionY());
-            if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
-
-        }
-        else{ //use left intersection
             ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), &temp, newEdge);
             //FIXME - this is a hack to fix the position
             newEdge->setX(this->getX());
@@ -291,6 +283,20 @@ void CircleEvent::handleEvent(){
             if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
 
         }
+        else{ //use left intersection
+            ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), newEdge, &temp);
+            //FIXME - this is a hack to fix the position
+            newEdge->setX(this->getX());
+            newEdge->setY(this->getIntersectionY());
+            if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
+        }
+
+        //if the new edge is vertical, set the angle to 3PI/2
+        if(ParabolaMath::areSameDouble(newEdge->getAngle(), PI / 2) || ParabolaMath::areSameDouble(newEdge->getAngle(), 3 * PI / 2)){
+            newEdge->setAngle(3 * PI / 2);
+        }
+
+
     }
     
 

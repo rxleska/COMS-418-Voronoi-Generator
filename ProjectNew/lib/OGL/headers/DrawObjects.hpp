@@ -18,6 +18,9 @@ namespace DrawObjects
     void drawSweepLine(double y);
     void drawBeachLine();
 
+    void drawVerticalLine(double x);
+    void drawHorizontalLine(double y);
+
     void drawArc(Arc *arc);
     void drawAllArcs();
 

@@ -153,6 +153,7 @@ int main(int argc, char *argv[]) {
 
 
 
+    //TODO HANDLE THE FIRST TWO SITES HAVING THE SAME Y VALUE
 
     //proc the first 2 sites 
     SiteEvent *site1 = (SiteEvent *) eventQueue->pop();

@@ -241,6 +241,25 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
     EdgeNode *nextLeft = getNextLeftEdge(leftedge);
     EdgeNode *nextRight = getNextRightEdge(rightedge);
 
+    bool incrementSweepline = false;
+    //if any of the arcs are at the sweep line, increment the sweepline by a small amount to avoid division by 0
+    if(ParabolaMath::areSameDouble(leftedge->getLeftArc()->getY(), this->sweepLine)){
+        this->sweepLine += 0.001;
+        incrementSweepline = true;
+    }
+    else if(ParabolaMath::areSameDouble(leftedge->getRightArc()->getY(), this->sweepLine)){
+        this->sweepLine += 0.001;
+        incrementSweepline = true;
+    }
+    else if(ParabolaMath::areSameDouble(rightedge->getLeftArc()->getY(), this->sweepLine)){
+        this->sweepLine += 0.001;
+        incrementSweepline = true;
+    }
+    else if(ParabolaMath::areSameDouble(rightedge->getRightArc()->getY(), this->sweepLine)){
+        this->sweepLine += 0.001;
+        incrementSweepline = true;
+    }
+
 
     // switching to q p- p+ r method, p- is left edge, p+ is right edge, q is next left edge, r is next right edge
     double p1x;
@@ -288,6 +307,19 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             delete event;
         }
     }
+    else{
+        if(DEBUG) std::cout << "did not insert circle event: " // the 3 arcs are
+        << rightedge->getLeftArc()->getX() << " " << rightedge->getLeftArc()->getY() << " " << rightedge->getRightArc()->getX() << " " << rightedge->getRightArc()->getY() << std::endl;
+        if(DEBUG){
+            if(nextRight != nullptr){
+                std::cout << "next right edge: " << nextRight->getLeftArc()->getX() << " " << nextRight->getLeftArc()->getY() << " " << nextRight->getRightArc()->getX() << " " << nextRight->getRightArc()->getY() << std::endl;
+            }
+            else{
+                std::cout << "next right edge is null" << std::endl;
+            }
+        }
+        beachLine->printEdgesInOrder(beachLine->getRoot());
+    }
 
     if(nextLeft != nullptr && nextRight != nullptr){
         //search for circle event with nextLeft and nextRight
@@ -299,6 +331,10 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
                 break;
             }
         }
+    }
+
+    if(incrementSweepline){
+        this->sweepLine -= 0.001;
     }
 
 

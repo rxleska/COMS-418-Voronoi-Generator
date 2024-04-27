@@ -155,6 +155,9 @@ double EdgeNode::getValue(double sweepline) {
 
 
     //end testing
+    if(this->getAngle() == PI/2.0 || this->getAngle() == 3*PI/2.0){
+        return this->getX();
+    }
 
 
 

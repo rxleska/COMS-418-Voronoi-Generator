@@ -30,15 +30,31 @@ namespace DrawObjects
 
 
         //draw a vertical line at -4.79231
-        glBegin(GL_LINES);
-        glVertex2f(-4.79231*widthScale/windowWidth, -1);
-        glVertex2f(-4.79231*widthScale/windowWidth, 1);
-        glEnd();
+        // glBegin(GL_LINES);
+        // glVertex2f(5*widthScale/windowWidth, -1);
+        // glVertex2f(5*widthScale/windowWidth, 1);
+        // glEnd();
 
         //draw horizontal line at 4.50263
+        // glBegin(GL_LINES);
+        // glVertex2f(-1, -6.84987*heightScale/windowHeight);
+        // glVertex2f(1, -6.84987*heightScale/windowHeight);
+        // glEnd();
+    }
+
+    void drawVerticalLine(double x){
+        //draw a vertical line at x
         glBegin(GL_LINES);
-        glVertex2f(-1, 4.50263*heightScale/windowHeight);
-        glVertex2f(1, 4.50263*heightScale/windowHeight);
+        glVertex2f(x*windowWidth/widthScale, -1);
+        glVertex2f(x*windowWidth/widthScale, 1);
+        glEnd();
+    }
+
+    void drawHorizontalLine(double y){
+        //draw a horizontal line at y
+        glBegin(GL_LINES);
+        glVertex2f(-1, y*windowHeight/heightScale);
+        glVertex2f(1, y*windowHeight/heightScale);
         glEnd();
     }
 

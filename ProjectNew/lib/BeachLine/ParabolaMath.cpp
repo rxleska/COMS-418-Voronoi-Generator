@@ -28,7 +28,16 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
     if(areSameDouble(y1, y2)){
         //TODO handle this case (1 intersection)
         //basically it becomes a line intersection instead of a parabola intersection
-        throw "Not implemented yet (need to handle 2 sites with the same y coordinate)";
+        *ex1 = (x2*x2 - x1*x1)/(2.0 * (x2 - x1));
+        *ex2 = *ex1;
+        *ey1 = getParabolaYatX(*ex1, x1, y1, swpln);
+        *ey2 = *ey1;
+        //set left edge pointed down and right edge pointed up
+        *er2 = PI/2.0;
+        *er1 = 3*PI/2.0;
+        return;
+
+        // throw "Not implemented yet (need to handle 2 sites with the same y coordinate)";
     }
 
     //if one point it touching the directrix
@@ -142,8 +151,8 @@ bool ParabolaMath::doesLineIntersectParabolaDO(double xf, double yf, double dire
         *x = xf;
         //use the line to get the y value
         double xdiff = xe - xf;
-        double unit = xdiff / cosf(re);
-        *y = ye - unit * sinf(re);
+        double unit = xdiff / cos(re);
+        *y = ye - unit * sin(re);
 
         // if(DEBUG) std::cout << "vertical parabola" << " x: " << *x << " y: " << *y << std::endl;
 
@@ -256,6 +265,73 @@ bool ParabolaMath::isGreaterThanOrEqualDouble(double a, double b){
 
 
 bool ParabolaMath::doRaysIntersectAtEvent(double x1, double y1, double r1, double x2, double y2, double r2, double x, double y){
+    //handle vertical rays (degenerate case) (this is needed to prevent division by 0)
+    if(areSameDouble(x1, x2) && areSameDouble(x1, x)){
+        if(areSameDouble(r1, 3*PI/2) && areSameDouble(r2, 3*PI/2)){//y1 down and y2 down
+            return isLessThanOrEqualDouble(y, fmin(y1, y2));
+        } 
+        else if(areSameDouble(r1, PI/2) && areSameDouble(r2, PI/2)){//y1 up and y2 up
+            return isGreaterThanOrEqualDouble(y, fmax(y1, y2));
+        }
+        else if(areSameDouble(r1, PI/2) && areSameDouble(r2, 3*PI/2)){//y1 up and y2 down
+            return isLessThanOrEqualDouble(y, y2) && isGreaterThanOrEqualDouble(y, y1);
+        }
+        else if(areSameDouble(r1, 3*PI/2) && areSameDouble(r2, PI/2)){//y1 down and y2 up
+            return isLessThanOrEqualDouble(y, y1) && isGreaterThanOrEqualDouble(y, y2);
+        }
+    }
+    else if((areSameDouble(r1, PI/2) || areSameDouble(r1, 3*PI/2)) && (areSameDouble(r2, PI/2) || areSameDouble(r2, 3*PI/2))){
+        return false; //catch the case where both rays are vertical but not at the same x value
+    }
+    else if(areSameDouble(r1, PI/2)){
+        //ray 1 points up 
+        double t1 = (x1 - x2)/cos(r2);
+        if(isLessThanDouble(t1, 0.0)){
+            return false;
+        }
+        double yint = y2 + t1 * sin(r2);
+        if(DEBUG) std::cout << "[ray interception: r1 up] yint: " << yint << " y1: " << y1 << " y: " << y << std::endl;
+        //debug log edges values
+        if(DEBUG) std::cout << "x1: " << x1 << " y1: " << y1 << " r1: " << r1 << " x2: " << x2 << " y2: " << y2 << " r2: " << r2 << " x: " << x << " y: " << y << std::endl;
+        return isGreaterThanOrEqualDouble(yint, y1) && areSameDouble(yint, y);
+    
+    }
+    else if(areSameDouble(r1, 3*PI/2)){
+        //ray 1 points down
+        double t1 = (x1 - x2)/cos(r2);
+        if(isLessThanDouble(t1, 0.0)){
+            return false;
+        }
+        double yint = y2 + t1 * sin(r2);
+        if(DEBUG) std::cout << "[ray interception: r1 down] yint: " << yint << " y1: " << y1 << " y: " << y << std::endl;
+        if(DEBUG) std::cout << "x1: " << x1 << " y1: " << y1 << " r1: " << r1 << " x2: " << x2 << " y2: " << y2 << " r2: " << r2 << " x: " << x << " y: " << y << std::endl;
+        return isLessThanOrEqualDouble(yint, y1) && areSameDouble(yint, y);
+    }
+    else if(areSameDouble(r2, PI/2)){
+        //ray 2 points up
+        double t2 = (x2 - x1)/cos(r1);
+        if(isLessThanDouble(t2, 0.0)){
+            return false;
+        }
+        double yint = y1 + t2 * sin(r1);
+        if(DEBUG) std::cout << "[ray interception: r2 up] yint: " << yint << " y2: " << y2 << " y: " << y << std::endl;
+        if(DEBUG) std::cout << "x1: " << x1 << " y1: " << y1 << " r1: " << r1 << " x2: " << x2 << " y2: " << y2 << " r2: " << r2 << " x: " << x << " y: " << y << std::endl;
+        return isGreaterThanOrEqualDouble(yint, y2) && areSameDouble(yint, y);
+    }
+    else if(areSameDouble(r2, 3*PI/2)){
+        //ray 2 points down
+        double t2 = (x2 - x1)/cos(r1);
+        if(isLessThanDouble(t2, 0.0)){
+            return false;
+        }
+        double yint = y1 + t2 * sin(r1);
+        if(DEBUG) std::cout << "[ray interception: r2 down] yint: " << yint << " y2: " << y2 << " y: " << y << std::endl;
+        if(DEBUG) std::cout << "x1: " << x1 << " y1: " << y1 << " r1: " << r1 << " x2: " << x2 << " y2: " << y2 << " r2: " << r2 << " x: " << x << " y: " << y << std::endl;
+        return isLessThanOrEqualDouble(yint, y2) && areSameDouble(yint, y);    
+    }
+
+
+
     double t1a = (x - x1)/cos(r1);
     double t1b = (y - y1)/sin(r1);
     double t2a = (x - x2)/cos(r2);
@@ -274,9 +350,52 @@ bool ParabolaMath::doEdgesIntersectAtEvent(EdgeNode *a, EdgeNode *b, double x, d
 
 
 bool ParabolaMath::doEdgesIntersect(EdgeNode *a, EdgeNode *b, double *x, double *y){
-    double leftslope = tanf(a->getAngle());
+    //degenerate case, one edge is vertical
+    if(areSameDouble(a->getAngle(), PI/2)){ //a points up vertically
+        *x = a->getX();
+        // get y from the other edge using the x value
+        *y = b->getY() + tan(b->getAngle()) * (*x - b->getX());
+        if(isLessThanDouble(*y, a->getY())){
+            return false;
+        }
+        return true;
+
+    }
+    else if(areSameDouble(a->getAngle(), 3*PI/2)){ // a points down vertically
+        *x = a->getX();
+        // get y from the other edge using the x value
+        *y = b->getY() + tan(b->getAngle()) * (*x - b->getX());
+        if(isLessThanDouble(*y, a->getY())){
+            return true;
+        }
+        return false;
+
+    }
+    else if(areSameDouble(b->getAngle(), PI/2)){ //b points up vertically
+        *x = b->getX();
+        // get y from the other edge using the x value
+        *y = a->getY() + tan(a->getAngle()) * (*x - a->getX());
+        if(isLessThanDouble(*y, b->getY())){
+            return false;
+        }
+        return true;
+    }
+    else if(areSameDouble(b->getAngle(), 3*PI/2)){ //b points down vertically
+        *x = b->getX();
+        // get y from the other edge using the x value
+        *y = a->getY() + tan(a->getAngle()) * (*x - a->getX());
+        if(isLessThanDouble(*y, b->getY())){
+            return true;
+        }
+        return false;
+
+    }
+
+
+
+    double leftslope = tan(a->getAngle());
     double leftInt = a->getY() - leftslope * a->getX();
-    double rightslope = tanf(b->getAngle());
+    double rightslope = tan(b->getAngle());
     double rightInt = b->getY() - rightslope * b->getX();
     if(areSameDouble(leftslope, rightslope)){
         return false;
