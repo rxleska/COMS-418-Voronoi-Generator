@@ -21,7 +21,7 @@ namespace OGLcallbacks{
 
     void update(int value) {
         if (!isPaused) {
-            SweepAnimationHeight -= 0.05;
+            SweepAnimationHeight -= 0.1;
             glutPostRedisplay(); // Redraw the window
         }
         glutTimerFunc(16, update, 0); // Schedule next update
@@ -53,13 +53,13 @@ namespace OGLcallbacks{
                 drawAllHalfEdges = !drawAllHalfEdges;
                 break;
             case 'l':
-                beachLine->setSweepLine(beachLine->getSweepLine() - 0.001);
+                // beachLine->setSweepLine(beachLine->getSweepLine() - 0.001);
                 std::cout << std::endl;
                 std::cout << std::endl;
                 std::cout << "Printing Beach Line" << std::endl;
                 std::cout << "y: " << beachLine->getSweepLine() << std::endl;
                 beachLine->printEdgesInOrder(beachLine->getRoot());
-                beachLine->setSweepLine(beachLine->getSweepLine() + 0.001);
+                // beachLine->setSweepLine(beachLine->getSweepLine() + 0.001);
                 break;
             case 'q':
                 eventQueue->printQueue();
@@ -109,8 +109,8 @@ namespace OGLcallbacks{
 
         //switch color to orange 
         glColor3f(1.0, 0.5, 0.0);
-        // DrawObjects::drawVerticalLine(8.5);
-        // DrawObjects::drawHorizontalLine(-13.8824);
+        DrawObjects::drawVerticalLine(0);
+        DrawObjects::drawHorizontalLine(0.333333);
 
         //switch color to green and draw the beachline
         glColor3f(0.0, 1.0, 0.0);

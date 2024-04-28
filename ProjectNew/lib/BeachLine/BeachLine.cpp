@@ -179,10 +179,33 @@ void BeachLine::insert(EdgeNode *node){
     EdgeNode *parent = nullptr;
     while(current != nullptr){
         parent = current;
-        if(node->getValue(this->sweepLine) < current->getValue(this->sweepLine)){
+        if(ParabolaMath::areSameDouble(node->getValue(this->sweepLine),current->getValue(this->sweepLine))){
+            if(node->getLeftArc() != nullptr && current->getRightArc() != nullptr && node->getLeftArc() == current->getRightArc()){
+                std::cout << "used right on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl;
+                current = current->getRight();
+            }
+            else if(node->getRightArc() != nullptr && current->getLeftArc() != nullptr && node->getRightArc() == current->getLeftArc()){
+                std::cout << "used left on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl; 
+                current = current->getLeft();
+            }
+            else{
+                //instead of checking the value at the sweep line, check the value at the sweep line + 0.005
+                if(node->getValue(this->sweepLine + 0.005) < current->getValue(this->sweepLine + 0.005)){
+                    current = current->getLeft();
+                } else {
+                    current = current->getRight();
+                }
+            }
+
+
+            
+        }
+        else{
+            if(node->getValue(this->sweepLine) < current->getValue(this->sweepLine)){
             current = current->getLeft();
-        } else {
-            current = current->getRight();
+            } else {
+                current = current->getRight();
+            }
         }
     }
 
@@ -483,6 +506,10 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
                 delete event;
             }        
         }
+        else{
+            std::cout << "a1: " << a1->getX() << " " << a1->getY() << " a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << std::endl;
+            std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
+        }
     }
 
     if(nextRight != nullptr && !(
@@ -507,6 +534,10 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
                 delete event;
             }
         }
+        else{
+            std::cout << "a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << " a4: " << a4->getX() << " " << a4->getY() << std::endl;
+            std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
+        }
     }
 }
 
@@ -529,15 +560,50 @@ bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, do
     //find the y intercept of a line perpendicular to BC that goes through midBC
     double bPerpBC = midBC.getY() - mPerpBC * midBC.getX();
 
-    //find the intersection of the two lines 
-    double circumcenterX = (bPerpBC - bPerpAB) / (mPerpAB - mPerpBC);
-    double circumcenterY = mPerpAB * circumcenterX + bPerpAB;
+    //find the slope of Cpt to Apt
+    double mCA = (Cpt.getY() - Apt.getY()) / (Cpt.getX() - Apt.getX());
+    //find the center point of the line between Cpt and Apt
+    Vertex midCA = Vertex((Cpt.getX() + Apt.getX()) / 2, (Cpt.getY() + Apt.getY()) / 2);
+    double mPerpCA = -1.0 / mCA;
+    //find the y intercept of a line perpendicular to CA that goes through midCA
+    double bPerpCA = midCA.getY() - mPerpCA * midCA.getX();
 
-    //find the distance between the circumcenter and any of the points //its the same for all 3 points
-    double radius = sqrt((Apt.getX() - circumcenterX)*(Apt.getX() - circumcenterX) + (Apt.getY() - circumcenterY)*(Apt.getY() - circumcenterY));
+    double circumcenterX;
+    double circumcenterY;
+    double radius;
+
+
+    if(ParabolaMath::areSameDouble(Apt.getY(), Bpt.getY())){ //use CA and BC
+        //find the intersection of the two lines
+        circumcenterX = (bPerpCA - bPerpBC) / (mPerpBC - mPerpCA);
+        circumcenterY = mPerpCA * circumcenterX + bPerpCA;
+
+        //find the distance between the circumcenter and any of the points //its the same for all 3 points
+        radius = sqrt((Apt.getX() - circumcenterX)*(Apt.getX() - circumcenterX) + (Apt.getY() - circumcenterY)*(Apt.getY() - circumcenterY));
+
+    }
+    else if(ParabolaMath::areSameDouble(Bpt.getY(), Cpt.getY())){// use AB and CA
+        //find the intersection of the two lines
+        circumcenterX = (bPerpAB - bPerpCA) / (mPerpCA - mPerpAB);
+        circumcenterY = mPerpAB * circumcenterX + bPerpAB;
+
+        //find the distance between the circumcenter and any of the points //its the same for all 3 points
+        radius = sqrt((Apt.getX() - circumcenterX)*(Apt.getX() - circumcenterX) + (Apt.getY() - circumcenterY)*(Apt.getY() - circumcenterY));
+
+    }
+    else{// use BC and AB
+        //find the intersection of the two lines 
+        circumcenterX = (bPerpBC - bPerpAB) / (mPerpAB - mPerpBC);
+        circumcenterY = mPerpAB * circumcenterX + bPerpAB;
+
+        //find the distance between the circumcenter and any of the points //its the same for all 3 points
+        radius = sqrt((Apt.getX() - circumcenterX)*(Apt.getX() - circumcenterX) + (Apt.getY() - circumcenterY)*(Apt.getY() - circumcenterY));
+    }
+
+    
 
     //check if the circle intersects the sweepline
-    if(circumcenterY - radius <= this->getSweepLine()){
+    if(ParabolaMath::isLessThanOrEqualDouble(circumcenterY - radius, this->sweepLine)){
         *x = circumcenterX;
         *y = circumcenterY;
         *r = radius;

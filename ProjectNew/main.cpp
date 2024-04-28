@@ -23,6 +23,18 @@ double widthScale;
 double heightScale;
 double SweepAnimationHeight;
     
+double stringToDouble(const std::string& str) {
+    try {
+        return std::stod(str);  // Uses the C++ standard library to convert string to double
+    } catch (const std::invalid_argument& ia) {
+        std::cerr << "Invalid argument: " << ia.what() << '\n';
+        return 0.0;
+    } catch (const std::out_of_range& oor) {
+        std::cerr << "Out of range: " << oor.what() << '\n';
+        return 0.0;
+    }
+}
+
 //string to int function
 int stringToInt(std::string str){
     int result = 0;
@@ -49,23 +61,23 @@ void readSites(std::vector<Vertex> *vertices){
     }
     bool isLeft = true;
 
-    while(!file.eof()){ //while not end of file marker
-        //if the next character is a number, read it in 
-        if(('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-'){
+    while (!file.eof()) { // While not end of file marker
+        // If the next character is part of a number, read it in 
+        if (('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-' || file.peek() == '.') {
             std::string num = "";
-            while(('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-'){
+            while (('0' <= file.peek() && file.peek() <= '9') || file.peek() == '-' || file.peek() == '.') {
                 num += file.get();
             }
-            if(isLeft){
-                vertices->push_back(Vertex(stringToInt(num), 0));
+            if (isLeft) {
+                vertices->push_back(Vertex(stringToDouble(num), 0.0));
                 isLeft = false;
-            }else{
-                (*vertices)[vertices->size() - 1].setY(stringToInt(num));
+            } else {
+                (*vertices)[vertices->size() - 1].setY(stringToDouble(num));
                 isLeft = true;
             }
         }
-        //if the next character is not a number, skip it
-        else{
+        // If the next character is not part of a number, skip it
+        else {
             file.get();
         }
     }
@@ -154,6 +166,9 @@ int main(int argc, char *argv[]) {
 
 
     //TODO HANDLE THE FIRST TWO SITES HAVING THE SAME Y VALUE
+    //TODO HANDLE THE FIRST TWO SITES HAVING THE SAME X VALUE
+
+
 
     //proc the first 2 sites 
     SiteEvent *site1 = (SiteEvent *) eventQueue->pop();
@@ -161,36 +176,38 @@ int main(int argc, char *argv[]) {
     // if(DEBUG) std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
     SiteEvent *site2 = (SiteEvent *) eventQueue->pop();
     Arc *arc2 = new Arc(site2->getX(), site2->getY());
-    // if(DEBUG) std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
-    beachLine->setSweepLine(site2->getY());
-    EdgeNode *leftEdge = new EdgeNode();
-    leftEdge->setLeftArc(arc1);
-    leftEdge->setRightArc(arc2);
-    EdgeNode *rightEdge = new EdgeNode();
-    rightEdge->setLeftArc(arc2);
-    rightEdge->setRightArc(arc1);
-    ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
-
-    // leftEdge->setAngle(3.97934);
-    // rightEdge->setAngle(0.83775);
-
-    //insert the edges into the beach line
-
-    //insert the new edges
 
 
-    // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
-    beachLine->insert(leftEdge);
-    // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
-    beachLine->insert(rightEdge);
+    //if the first two sites have the same y value
+    if(site1->getY() == site2->getY()){
+        //define the y value of the edge to be an arbirarly large number
+        beachLine->setSweepLine(site2->getY());
+        EdgeNode *onlyEdge = new EdgeNode();
+        onlyEdge->setLeftArc(arc1);
+        onlyEdge->setRightArc(arc2);
+        onlyEdge->setX((arc1->getX() + arc2->getX()) / 2.0); // middle of the 2 arcs
+        onlyEdge->setY(10000); //arbitrarily large number
+        onlyEdge->setAngle(3*PI/2.0);
 
-    // if(DEBUG){
-    //     //write the edges to the console
-    //     std::cout << "Left Edge: " << std::endl;
-    //     std::cout << "X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
-    //     std::cout << "Right Edge: " << std::endl;
-    //     std::cout << "X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
-    // }
+        beachLine->insert(onlyEdge);        
+    }
+    //if the first two sites have the same x value or otherwise (its the same either way)
+    else{
+        beachLine->setSweepLine(site2->getY());
+        EdgeNode *leftEdge = new EdgeNode();
+        leftEdge->setLeftArc(arc1);
+        leftEdge->setRightArc(arc2);
+        EdgeNode *rightEdge = new EdgeNode();
+        rightEdge->setLeftArc(arc2);
+        rightEdge->setRightArc(arc1);
+        ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
+
+        // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+        beachLine->insert(leftEdge);
+        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+        beachLine->insert(rightEdge);
+    }
+
 
     beachLine->printTree(beachLine->getRoot());
 
