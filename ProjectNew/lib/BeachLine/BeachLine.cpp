@@ -94,6 +94,7 @@ void BeachLine::splay(EdgeNode *node) {
 
 
 EdgeNode *BeachLine::search(double searchX) {
+    // if(VDEBUG) std::cout << "[BeachLine] search" << std::endl;
     //now returns the node that is closest to the searchX
     EdgeNode *current = this->root;
     while (current != nullptr) {
@@ -128,6 +129,7 @@ EdgeNode *BeachLine::search(double searchX) {
 }
 
 EdgeNode *BeachLine::search(double searchX, double altSweepline) {
+    // if(VDEBUG) std::cout << "[BeachLine] search alt " << altSweepline << std::endl;
     //now returns the node that is closest to the searchX
     EdgeNode *current = this->root;
     while (current != nullptr) {
@@ -166,6 +168,9 @@ EdgeNode *BeachLine::search(double searchX, double altSweepline) {
 
 
 void BeachLine::insert(EdgeNode *node){
+    if(VDEBUG) std::cout << "[BeachLine] insert" << std::endl;
+    if(VDEBUG) std::cout << node->getX() << " " << node->getY() << " " << node->getAngle() << std::endl;
+
     if(this->root == nullptr){
         this->root = node;
         return;
@@ -192,6 +197,8 @@ void BeachLine::insert(EdgeNode *node){
 }
 
 void BeachLine::remove(EdgeNode *node) {
+    if(VDEBUG) std::cout << "[BeachLine] remove" << std::endl;
+    if(VDEBUG) std::cout << node->getX() << " " << node->getY() << " " << node->getAngle() << std::endl;
     if (node == nullptr) return;
 
     // Splay the node to the root
@@ -237,29 +244,39 @@ void BeachLine::remove(EdgeNode *node) {
 
 //beach line specific functions
 void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
-
-    EdgeNode *nextLeft = getNextLeftEdge(leftedge);
-    EdgeNode *nextRight = getNextRightEdge(rightedge);
+    if(VDEBUG) std::cout << "[BeachLine] checkCircleEvent" << std::endl;
 
     bool incrementSweepline = false;
     //if any of the arcs are at the sweep line, increment the sweepline by a small amount to avoid division by 0
     if(ParabolaMath::areSameDouble(leftedge->getLeftArc()->getY(), this->sweepLine)){
-        this->sweepLine += 0.001;
+        this->sweepLine -= 0.001;
         incrementSweepline = true;
     }
     else if(ParabolaMath::areSameDouble(leftedge->getRightArc()->getY(), this->sweepLine)){
-        this->sweepLine += 0.001;
+        this->sweepLine -= 0.001;
         incrementSweepline = true;
     }
     else if(ParabolaMath::areSameDouble(rightedge->getLeftArc()->getY(), this->sweepLine)){
-        this->sweepLine += 0.001;
+        this->sweepLine -= 0.001;
         incrementSweepline = true;
     }
     else if(ParabolaMath::areSameDouble(rightedge->getRightArc()->getY(), this->sweepLine)){
-        this->sweepLine += 0.001;
+        this->sweepLine -= 0.001;
         incrementSweepline = true;
     }
 
+    if(incrementSweepline){
+        // std::cout << "incremented sweepline for circle event check" << std::endl;
+    }
+
+    EdgeNode *nextLeft = getNextLeftEdge(leftedge);
+    EdgeNode *nextRight = getNextRightEdge(rightedge);
+
+    if(incrementSweepline){
+        this->sweepLine += 0.001;
+    }
+
+    // std::cout << std::endl << std::endl;
 
     // switching to q p- p+ r method, p- is left edge, p+ is right edge, q is next left edge, r is next right edge
     double p1x;
@@ -280,11 +297,16 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             if(DEBUG) std::cout << "inserted circle event: " << p1x << " " << p1y - radius << std::endl;
         }
         else{
+            // if(DEBUG) std::cout << ParabolaMath::doEdgesIntersectAtEvent(nextLeft, leftedge, p1x, p1y);
             // log p1y-radius << " " << beachLine->getSweepLine() << std::endl;
             if(DEBUG) std::cout << "did not insert circle event: " << p1y - radius << " " << beachLine->getSweepLine() << std::endl;
+            //log desired event location
+            if(DEBUG) std::cout << "desired event location: " << p1x << " " << p1y << std::endl;
             delete event;
         }
     }
+
+    // std::cout << std::endl << std::endl;
 
     double p2x;
     double p2y;
@@ -303,7 +325,10 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
             if(DEBUG) std::cout << "inserted circle event: " << p2x << " " << p2y - radius << std::endl;
         }
         else{
+            // if(DEBUG) std::cout << ParabolaMath::doEdgesIntersectAtEvent(rightedge, nextRight, p2x, p2y);
+
             if(DEBUG) std::cout << "did not insert circle event: " << p1y - radius << " " << beachLine->getSweepLine() << std::endl;
+            if(DEBUG) std::cout << "desired event location: " << p1x << " " << p1y << std::endl;
             delete event;
         }
     }
@@ -318,7 +343,7 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
                 std::cout << "next right edge is null" << std::endl;
             }
         }
-        beachLine->printEdgesInOrder(beachLine->getRoot());
+        // beachLine->printEdgesInOrder(beachLine->getRoot());
     }
 
     if(nextLeft != nullptr && nextRight != nullptr){
@@ -331,10 +356,6 @@ void BeachLine::checkCircleEvent(EdgeNode *leftedge, EdgeNode *rightedge){
                 break;
             }
         }
-    }
-
-    if(incrementSweepline){
-        this->sweepLine -= 0.001;
     }
 
 
@@ -458,6 +479,7 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
                 if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
             }
             else{
+                std::cout << "did not insert circle event: " << evtx << " " << evty - evtr << " " << evty << std::endl;
                 delete event;
             }        
         }
@@ -490,6 +512,7 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
 
 
 bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, double *x, double *y, double *r){
+    if(VDEBUG) std::cout << "[BeachLine] circleIntersectsBeachLine" << std::endl;
     //find the slope of Apt to Bpt
     double mAB = (Apt.getY() - Bpt.getY()) / (Apt.getX() - Bpt.getX());
     //find the center point of the line between Apt and Bpt

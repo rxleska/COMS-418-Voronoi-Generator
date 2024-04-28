@@ -182,6 +182,7 @@ void CircleEvent::setIntersectionY(double intersectionY){
 void CircleEvent::handleEvent(){
     if(DEBUG) std::cout << "Circle Event Handled at " << this->getX() << " " << this->getY() << std::endl;
 
+
     if(leftEdge == nullptr || rightEdge == nullptr){
         return; 
     }
@@ -228,31 +229,55 @@ void CircleEvent::handleEvent(){
     EdgeNode * nextLeft = beachLine->getNextLeftEdge(leftEdge);
     EdgeNode * nextRight = beachLine->getNextRightEdge(rightEdge);
 
-    if(nextLeft != nullptr){
-        for(CircleEvent * event : circleEvents){
-            if(event->getLeftEdge() == nextLeft && event->getRightEdge() == leftEdge){
-                //remove from circle events
-                std::remove(circleEvents.begin(), circleEvents.end(), event);
-                eventQueue->remove(event);
-                break;
+    if (nextLeft != nullptr) {
+        for (auto it = circleEvents.begin(); it != circleEvents.end(); ) {
+            CircleEvent* event = *it;
+            if (event->getLeftEdge() == leftEdge || event->getRightEdge() == leftEdge) {
+                eventQueue->remove(event);  // Assuming this correctly removes the event from the queue
+                it = circleEvents.erase(it);  // Correctly erase from vector
+            } else {
+                ++it;
             }
         }
     }
 
-    if(nextRight != nullptr){
-        for(CircleEvent * event : circleEvents){
-            if(event->getLeftEdge() == rightEdge && event->getRightEdge() == nextRight){
-                //remove from circle events
-                std::remove(circleEvents.begin(), circleEvents.end(), event);
-                eventQueue->remove(event);
-                break;
+    if (nextRight != nullptr) {
+        for (auto it = circleEvents.begin(); it != circleEvents.end(); ) {
+            CircleEvent* event = *it;
+            if (event->getLeftEdge() == rightEdge || event->getRightEdge() == rightEdge) {
+                eventQueue->remove(event);  // Assuming this correctly removes the event from the queue
+                it = circleEvents.erase(it);  // Correctly erase from vector
+            } else {
+                ++it;
             }
         }
     }
 
 
+    // if(nextLeft != nullptr){
+    //     for(CircleEvent * event : circleEvents){
+    //         if(event->getLeftEdge() == nextLeft && event->getRightEdge() == leftEdge){
+    //             //remove from circle events
+    //             std::remove(circleEvents.begin(), circleEvents.end(), event);
+    //             eventQueue->remove(event);
+    //         }
+    //     }
+    // }
 
+    // if(nextRight != nullptr){
+    //     for(CircleEvent * event : circleEvents){
+    //         if(event->getLeftEdge() == rightEdge && event->getRightEdge() == nextRight){
+    //             //remove from circle events
+    //             std::remove(circleEvents.begin(), circleEvents.end(), event);
+    //             eventQueue->remove(event);
+    //         }
+    //     }
+    // }
+
+
+    // std::cout << "leftEdge: " << leftEdge->getX() << " " << leftEdge->getY() << std::endl;
     beachLine->remove(leftEdge);
+    // std::cout << "rightEdge: " << rightEdge->getX() << " " << rightEdge->getY() << std::endl;
     beachLine->remove(rightEdge);
 
     //create a new edge 
@@ -261,7 +286,7 @@ void CircleEvent::handleEvent(){
     newEdge->setRightArc(rightArc);
 
     
-    if(ParabolaMath::areSameDouble(leftArc->getX(), rightArc->getX())){
+    if(ParabolaMath::areSameDouble(leftArc->getY(), rightArc->getY())){
         newEdge->setX(this->getX());
         newEdge->setY(this->getIntersectionY());
         newEdge->setAngle(3 * PI / 2);
@@ -304,6 +329,7 @@ void CircleEvent::handleEvent(){
     // if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
     
     //insert the new edge
+    // std::cout << "EDGE INSERTED" << " X: " << newEdge->getX() << " Y: " << newEdge->getY() << " Angle: " << newEdge->getAngle() << std::endl;
     beachLine->insert(newEdge);
 
     //check for more circle events 
@@ -374,8 +400,8 @@ void SiteEvent::handleEvent(){
             Edge * edge1 = new Edge();
             Edge * edge2 = new Edge();
 
-            edge1->setOrigin(new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY()));
-            edge2->setOrigin(new Vertex(newArc->getX(), newArc->getY()));
+            edge1->setOrigin(new Vertex(searchResult->getX(), searchResult->getY()));
+            edge2->setOrigin(new Vertex(leftEdge->getX(), leftEdge->getY()));
 
             edge1->setNext(edge2);
             edge2->setNext(edge1);
@@ -387,6 +413,18 @@ void SiteEvent::handleEvent(){
             //add edges to edge list
             finishedEdges.push_back(edge1);
 
+            //remove circle events that use this edge
+            if (searchResult != nullptr) {
+                for (auto it = circleEvents.begin(); it != circleEvents.end(); ) {
+                    CircleEvent* event = *it;
+                    if (event->getLeftEdge() == searchResult || event->getRightEdge() == searchResult) {
+                        eventQueue->remove(event);  // Assuming this correctly removes the event from the queue
+                        it = circleEvents.erase(it);  // Correctly erase from vector
+                    } else {
+                        ++it;
+                    }
+                }
+            }
 
             beachLine->remove(searchResult);
         }
@@ -411,7 +449,9 @@ void SiteEvent::handleEvent(){
         }
 
         //insert the new edges
+        // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
         beachLine->insert(leftEdge);
+        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
         beachLine->insert(rightEdge);
 
 

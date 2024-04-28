@@ -1,6 +1,9 @@
 #include "headers/EQueue.hpp"
 #include "../BeachLine/headers/ParabolaMath.hpp"
 
+//forward declarations
+// std::vector<CircleEvent *> circleEvents;
+
 // private methods
 void EventQueue::resize(){
     // double the capacity
@@ -187,4 +190,15 @@ int EventQueue::getSize(){
 // check if the queue is empty
 bool EventQueue::isEmpty(){
     return size == 0;
+}
+
+// print the queue
+void EventQueue::printQueue(){
+    //print the size and capacity
+    std::cout << "Size: " << size << std::endl;
+    std::cout << "Capacity: " << capacity << std::endl;
+    //print the events
+    for(int i = 0; i < size; i++){
+        std::cout << "Event " << i << ": " << (events[i]->getIsCircle() ? "CE" : "SE") <<" (" << events[i]->getX() << ", " << events[i]->getY() << ")" << std::endl;
+    }
 }

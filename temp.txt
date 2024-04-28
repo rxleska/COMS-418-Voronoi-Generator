@@ -1,0 +1,178 @@
+Vertices:
+Vertex 0: (2, -3)
+Vertex 1: (-10, 9)
+Vertex 2: (0, 0)
+Vertex 3: (-5, -2)
+Vertex 4: (4, -7)
+Vertex 5: (5, 0)
+Vertex 6: (2, -7)
+
+
+EDGE INSERTED X: 0 Y: 10.0556 Angle: 3.97957
+EDGE INSERTED X: 0 Y: 10.0556 Angle: 0.837981
+x: 0 y: 10.0556 r: 3.97957 value: -7.99361e-15
+ left arc x:-10 y:9
+ right arc x:0 y:0
+x: 0 y: 10.0556 r: 0.837981 value: 0
+ left arc x:0 y:0
+ right arc x:-10 y:9
+Site Event at 5 0
+EDGE INSERTED X: 5 Y: 17 Angle: 4.17197
+EDGE INSERTED X: 5 Y: 17 Angle: 1.03038
+incremented sweepline for circle event check
+
+
+1 CIRCLE EVENT INSERTED
+nextLeft: 0 10.0556 0.837981
+leftedge: 5 17 4.17197
+left arc0 0
+center arc-10 9
+right arc5 0
+inserted circle event: 2.5 -0.241239
+
+
+did not insert circle event: 5 0 -10 9
+next right edge is null
+x: 0 y: 10.0556 r: 3.97957 value: -7.99361e-15
+ left arc x:-10 y:9
+ right arc x:0 y:0
+x: 0 y: 10.0556 r: 0.837981 value: 0
+ left arc x:0 y:0
+ right arc x:-10 y:9
+x: 5 y: 17 r: 4.17197 value: 5
+ left arc x:-10 y:9
+ right arc x:5 y:0
+x: 5 y: 17 r: 1.03038 value: 5
+ left arc x:5 y:0
+ right arc x:-10 y:9
+Circle Event Handled at 2.5 -0.241239
+leftEdge: 0 10.0556
+rightEdge: 5 17
+x: 2.5 y: 12.8333 angle: 4.71239
+EDGE INSERTED X: 2.5 Y: 12.8333 Angle: 4.71239
+Site Event at -5 -2
+EDGE INSERTED X: -5 Y: 4.63636 Angle: 3.56822
+EDGE INSERTED X: -5 Y: 4.63636 Angle: 0.426627
+incremented sweepline for circle event check
+
+
+
+
+2 CIRCLE EVENT INSERTED
+rightedge: -5 4.63636 0.426627
+nextRight: 0 10.0556 3.97957
+left arc-5 -2
+center arc-10 9
+right arc0 0
+inserted circle event: -4.79231 -2.0032
+Circle Event Handled at -4.79231 -2.0032
+leftEdge: -5 4.63636
+rightEdge: 0 10.0556
+x: -4.79231 y: 4.73077 angle: 5.0929
+EDGE INSERTED X: -4.79231 Y: 4.73077 Angle: 5.0929
+[ray interception: r2 down] yint: -13.5 y2: 12.8333 y: -13.5
+x1: -4.79231 y1: 4.73077 r1: 5.0929 x2: 2.5 y2: 12.8333 r2: 4.71239 x: 2.5 y: -13.5
+4 CIRCLE EVENT INSERTED
+centerEdge: -4.79231 4.73077 5.0929
+nextRight: 2.5 12.8333 4.71239
+left arc-5 -2
+center arc0 0
+right arc5 0
+inserted circle event: 2.5 -27.2295
+Site Event at 2 -3
+EDGE INSERTED X: 2 Y: -0.833333 Angle: 3.7296
+EDGE INSERTED X: 2 Y: -0.833333 Angle: 0.588003
+incremented sweepline for circle event check
+
+
+1 CIRCLE EVENT INSERTED
+nextLeft: -4.79231 4.73077 5.0929
+leftedge: 2 -0.833333 3.7296
+left arc-5 -2
+center arc0 0
+right arc2 -3
+inserted circle event: -1.60526 -6.84988
+
+
+[ray interception: r2 down] yint: -0.5 y2: 12.8333 y: -0.5
+x1: 2 y1: -0.833333 r1: 0.588003 x2: 2.5 y2: 12.8333 r2: 4.71239 x: 2.5 y: -0.5
+2 CIRCLE EVENT INSERTED
+rightedge: 2 -0.833333 0.588003
+nextRight: 2.5 12.8333 4.71239
+left arc2 -3
+center arc0 0
+right arc5 0
+inserted circle event: 2.5 -3.04951
+Circle Event Handled at 2.5 -3.04951
+leftEdge: 2 -0.833333
+rightEdge: 2.5 12.8333
+x: 2.5 y: -0.5 angle: 5.49779
+EDGE INSERTED X: 2.5 Y: -0.5 Angle: 5.49779
+Circle Event Handled at -1.60526 -6.84988
+leftEdge: -4.79231 4.73077
+rightEdge: 2 -0.833333
+x: -1.60526 y: -3.23684 angle: 4.57049
+EDGE INSERTED X: -1.60526 Y: -3.23684 Angle: 4.57049
+Site Event at 2 -7
+EDGE INSERTED X: 2 Y: -5 Angle: 3.14159
+EDGE INSERTED X: 2 Y: -5 Angle: 0
+incremented sweepline for circle event check
+
+
+r2 is horizontal
+r2 is horizontal
+1 CIRCLE EVENT INSERTED
+nextLeft: -1.60526 -3.23684 4.57049
+leftedge: 2 -5 3.14159
+left arc-5 -2
+center arc2 -3
+right arc2 -7
+inserted circle event: -1.85714 -9.34483
+
+
+r1 is horizontal
+2 CIRCLE EVENT INSERTED
+rightedge: 2 -5 0
+nextRight: 2.5 -0.5 5.49779
+left arc2 -7
+center arc2 -3
+right arc5 0
+inserted circle event: 7 -10.3852
+Site Event at 4 -7
+EDGE INSERTED X: 4 Y: -4.5 Angle: 3.60524
+EDGE INSERTED X: 4 Y: -4.5 Angle: 0.463648
+incremented sweepline for circle event check
+
+
+r1 is horizontal
+1 CIRCLE EVENT INSERTED
+nextLeft: 2 -5 0
+leftedge: 4 -4.5 3.60524
+left arc2 -7
+center arc2 -3
+right arc4 -7
+inserted circle event: 3 -7.23607
+
+
+2 CIRCLE EVENT INSERTED
+rightedge: 4 -4.5 0.463648
+nextRight: 2.5 -0.5 5.49779
+left arc4 -7
+center arc2 -3
+right arc5 0
+inserted circle event: 5.66667 -7.39345
+Circle Event Handled at 3 -7.23607
+leftEdge: 2 -5
+rightEdge: 4 -4.5
+x: 3 y: -5 angle: 4.71239
+EDGE INSERTED X: 3 Y: -5 Angle: 4.71239
+Circle Event Handled at 5.66667 -7.39345
+leftEdge: 4 -4.5
+rightEdge: 2.5 -0.5
+x: 5.66667 y: -3.66667 angle: 6.14129
+EDGE INSERTED X: 5.66667 Y: -3.66667 Angle: 6.14129
+Circle Event Handled at -1.85714 -9.34483
+leftEdge: -1.60526 -3.23684
+rightEdge: 2 -5
+x: -1.85714 y: -5 angle: 4.09214
+EDGE INSERTED X: -1.85714 Y: -5 Angle: 4.09214

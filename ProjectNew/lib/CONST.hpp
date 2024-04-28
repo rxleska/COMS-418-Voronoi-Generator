@@ -4,6 +4,7 @@
 
 #include "BeachLine/headers/BeachLine.hpp"
 #include "EventQueue/headers/EQueue.hpp"
+#include "EventQueue/headers/Event.hpp"
 #include "DCEL/headers/Vertex.hpp"
 #include "DCEL/headers/Edge.hpp"
 
@@ -14,8 +15,10 @@ class Vertex;
 class Edge;
 
 #define PI 3.14159265358979323846
-#define DEBUG 1
-#define DENOTEHANDLE 1
+#define CRITICALDEBUG 1
+#define DEBUG 0 // Debug
+#define VDEBUG 0 //Verbose Debug
+#define DENOTEHANDLE 0
 #define EPSILON 0.00001
 
 #define boundingScale 0.1
@@ -28,6 +31,7 @@ class Edge;
 extern BeachLine *beachLine;
 extern std::vector<Vertex> vertices;
 extern std::vector<Edge *> finishedEdges; //will be replaced with extern DCEL
+extern std::vector<CircleEvent *> circleEvents; //used for removing circle events that are no longer valid
 extern EventQueue *eventQueue;
 extern bool isPaused; // Whether the simulation is paused
 extern double SweepAnimationHeight;
@@ -37,7 +41,6 @@ extern double widthScale;
 extern double heightScale;
 extern bool drawAllArcs;
 extern bool drawAllHalfEdges;
-extern std::vector<CircleEvent *> circleEvents; //used for removing circle events that are no longer valid
 
 
 #endif

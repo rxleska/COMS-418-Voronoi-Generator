@@ -45,16 +45,16 @@ namespace DrawObjects
     void drawVerticalLine(double x){
         //draw a vertical line at x
         glBegin(GL_LINES);
-        glVertex2f(x*windowWidth/widthScale, -1);
-        glVertex2f(x*windowWidth/widthScale, 1);
+        glVertex2f(x*widthScale/windowWidth, -1);
+        glVertex2f(x*widthScale/windowWidth, 1);
         glEnd();
     }
 
     void drawHorizontalLine(double y){
         //draw a horizontal line at y
         glBegin(GL_LINES);
-        glVertex2f(-1, y*windowHeight/heightScale);
-        glVertex2f(1, y*windowHeight/heightScale);
+        glVertex2f(-1, y*heightScale/windowHeight);
+        glVertex2f(1, y*heightScale/windowHeight);
         glEnd();
     }
 
@@ -131,6 +131,7 @@ namespace DrawObjects
         if(edge == nullptr){
             return;
         }
+
 
         drawHalfEdge(edge);
         drawAllHalfEdgesRec(edge->getLeft());

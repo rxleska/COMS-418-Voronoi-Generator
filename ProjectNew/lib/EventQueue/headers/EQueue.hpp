@@ -46,6 +46,9 @@ class EventQueue{
 
         //check if the queue is empty
         bool isEmpty();
+
+        //print the queue
+        void printQueue();
 };
 
 

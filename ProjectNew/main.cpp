@@ -177,7 +177,11 @@ int main(int argc, char *argv[]) {
     //insert the edges into the beach line
 
     //insert the new edges
+
+
+    // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
     beachLine->insert(leftEdge);
+    // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
     beachLine->insert(rightEdge);
 
     // if(DEBUG){
