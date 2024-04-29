@@ -26,7 +26,6 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
     
     //check if points have the same y coordinate 
     if(areSameDouble(y1, y2)){
-        //TODO handle this case (1 intersection)
         //basically it becomes a line intersection instead of a parabola intersection
         *ex1 = (x2*x2 - x1*x1)/(2.0 * (x2 - x1));
         *ex2 = *ex1;
@@ -61,8 +60,7 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
         //check the discriminant
         discriminant = b*b - 4*a*c;
         if(isLessThanDouble(discriminant, 0.0)){
-            //TODO handle this case (0 intersections)
-            throw "Not implemented yet (need to handle 2 parabolas that don't intersect)";
+            throw "NOT POSSIBLE (2 parabolas that don't intersect)";
         }
 
         xminus = (-b - sqrt(discriminant)) / (2.0 * a);
@@ -81,8 +79,7 @@ void ParabolaMath::getParabolaEdges(double x1, double y1, double x2, double y2, 
     //check the discriminant
     discriminant = b*b - 4*a*c;
     if(isLessThanDouble(discriminant, 0.0)){
-        //TODO handle this case (0 intersections)
-        throw "Not implemented yet (need to handle 2 parabolas that don't intersect)";
+        throw "Not POSSIBLE (2 parabolas that don't intersect)";
     }
     xminus = (-b - sqrt(discriminant)) / (2.0 * a);
     xplus = (-b + sqrt(discriminant)) / (2.0 * a);
@@ -504,7 +501,6 @@ bool ParabolaMath::doEdgesIntersect(EdgeNode *a, EdgeNode *b, double *x, double 
     double rightslope = tan(b->getAngle());
     double rightInt = b->getY() - rightslope * b->getX();
     if(areSameDouble(leftslope, rightslope)){
-        //TODO handle this case (parallel lines) (they might intersect at some point)
         if(!areSameDouble(rightInt, leftInt)){
             return false;
         }

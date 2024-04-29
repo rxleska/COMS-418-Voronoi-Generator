@@ -404,7 +404,6 @@ void CircleEvent::handleEvent(){
 
         if(ParabolaMath::isGreaterThanDouble(this->getX(), higherArc->getX())){ //use right intersection
             ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), &temp, newEdge);
-            //FIXME - this is a hack to fix the position
             newEdge->setX(this->getX());
             newEdge->setY(this->getIntersectionY());
             if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
@@ -412,7 +411,6 @@ void CircleEvent::handleEvent(){
         }
         else{ //use left intersection
             ParabolaMath::getParabolaEdges(*leftArc, *rightArc, beachLine->getSweepLine(), newEdge, &temp);
-            //FIXME - this is a hack to fix the position
             newEdge->setX(this->getX());
             newEdge->setY(this->getIntersectionY());
             if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
@@ -496,9 +494,7 @@ void SiteEvent::handleEvent(){
             EdgeNode temp = EdgeNode(); //used a proxy for the other edge
             ParabolaMath::getParabolaEdges(*searchResult->getLeftArc(), *newArc, beachLine->getSweepLine(), leftEdge, &temp);
             ParabolaMath::getParabolaEdges(*newArc, *searchResult->getRightArc(), beachLine->getSweepLine(), &temp,  rightEdge);
-            
 
-            //TODO REPLACE WITH DCEL
             Edge * edge1 = new Edge();
             Edge * edge2 = new Edge();
 
@@ -577,8 +573,9 @@ void SiteEvent::handleEvent(){
                 //do nothing                
             }
             else{
-                //TODO FIX THIS CASE?
-                throw "fix this later if it happens";
+                //DO nothing
+                // //FIX THIS CASE?
+                // throw "fix this later if it happens";
             }
             
         }
@@ -602,8 +599,9 @@ void SiteEvent::handleEvent(){
                 //do nothing                
             }
             else{
-                //TODO FIX THIS CASE?
-                throw "fix this later if it happens";
+                //DO NOTHING
+                // //FIX THIS CASE?
+                // throw "fix this later if it happens";
             }
             
         }
