@@ -162,30 +162,50 @@ namespace OGLcallbacks{
                 double sx = edge->getX();
                 double sy = edge->getY();
                 double theta = edge->getAngle();
+                Arc * arc = edge->getLeftArc();
+                Arc * arc2 = edge->getRightArc();
 
                 
                 double ix, iy;
                 //bottom segment
                 if(rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[1], ys[0], &ix, &iy)){
-                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1));
+                    PseudoEdge pe = PseudoEdge(
+                        new Vertex(sx, sy, -1), 
+                        new Vertex(ix, iy, -1), 
+                        false, 
+                        new Vertex(arc->getX(), arc->getY(), -1),
+                        new Vertex(arc2->getX(), arc2->getY(), -1)
+                    );
                     pseudoEdges.push_back(pe);
                     bounds.push_back(Vertex(ix, iy, -1));
                 }
                 //left segment
                 else if(rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[0], ys[1], &ix, &iy)){
-                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1));
+                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                        false, 
+                        new Vertex(arc->getX(), arc->getY(), -1),
+                        new Vertex(arc2->getX(), arc2->getY(), -1)
+                    );
                     pseudoEdges.push_back(pe);
                     bounds.push_back(Vertex(ix, iy, -1));
                 }
                 //top segment 
                 else if(rayIntersectsSegment(sx, sy, theta, xs[0], ys[1], xs[1], ys[1], &ix, &iy)){
-                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1));
+                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                        false, 
+                        new Vertex(arc->getX(), arc->getY(), -1),
+                        new Vertex(arc2->getX(), arc2->getY(), -1)
+                    );
                     pseudoEdges.push_back(pe);
                     bounds.push_back(Vertex(ix, iy, -1));
                 }
                 //right segment
                 else if(rayIntersectsSegment(sx, sy, theta, xs[1], ys[1], xs[1], ys[0], &ix, &iy)){
-                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1));
+                    PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                        false, 
+                        new Vertex(arc->getX(), arc->getY(), -1),
+                        new Vertex(arc2->getX(), arc2->getY(), -1)
+                    );
                     pseudoEdges.push_back(pe);
                     bounds.push_back(Vertex(ix, iy, -1));
                 }
@@ -223,7 +243,7 @@ namespace OGLcallbacks{
                     if (start1->getX() - start2->getX() < EPSILON && start1->getY() - start2->getY() < EPSILON && fabs(angle1 - angle2) - PI < EPSILON && fabs(angle1 - angle2) - PI > -EPSILON) {
                         Vertex* end1 = pseudoEdges[i].end;
                         Vertex* end2 = pseudoEdges[i + 1].end;
-                        pseudoEdges[i] = PseudoEdge(end1, end2);
+                        pseudoEdges[i] = PseudoEdge(end1, end2, false, pseudoEdges[i].arc1, pseudoEdges[i].arc2);
                         pseudoEdges.erase(pseudoEdges.begin() + i + 1);
                         i--;
                     }
@@ -303,8 +323,8 @@ namespace OGLcallbacks{
             glColor3f(1.0, 1.0, 1.0);
             DrawObjects::drawDCEL();
 
-            glColor3f(0.0, 0.0, 1.0);
-            DrawObjects::drawSites();
+            // glColor3f(0.0, 0.0, 1.0);
+            // DrawObjects::drawSites();
         }
 
 

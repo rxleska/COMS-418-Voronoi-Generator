@@ -18,6 +18,7 @@ class Face{
         int id;
         Edge* outerComponent;
         Edge* innerComponent;
+        Vertex *site;
         bool isUnbounded;
     public:
         //Getters
@@ -25,11 +26,13 @@ class Face{
         Edge* getOuterComponent();
         Edge* getInnerComponent();
         bool getIsUnbounded();
+        Vertex * getSite();
         //Setters
         void setOuterComponent(Edge* outerComponent);
         void setInnerComponent(Edge* innerComponent);
         void setId(int id);
-        void setIsUnbounded(bool isUnbounded);
+        void setIsUnbounded(bool isUnbounded);\
+        void setSite(Vertex * site);
         //Constructors
         Face();
         Face(Edge* outerComponent, Edge* innerComponent);

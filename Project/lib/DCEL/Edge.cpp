@@ -14,6 +14,7 @@ Edge::Edge() {
     this->incidentFace = nullptr;
     this->isBorder = false;
     this->id = idCounter++;
+    this->site = nullptr;
 }
 
 Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFace) {
@@ -24,6 +25,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFac
     this->incidentFace = incidentFace;
     this->isBorder = false;
     this->id = idCounter++;
+    this->site = nullptr;
 }
 
 Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev) {
@@ -34,6 +36,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev) {
     this->incidentFace = nullptr;
     this->isBorder = false;
     this->id = idCounter++;
+    this->site = nullptr;
 }
 
 // getters
@@ -63,6 +66,10 @@ int Edge::getId() {
 
 bool Edge::getIsBorder() {
     return this->isBorder;
+}
+
+Vertex * Edge::getSite() {
+    return this->site;
 }
 
 double Edge::getAngle() {
@@ -102,6 +109,39 @@ void Edge::setIsBorder(bool isBorder) {
     this->isBorder = isBorder;
 }
 
+void Edge::setSite(Vertex * site) {
+    this->site = site;
+}
+
+void Edge::setSite(Vertex * site, Vertex * site2) {
+    //check which site is to the right of the edge
+    //turn the edge into a vector 
+    double x = this->twin->getOrigin()->getX() - this->origin->getX();
+    double y = this->twin->getOrigin()->getY() - this->origin->getY();
+
+    //turn the sites into vectors with the edge as the origin
+    double x1 = site->getX() - this->origin->getX();
+    double y1 = site->getY() - this->origin->getY();
+    double x2 = site2->getX() - this->origin->getX();
+    double y2 = site2->getY() - this->origin->getY();
+
+    //calculate the cross product of the edge and the two sites
+    double cross1 = x * y1 - y * x1;
+    double cross2 = x * y2 - y * x2;
+
+    if (cross1 > cross2) {
+        // std::cout << "choosing site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl; 
+        this->site = site2;
+    } else if (cross1 < cross2) {
+        // std::cout << "choosing site 1: (" << site->getX() << ", " << site->getY() << ")" << std::endl; 
+        this->site = site;
+    } else {
+        //if the sites are colinear choose the one with the smallest y value
+        throw "Error: sites are colinear";
+    }
+
+}
+
 // destructor
 Edge::~Edge() {
     //nothing to delete all pointers that are used elsewhere
@@ -119,7 +159,8 @@ void Edge::printEdge() {
     (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) << " " << 
     (this->next == nullptr ? "nil" : this->next->getEdgeName()) << " " << 
     (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) << " " << 
-    (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName()) << std::endl;    
+    (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName()) << " " 
+    << std::endl;    
 }
 
 bool Edge::getIsClosed() {

@@ -22,6 +22,10 @@ bool Face::getIsUnbounded(){
     return isUnbounded;
 }
 
+Vertex * Face::getSite(){
+    return site;
+}
+
 //Setters
 void Face::setOuterComponent(Edge* outerComponent){
     this->outerComponent = outerComponent;
@@ -39,12 +43,17 @@ void Face::setIsUnbounded(bool isUnbounded){
     this->isUnbounded = isUnbounded;
 }
 
+void Face::setSite(Vertex * site){
+    this->site = site;
+}
+
 //Constructors
 Face::Face(){
     id = idCounter++;
     outerComponent = nullptr;
     innerComponent = nullptr;
     this->isUnbounded = false;
+    this->site = nullptr;
 }
 
 Face::Face(Edge* outerComponent, Edge* innerComponent){
@@ -52,6 +61,7 @@ Face::Face(Edge* outerComponent, Edge* innerComponent){
     this->outerComponent = outerComponent;
     this->innerComponent = innerComponent;
     this->isUnbounded = false;
+    this->site = nullptr;
 }
 
 Face::Face(Edge* outerComponent, Edge* innerComponent, int id){
@@ -59,6 +69,7 @@ Face::Face(Edge* outerComponent, Edge* innerComponent, int id){
     this->outerComponent = outerComponent;
     this->innerComponent = innerComponent;
     this->isUnbounded = false;
+    this->site = nullptr;
 }
 
 //Destructor

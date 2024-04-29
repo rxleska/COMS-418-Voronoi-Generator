@@ -19,6 +19,7 @@ class Edge {
         Edge* prev;
         Face* incidentFace;
         bool isBorder;
+        Vertex *site;
         int id;
         static int idCounter;
     public:
@@ -31,6 +32,7 @@ class Edge {
         double getAngle();
         int getId();
         bool getIsBorder();
+        Vertex * getSite();
         //Setters
         void setOrigin(Vertex* origin);
         void setTwin(Edge* twin);
@@ -38,6 +40,8 @@ class Edge {
         void setPrev(Edge* prev);
         void setIncidentFace(Face* incidentFace);
         void setIsBorder(bool isBorder);
+        void setSite(Vertex * site);
+        void setSite(Vertex * site, Vertex * site2);
         //Constructors
         Edge();
         Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFace);

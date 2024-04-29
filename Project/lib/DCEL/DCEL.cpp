@@ -368,6 +368,11 @@ void DCEL::constructDCEL(std::vector<PseudoEdge> pseudoEdges) {
             edgeD->setIsBorder(true);
         }
 
+        if(pseudoEdge.arc1 != nullptr && pseudoEdge.arc2 != nullptr){
+            edgeO->setSite(pseudoEdge.arc1, pseudoEdge.arc2);
+            edgeD->setSite(pseudoEdge.arc1, pseudoEdge.arc2);
+        }
+
         //add the edges to the DCEL
         this->addEdge(edgeO);
         this->addEdge(edgeD);
@@ -397,6 +402,11 @@ void DCEL::constructDCEL(std::vector<PseudoEdge> pseudoEdges) {
         if (edge->getIncidentFace() == nullptr) {
             Face *face = new Face();
             face->setOuterComponent(edge);
+            bool siteAssigned = false;
+            if(edge->getSite() != nullptr){
+                face->setSite(edge->getSite());
+                siteAssigned = true;
+            }
             edge->setIncidentFace(face);
             Edge *e = edge->getNext();
             bool isAllUnbounded = true;
@@ -408,6 +418,11 @@ void DCEL::constructDCEL(std::vector<PseudoEdge> pseudoEdges) {
                 else{
                     isAllUnbounded = false;
                 }
+                if(!siteAssigned && edge->getSite() != nullptr){
+                    face->setSite(edge->getSite());
+                    siteAssigned = true;
+                }
+
                 e = e->getNext();
             }
             //if isAllUnbounded is true, set face to use inner component
