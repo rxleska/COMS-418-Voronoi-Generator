@@ -1,8 +1,10 @@
 #include "headers/Event.hpp"
 #include "../BeachLine/headers/BeachLine.hpp"
 #include "../BeachLine/headers/ParabolaMath.hpp"
+#include "../DCEL/headers/PseudoEdge.hpp"
 #include "../DCEL/headers/Edge.hpp"
 
+// std::vector<PseudoEdge> pseudoEdges;
 
 //###############
 // Event class
@@ -251,17 +253,15 @@ void CircleEvent::handleEvent(){
 
     Arc *leftArc = leftEdge->getLeftArc();
     Arc *rightArc = rightEdge->getRightArc();
-    
 
-    //TODO REPLACE WITH DCEL
 
     // //for each edgenode create 2 edges twinned together
     for(EdgeNode * edge : EdgesToEnd){
         Edge * edge1 = new Edge();
         Edge * edge2 = new Edge();
 
-        edge1->setOrigin(new Vertex(edge->getX(), edge->getY()));
-        edge2->setOrigin(new Vertex(this->getX(), this->getIntersectionY()));
+        edge1->setOrigin(new Vertex(edge->getX(), edge->getY(), -1));
+        edge2->setOrigin(new Vertex(this->getX(), this->getIntersectionY(), -1));
 
         edge1->setNext(edge2);
         edge2->setNext(edge1);
@@ -271,7 +271,10 @@ void CircleEvent::handleEvent(){
         edge2->setTwin(edge1);
 
         finishedEdges.push_back(edge1);
+        pseudoEdges.push_back(PseudoEdge(new Vertex(edge->getX(), edge->getY(), -1), new Vertex(this->getX(), this->getIntersectionY(), -1)));
+
     }
+
     // Edge * edge1 = new Edge();
     // Edge * edge2 = new Edge();
     // Edge * edge3 = new Edge();
@@ -491,8 +494,8 @@ void SiteEvent::handleEvent(){
             Edge * edge1 = new Edge();
             Edge * edge2 = new Edge();
 
-            edge1->setOrigin(new Vertex(searchResult->getX(), searchResult->getY()));
-            edge2->setOrigin(new Vertex(leftEdge->getX(), leftEdge->getY()));
+            edge1->setOrigin(new Vertex(searchResult->getX(), searchResult->getY(), -1));
+            edge2->setOrigin(new Vertex(leftEdge->getX(), leftEdge->getY(), -1));
 
             edge1->setNext(edge2);
             edge2->setNext(edge1);
@@ -503,6 +506,7 @@ void SiteEvent::handleEvent(){
 
             //add edges to edge list
             finishedEdges.push_back(edge1);
+            pseudoEdges.push_back(PseudoEdge(new Vertex(searchResult->getX(), searchResult->getY(), -1), new Vertex(leftEdge->getX(), leftEdge->getY(), -1)));
 
             //remove circle events that use this edge
             if (searchResult != nullptr) {
@@ -541,12 +545,69 @@ void SiteEvent::handleEvent(){
 
 
         //insert the new edges
-        std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
-        beachLine->insert(leftEdge);
-        std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
-        beachLine->insert(rightEdge);
+        //left edge
+        //if y is infinity, handle it differently
+        bool insertLeft = false;
+        bool insertRight = false;
+        if(std::isinf(leftEdge->getY())){
+            //if angle is PI/2, do not add it 
+            if(ParabolaMath::areSameDouble(leftEdge->getAngle(), 3*PI / 2)){ //points down, set y to large number 
+                leftEdge->setY(10000);
+                std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+                beachLine->insert(leftEdge);
+                insertLeft = true;
+            }
+            else if(ParabolaMath::areSameDouble(leftEdge->getAngle(), PI / 2)){ //do not add the edge
+                //do nothing                
+            }
+            else{
+                //TODO FIX THIS CASE?
+                throw "fix this later if it happens";
+            }
+            
+        }
+        else{
+            std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+            beachLine->insert(leftEdge);
+            insertLeft = true;
+        }
 
+        //right edge
+        //if y is infinity, handle it differently
+        if(std::isinf(rightEdge->getY())){
+            //if angle is PI/2, do not add it 
+            if(ParabolaMath::areSameDouble(rightEdge->getAngle(), 3*PI / 2)){ //points down, set y to large number 
+                rightEdge->setY(10000);
+                std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+                beachLine->insert(rightEdge);
+                insertRight = true;
+            }
+            else if(ParabolaMath::areSameDouble(rightEdge->getAngle(), PI / 2)){ //do not add the edge
+                //do nothing                
+            }
+            else{
+                //TODO FIX THIS CASE?
+                throw "fix this later if it happens";
+            }
+            
+        }
+        else{
+            std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+            beachLine->insert(rightEdge);
+            insertRight = true;
+        }
 
-        beachLine->checkCircleEvent(leftEdge, rightEdge);
+        if(insertLeft && insertRight){
+            beachLine->checkCircleEvent(leftEdge, rightEdge);
+        }
+        else{
+            if(insertLeft){
+                beachLine->checkCircleEvent(leftEdge);
+            }
+            if(insertRight){
+                beachLine->checkCircleEvent(rightEdge);
+            }
+        }
+
     }
 }

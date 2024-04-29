@@ -1,12 +1,15 @@
 #ifndef DECL_EDGE_HPP
 #define DECL_EDGE_HPP
 
+#include <iostream>
+#include <string>
 #include "Vertex.hpp"
-// TODO #include "Face.hpp"
+#include "Face.hpp"
 
-
-// Forward declaration
+//forward declaration
+class Vertex;
 class Face;
+
 
 class Edge {
     private: 
@@ -15,6 +18,7 @@ class Edge {
         Edge* next;
         Edge* prev;
         Face* incidentFace;
+        bool isBorder;
         int id;
         static int idCounter;
     public:
@@ -24,13 +28,16 @@ class Edge {
         Edge* getNext();
         Edge* getPrev();
         Face* getIncidentFace();
+        double getAngle();
         int getId();
+        bool getIsBorder();
         //Setters
         void setOrigin(Vertex* origin);
         void setTwin(Edge* twin);
         void setNext(Edge* next);
         void setPrev(Edge* prev);
         void setIncidentFace(Face* incidentFace);
+        void setIsBorder(bool isBorder);
         //Constructors
         Edge();
         Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFace);
@@ -40,6 +47,9 @@ class Edge {
         ~Edge();
         //Methods
         void printEdge();
+        bool getIsClosed(); //returns true if the face of the edge is complete (i.e cycles back to the origin edge without hitting the twin of the origin edge)
+        //get edge name
+        std::string getEdgeName();
 };
 
 

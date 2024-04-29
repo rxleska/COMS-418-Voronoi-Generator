@@ -7,12 +7,16 @@
 #include "EventQueue/headers/Event.hpp"
 #include "DCEL/headers/Vertex.hpp"
 #include "DCEL/headers/Edge.hpp"
+#include "DCEL/headers/DCEL.hpp"
+#include "DCEL/headers/PseudoEdge.hpp"
 
 // Forward declarations
 class BeachLine;
 class EventQueue;
 class Vertex;
 class Edge;
+class DCEL;
+class PsuedoEdge;
 
 #define PI 3.14159265358979323846
 #define CRITICALDEBUG 1
@@ -28,6 +32,9 @@ class Edge;
 #include <cmath>
 #include <algorithm>
 
+
+
+extern DCEL *dcel;
 extern BeachLine *beachLine;
 extern std::vector<Vertex> vertices;
 extern std::vector<Edge *> finishedEdges; //will be replaced with extern DCEL
@@ -41,6 +48,10 @@ extern double widthScale;
 extern double heightScale;
 extern bool drawAllArcs;
 extern bool drawAllHalfEdges;
+extern bool hasEnded;
+extern bool displayDCEL;
+
+extern std::vector<PseudoEdge> pseudoEdges;
 
 
 #endif

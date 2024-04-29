@@ -486,7 +486,7 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
         a2 == a3 ||
         a3 == a1
     )){ // test 1st circle
-        if(circleIntersectsBeachLine(Vertex(a1->getX(), a1->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
+        if(circleIntersectsBeachLine(Vertex(a1->getX(), a1->getY(), -1), Vertex(a2->getX(), a2->getY(), -1), Vertex(a3->getX(), a3->getY(), -1), &evtx, &evty, &evtr)){
             event = new CircleEvent();
             event->setX(evtx);
             event->setY(evty- evtr);
@@ -517,7 +517,7 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
         a3 == a4 ||
         a4 == a2
     )){ // test 2nd circle
-        if(circleIntersectsBeachLine(Vertex(a4->getX(), a4->getY()), Vertex(a2->getX(), a2->getY()), Vertex(a3->getX(), a3->getY()), &evtx, &evty, &evtr)){
+        if(circleIntersectsBeachLine(Vertex(a4->getX(), a4->getY(), -1), Vertex(a2->getX(), a2->getY(), -1), Vertex(a3->getX(), a3->getY(), -1), &evtx, &evty, &evtr)){
             event = new CircleEvent();
             event->setX(evtx);
             event->setY(evty - evtr);
@@ -547,7 +547,7 @@ bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, do
     //find the slope of Apt to Bpt
     double mAB = (Apt.getY() - Bpt.getY()) / (Apt.getX() - Bpt.getX());
     //find the center point of the line between Apt and Bpt
-    Vertex midAB = Vertex((Apt.getX() + Bpt.getX()) / 2, (Apt.getY() + Bpt.getY()) / 2);
+    Vertex midAB = Vertex((Apt.getX() + Bpt.getX()) / 2, (Apt.getY() + Bpt.getY()) / 2, -1);
     double mPerpAB = -1.0 / mAB;
     //find the y intercept of a line perpendicular to AB that goes through midAB
     double bPerpAB = midAB.getY() - mPerpAB * midAB.getX();
@@ -555,7 +555,7 @@ bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, do
     //find the slope of Bpt to Cpt
     double mBC = (Bpt.getY() - Cpt.getY()) / (Bpt.getX() - Cpt.getX());
     //find the center point of the line between Bpt and Cpt
-    Vertex midBC = Vertex((Bpt.getX() + Cpt.getX()) / 2, (Bpt.getY() + Cpt.getY()) / 2);
+    Vertex midBC = Vertex((Bpt.getX() + Cpt.getX()) / 2, (Bpt.getY() + Cpt.getY()) / 2, -1);
     double mPerpBC = -1.0 / mBC;
     //find the y intercept of a line perpendicular to BC that goes through midBC
     double bPerpBC = midBC.getY() - mPerpBC * midBC.getX();
@@ -563,7 +563,7 @@ bool BeachLine::circleIntersectsBeachLine(Vertex Apt, Vertex Bpt, Vertex Cpt, do
     //find the slope of Cpt to Apt
     double mCA = (Cpt.getY() - Apt.getY()) / (Cpt.getX() - Apt.getX());
     //find the center point of the line between Cpt and Apt
-    Vertex midCA = Vertex((Cpt.getX() + Apt.getX()) / 2, (Cpt.getY() + Apt.getY()) / 2);
+    Vertex midCA = Vertex((Cpt.getX() + Apt.getX()) / 2, (Cpt.getY() + Apt.getY()) / 2, -1);
     double mPerpCA = -1.0 / mCA;
     //find the y intercept of a line perpendicular to CA that goes through midCA
     double bPerpCA = midCA.getY() - mPerpCA * midCA.getX();

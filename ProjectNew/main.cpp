@@ -6,6 +6,7 @@
 #include "lib/BeachLine/headers/Arc.hpp"
 #include "lib/DCEL/headers/Vertex.hpp"
 #include "lib/DCEL/headers/Edge.hpp"
+#include "lib/DCEL/headers/DCEL.hpp"
 #include <fstream>
 #include <GL/glut.h>
 #include "lib/OGL/headers/DrawObjects.hpp"
@@ -15,6 +16,7 @@
 // Global variables (extern in CONST.hpp)
 std::vector<Vertex> vertices;
 std::vector<Edge *> finishedEdges;
+DCEL *dcel;
 BeachLine *beachLine;
 EventQueue *eventQueue;
 double windowWidth;
@@ -69,7 +71,7 @@ void readSites(std::vector<Vertex> *vertices){
                 num += file.get();
             }
             if (isLeft) {
-                vertices->push_back(Vertex(stringToDouble(num), 0.0));
+                vertices->push_back(Vertex(stringToDouble(num), 0.0, -1));
                 isLeft = false;
             } else {
                 (*vertices)[vertices->size() - 1].setY(stringToDouble(num));
@@ -100,6 +102,8 @@ int main(int argc, char *argv[]) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
+
+    dcel = new DCEL(vertices.size());
 
     //print out the vertices
     if(DEBUG){
@@ -164,18 +168,18 @@ int main(int argc, char *argv[]) {
     }
 
 
-
-    //TODO HANDLE THE FIRST TWO SITES HAVING THE SAME Y VALUE
-    //TODO HANDLE THE FIRST TWO SITES HAVING THE SAME X VALUE
-
-
-
     //proc the first 2 sites 
     SiteEvent *site1 = (SiteEvent *) eventQueue->pop();
     Arc *arc1 = new Arc(site1->getX(), site1->getY());
     // if(DEBUG) std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
     SiteEvent *site2 = (SiteEvent *) eventQueue->pop();
     Arc *arc2 = new Arc(site2->getX(), site2->getY());
+
+    //print the first two sites locations
+    if(1){
+        std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
+        std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
+    }
 
 
     //if the first two sites have the same y value
@@ -202,9 +206,9 @@ int main(int argc, char *argv[]) {
         rightEdge->setRightArc(arc1);
         ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
 
-        // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+        std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
         beachLine->insert(leftEdge);
-        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+        std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
         beachLine->insert(rightEdge);
     }
 

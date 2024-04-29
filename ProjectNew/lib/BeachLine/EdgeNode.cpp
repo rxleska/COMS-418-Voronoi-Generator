@@ -10,6 +10,7 @@ EdgeNode::EdgeNode() {
     this->angle = 0;
     this->left = nullptr;
     this->right = nullptr;
+    this->parent = nullptr;
 }
 
 EdgeNode::EdgeNode(double x, double y, double angle) {
@@ -18,6 +19,7 @@ EdgeNode::EdgeNode(double x, double y, double angle) {
     this->angle = angle;
     this->left = nullptr;
     this->right = nullptr;
+    this->parent = nullptr;
 }
 
 EdgeNode::EdgeNode(double x, double y, double angle, EdgeNode *left, EdgeNode *right) {
@@ -26,6 +28,7 @@ EdgeNode::EdgeNode(double x, double y, double angle, EdgeNode *left, EdgeNode *r
     this->angle = angle;
     this->left = left;
     this->right = right;
+    this->parent = nullptr;
 }
 
 //destructor
@@ -40,6 +43,7 @@ EdgeNode::EdgeNode(const EdgeNode &e) {
     this->angle = e.angle;
     this->left = e.left;
     this->right = e.right;
+    this->parent = e.parent;
 }
 
 EdgeNode& EdgeNode::operator=(const EdgeNode &e) {
@@ -48,6 +52,7 @@ EdgeNode& EdgeNode::operator=(const EdgeNode &e) {
     this->angle = e.angle;
     this->left = e.left;
     this->right = e.right;
+    this->parent = e.parent;
     return *this;
 }
 

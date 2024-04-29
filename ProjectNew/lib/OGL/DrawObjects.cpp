@@ -9,6 +9,18 @@
 
 namespace DrawObjects
 {
+    static const GLfloat pastelColors[][3] = {
+        {0.9f, 0.7f, 0.7f},  // pastel red
+        {0.7f, 0.7f, 0.9f},  // pastel blue
+        {0.7f, 0.9f, 0.7f},  // pastel green
+        {0.9f, 0.9f, 0.7f},  // pastel yellow
+        {0.9f, 0.7f, 0.9f},  // pastel purple
+        {0.7f, 0.9f, 0.9f},  // pastel cyan
+        {1.0f, 0.8f, 0.8f},  // lighter pastel red
+        {0.8f, 0.8f, 1.0f},  // lighter pastel blue
+        {0.8f, 1.0f, 0.8f}   // lighter pastel green
+    };
+
     void drawSites()
     {
         glPointSize(5);
@@ -145,6 +157,48 @@ namespace DrawObjects
             glVertex2f(edge->getTwin()->getOrigin()->getX()*widthScale/windowWidth, edge->getTwin()->getOrigin()->getY()*heightScale/windowHeight);
             glEnd();
         }
+    }
+
+    void drawDCEL(){
+        int i = 0;
+
+        for(Face * face : dcel->getFaces()){
+            if(face->getOuterComponent() != nullptr){
+                //set the color
+                glColor3f(pastelColors[i%9][0], pastelColors[i%9][1], pastelColors[i%9][2]);
+                i++;
+                Edge * edge = face->getOuterComponent();
+                //draw the face as a polygon
+                glBegin(GL_POLYGON);
+                do{
+                    glVertex2f(edge->getOrigin()->getX()*widthScale/windowWidth, edge->getOrigin()->getY()*heightScale/windowHeight);
+                    edge = edge->getNext();
+                }while(edge != face->getOuterComponent());
+                glEnd();
+            }
+        }
+
+
+        //switch the color to while and draw the edges
+        glColor3f(1.0f, 1.0f, 1.0f);
+        //change the line width
+        glLineWidth(3.0);
+
+        for(Edge * edge : dcel->getEdges()){
+            glBegin(GL_LINES);
+            glVertex2f(edge->getOrigin()->getX()*widthScale/windowWidth, edge->getOrigin()->getY()*heightScale/windowHeight);
+            glVertex2f(edge->getTwin()->getOrigin()->getX()*widthScale/windowWidth, edge->getTwin()->getOrigin()->getY()*heightScale/windowHeight);
+            glEnd();
+        }
+
+        //draw each vertex as a red point
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glPointSize(5);
+        glBegin(GL_POINTS);
+        for(Vertex *v : dcel->getVertices()){
+            glVertex2f(v->getX()*widthScale/windowWidth, v->getY()*heightScale/windowHeight);
+        }
+        glEnd();
     }
 
 } // namespace DrawObjects

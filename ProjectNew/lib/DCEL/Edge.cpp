@@ -3,7 +3,7 @@
 
 
 //init static variable
-int Edge::idCounter = 0;
+int Edge::idCounter = 1;
 
 // constructors
 Edge::Edge() {
@@ -12,6 +12,7 @@ Edge::Edge() {
     this->next = nullptr;
     this->prev = nullptr;
     this->incidentFace = nullptr;
+    this->isBorder = false;
     this->id = idCounter++;
 }
 
@@ -21,6 +22,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFac
     this->next = next;
     this->prev = prev;
     this->incidentFace = incidentFace;
+    this->isBorder = false;
     this->id = idCounter++;
 }
 
@@ -30,6 +32,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev) {
     this->next = next;
     this->prev = prev;
     this->incidentFace = nullptr;
+    this->isBorder = false;
     this->id = idCounter++;
 }
 
@@ -58,6 +61,21 @@ int Edge::getId() {
     return this->id;
 }
 
+bool Edge::getIsBorder() {
+    return this->isBorder;
+}
+
+double Edge::getAngle() {
+    Vertex *v1 = this->origin;
+    Vertex *v2 = this->twin->getOrigin();
+    //calculate the angle between the two vectors
+    double angle = atan2(v2->getY() - v1->getY(), v2->getX() - v1->getX());
+    if(angle < 0){
+        angle += 2 * PI;
+    }  
+    return angle; 
+}
+
 // setters
 
 void Edge::setOrigin(Vertex* origin) {
@@ -80,6 +98,10 @@ void Edge::setIncidentFace(Face* incidentFace) {
     this->incidentFace = incidentFace;
 }
 
+void Edge::setIsBorder(bool isBorder) {
+    this->isBorder = isBorder;
+}
+
 // destructor
 Edge::~Edge() {
     //nothing to delete all pointers that are used elsewhere
@@ -92,10 +114,28 @@ Edge::~Edge() {
 
 // methods
 void Edge::printEdge() {
-    std::cout << "Edge id: " << this->id << std::endl;
-    std::cout << "Origin: " << this->origin->getX() << " " << this->origin->getY() << std::endl;
-    std::cout << "Twin: " << this->twin->getId() << std::endl;
-    std::cout << "Next: " << this->next->getId() << std::endl;
-    std::cout << "Prev: " << this->prev->getId() << std::endl;
-    // std::cout << "Incident Face: " << this->incidentFace->getId() << std::endl;
+    std::cout << this->getEdgeName() << " " << 
+    (this->origin == nullptr ? "nil" : this->origin->getVertexName()) << " " << 
+    (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) << " " << 
+    (this->next == nullptr ? "nil" : this->next->getEdgeName()) << " " << 
+    (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) << " " << 
+    (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName()) << std::endl;    
+}
+
+bool Edge::getIsClosed() {
+    Edge *edge = this;
+    do {
+        edge = edge->getNext();
+        if (edge == this) {
+            return true;
+        }
+        if(edge == this->getTwin()){
+            return false;
+        }
+    } while (edge != nullptr);
+    return false;
+}
+
+std::string Edge::getEdgeName() {
+    return "e" + std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
 }

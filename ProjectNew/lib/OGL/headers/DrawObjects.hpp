@@ -29,6 +29,8 @@ namespace DrawObjects
     void drawAllHalfEdgesRec(EdgeNode *edge);
 
     void drawFinishedEdges();
+
+    void drawDCEL();
     
 } // namespace DrawObjects
 
