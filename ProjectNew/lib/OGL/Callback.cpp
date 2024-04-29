@@ -302,6 +302,9 @@ namespace OGLcallbacks{
             //set color to white and draw the DCEL
             glColor3f(1.0, 1.0, 1.0);
             DrawObjects::drawDCEL();
+
+            glColor3f(0.0, 0.0, 1.0);
+            DrawObjects::drawSites();
         }
 
 
