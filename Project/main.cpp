@@ -53,10 +53,10 @@ int stringToInt(std::string str){
     return result * sign;
 }
 
-void readSites(std::vector<Vertex> *vertices){
+void readSites(std::vector<Vertex> *vertices, std::string src){
     // Read in the data from sites.txt
     //open file for reading
-    std::ifstream file("sites.txt");
+    std::ifstream file(src);
     if (!file.is_open()){
         std::cerr << "Error: could not open file" << std::endl;
         throw std::runtime_error("Error: could not open file");
@@ -90,18 +90,103 @@ void readSites(std::vector<Vertex> *vertices){
 }
 
 int main(int argc, char *argv[]) {
+    //handle input flags
+    /* no flags run animation with sites.txt as the src
+     * -na or -noAnimation skip the animation part 
+     * file input 
+    */ 
+   bool doAnimation = true;
+   int numFlags = 0;
+
+   if(argc > 3){
+        std::cerr << "Error: too many arguments" << std::endl;
+        std::cerr << "Usage: ./main [-na/-noAnimation] [srcFile]" << std::endl;
+        return 1;
+   }
+
+    //if there are 2 arguments
+    else if(argc == 3){
+        std::string flag = argv[1];
+        std::string flag2 = argv[2];
+        numFlags = 2;
+        if(flag == "-na" || flag == "-noAnimation"){
+            doAnimation = false;
+            try{
+                readSites(&vertices, argv[2]);
+            }
+            catch(std::runtime_error &e){
+                std::cerr << e.what() << std::endl;
+                return 1;
+            }
+        }else if(flag2 == "-na" || flag2 == "-noAnimation"){
+            doAnimation = false;
+            try{
+                readSites(&vertices, flag);
+            }
+            catch(std::runtime_error &e){
+                std::cerr << e.what() << std::endl;
+                return 1;
+            }
+        }
+        else{
+            std::cerr << "Error: invalid flag" << std::endl;
+            std::cerr << "Usage: ./main optional:[-na/-noAnimation] optional:[srcFile]" << std::endl;
+            return 1;
+        }
+    }
+
+    //if there is 1 argument
+    else if(argc == 2){
+        numFlags = 1;
+        std::string flag = argv[1];
+        if(flag == "-na" || flag == "-noAnimation"){
+            doAnimation = false;
+            try{
+                std::string srcFile = "sites.txt";
+                readSites(&vertices, srcFile);
+            }
+            catch(std::runtime_error &e){
+                std::cerr << e.what() << std::endl;
+                return 1;
+            }
+        }else{
+            try{
+                readSites(&vertices, flag);
+            }
+            catch(std::runtime_error &e){
+                std::cerr << e.what() << std::endl;
+                return 1;
+            }
+        }
+    }
+
+    //if there are no arguments
+    else if(argc == 1){
+        try{
+            std::string srcFile = "sites.txt";
+            readSites(&vertices, srcFile);
+        }
+        catch(std::runtime_error &e){
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+    }
+
+
+
     //init beach line 
     beachLine = new BeachLine();
 
 
     //read in the sites from the file
-    try{
-        readSites(&vertices);
-    }
-    catch(std::runtime_error &e){
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
+    // try{
+    //     std::string srcFile = "sites.txt";
+    //     readSites(&vertices, srcFile);
+    // }
+    // catch(std::runtime_error &e){
+    //     std::cerr << e.what() << std::endl;
+    //     return 1;
+    // }
 
     dcel = new DCEL(vertices.size());
 
@@ -219,17 +304,156 @@ int main(int argc, char *argv[]) {
     //set animation sweepline to the second site
     SweepAnimationHeight = site2->getY();
 
-    
-    glutInit(&argc, argv); // Initialize GLUT
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // Set the display mode
-    glutInitWindowSize(windowWidth, windowHeight); // Set the window size
-    glutCreateWindow("Fortune's Algorithm"); // Create the window
+    if(doAnimation){
+        int argc2 = 1;
+        glutInit(&argc2, argv + numFlags); // Initialize GLUT
+        glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // Set the display mode
+        glutInitWindowSize(windowWidth, windowHeight); // Set the window size
+        glutCreateWindow("Fortune's Algorithm"); // Create the window
 
-    OGLcallbacks::initOpenGL(); // Initialize OpenGL
-    glutDisplayFunc(OGLcallbacks::display); // Set the display callback
-    glutKeyboardFunc(OGLcallbacks::handleKeypress); // Set the keypress callback
-    glutTimerFunc(0, OGLcallbacks::update, 0); // Set the update callback
+        OGLcallbacks::initOpenGL(); // Initialize OpenGL
+        glutDisplayFunc(OGLcallbacks::display); // Set the display callback
+        glutKeyboardFunc(OGLcallbacks::handleKeypress); // Set the keypress callback
+        glutTimerFunc(0, OGLcallbacks::update, 0); // Set the update callback
 
-    glutMainLoop(); // Start the main loop
+        glutMainLoop(); // Start the main loop
+    }
+    else{
+        Event * topEvent;
+
+        //run the rest of the queue
+        while(!eventQueue->isEmpty()){
+            topEvent = eventQueue->peek();
+            eventQueue->pop();
+            topEvent->handleEvent();
+        }
+
+        //define the bounding box segments
+        double xs[] = {-windowWidth/widthScale, windowWidth/widthScale};
+        double ys[] = {-windowHeight/heightScale, windowHeight/heightScale};
+        std::vector<Vertex> bounds;
+
+        //empty the beachline, creating pseudo edges
+        while(beachLine->getRoot() != nullptr){
+            //convert the unbounded edge to a pseudo edge
+
+            //get the edge
+            EdgeNode * edge = beachLine->getRoot();
+            double sx = edge->getX();
+            double sy = edge->getY();
+            double theta = edge->getAngle();
+            Arc * arc = edge->getLeftArc();
+            Arc * arc2 = edge->getRightArc();
+
+            
+            double ix, iy;
+            //bottom segment
+            if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[1], ys[0], &ix, &iy)){
+                PseudoEdge pe = PseudoEdge(
+                    new Vertex(sx, sy, -1), 
+                    new Vertex(ix, iy, -1), 
+                    false, 
+                    new Vertex(arc->getX(), arc->getY(), -1),
+                    new Vertex(arc2->getX(), arc2->getY(), -1)
+                );
+                pseudoEdges.push_back(pe);
+                bounds.push_back(Vertex(ix, iy, -1));
+            }
+            //left segment
+            else if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[0], ys[1], &ix, &iy)){
+                PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                    false, 
+                    new Vertex(arc->getX(), arc->getY(), -1),
+                    new Vertex(arc2->getX(), arc2->getY(), -1)
+                );
+                pseudoEdges.push_back(pe);
+                bounds.push_back(Vertex(ix, iy, -1));
+            }
+            //top segment 
+            else if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[1], xs[1], ys[1], &ix, &iy)){
+                PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                    false, 
+                    new Vertex(arc->getX(), arc->getY(), -1),
+                    new Vertex(arc2->getX(), arc2->getY(), -1)
+                );
+                pseudoEdges.push_back(pe);
+                bounds.push_back(Vertex(ix, iy, -1));
+            }
+            //right segment
+            else if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[1], ys[1], xs[1], ys[0], &ix, &iy)){
+                PseudoEdge pe = PseudoEdge(new Vertex(sx, sy, -1), new Vertex(ix, iy, -1), 
+                    false, 
+                    new Vertex(arc->getX(), arc->getY(), -1),
+                    new Vertex(arc2->getX(), arc2->getY(), -1)
+                );
+                pseudoEdges.push_back(pe);
+                bounds.push_back(Vertex(ix, iy, -1));
+            }
+            else{
+                //ray starts outside of the bounding box
+                bounds.push_back(Vertex(sx, sy, -1)); 
+            }
+
+            beachLine->remove(beachLine->getRoot());
+        }
+        bounds.push_back(Vertex(xs[0], ys[0],-1));
+        bounds.push_back(Vertex(xs[0], ys[1],-1));
+        bounds.push_back(Vertex(xs[1], ys[1],-1));
+        bounds.push_back(Vertex(xs[1], ys[0],-1));
+            //combine edges that have the same angle and share the same origin vertex
+            // Sort pseudoEdges based on their start Vertex (x then y)
+            std::sort(pseudoEdges.begin(), pseudoEdges.end(), [](const PseudoEdge& edge1, const PseudoEdge& edge2) {
+                Vertex *start1 = edge1.start;
+                Vertex *start2 = edge2.start;
+                if (fabs(start1->getX() - start2->getX()) > EPSILON) {
+                    return start1->getX() < start2->getX();
+                }
+                return start1->getY() < start2->getY();
+            });
+
+            // Combine edges with the same start and angle
+            for (size_t i = 0; i < pseudoEdges.size() - 1; i++) {
+                Vertex *start1 = pseudoEdges[i].start;
+                Vertex *start2 = pseudoEdges[i + 1].start;
+                double angle1 = pseudoEdges[i].getAngle();
+                double angle2 = pseudoEdges[i + 1].getAngle();
+                if (start1->getX() - start2->getX() < EPSILON && start1->getY() - start2->getY() < EPSILON && fabs(angle1 - angle2) - PI < EPSILON && fabs(angle1 - angle2) - PI > -EPSILON) {
+                    Vertex* end1 = pseudoEdges[i].end;
+                    Vertex* end2 = pseudoEdges[i + 1].end;
+                    pseudoEdges[i] = PseudoEdge(end1, end2, false, pseudoEdges[i].arc1, pseudoEdges[i].arc2);
+                    pseudoEdges.erase(pseudoEdges.begin() + i + 1);
+                    i--;
+                }
+            }
+
+            //sort bounds by angle with respect to the center of the bounding box
+            std::sort(bounds.begin(), bounds.end(), [](Vertex v1, Vertex v2) {
+                double angle1 = atan2(v1.getY(), v1.getX());
+                double angle2 = atan2(v2.getY(), v2.getX());
+                if (angle1 < 0) {
+                    angle1 += 2 * PI;
+                }
+                if (angle2 < 0) {
+                    angle2 += 2 * PI;
+                }
+                return angle1 < angle2;
+            });
+
+            // Create the bounding box edges
+            for (size_t i = 0; i < bounds.size(); i++) {
+                Vertex *start = &bounds[i];
+                Vertex *end = &bounds[(i + 1) % bounds.size()];
+                PseudoEdge pe = PseudoEdge(start, end, true);
+                pseudoEdges.push_back(pe);
+            }
+
+        
+
+        //calculate the dcel 
+        dcel->constructDCEL(pseudoEdges);
+        dcelDelaunay = dcel->toDelaunayTriangulation();
+
+        OGLcallbacks::writeDCELStoFile();
+    }
     return 0;
 }

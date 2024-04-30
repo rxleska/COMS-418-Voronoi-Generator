@@ -146,16 +146,16 @@ std::string Vertex::vertexToString(bool isVoronoi){
     if(isVoronoi){
         if(isBoundary){
             // std::cout << "b" << id << " (" << x << ", " << y << ") " << (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName()) << std::endl;
-            vertexString += "b" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+            vertexString += "b" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName(isVoronoi));
         }
         else{
             // std::cout << "v" << id << " (" << x << ", " << y << ") " << (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName()) << std::endl;
-            vertexString += "v" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+            vertexString += "v" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName(isVoronoi));
         }
     }
     else{
         //use p for delaunay
-        vertexString += "p" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+        vertexString += "p" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName(isVoronoi));
     }
     return vertexString;
 }

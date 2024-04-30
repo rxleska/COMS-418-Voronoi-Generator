@@ -96,13 +96,13 @@ std::string Face::faceToString(bool isVoronoi){
     std::string faceString = "";
     if(isUnbounded){
         faceString += "uf" + std::to_string(id) + " " + 
-        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) + " " + 
-        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName());
+        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName(isVoronoi)) + " " + 
+        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName(isVoronoi));
     }
     else{
         faceString += (isVoronoi? "f" :"t") + std::to_string(id) + " " + 
-        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) + " " + 
-        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName());
+        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName(isVoronoi)) + " " + 
+        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName(isVoronoi));
     }
     return faceString;
 }
@@ -112,6 +112,13 @@ std::string Face::getFaceName(){
         return "uf" + std::to_string(id);
     }
     return "f" + std::to_string(id);
+}
+
+std::string Face::getFaceName(bool isVoronoi){
+    if(isUnbounded){
+        return "uf" + std::to_string(id);
+    }
+    return (isVoronoi? "f" :"t") + std::to_string(id);
 }
 
 //Methods

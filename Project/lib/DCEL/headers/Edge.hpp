@@ -59,6 +59,7 @@ class Edge {
         bool getIsClosed(); //returns true if the face of the edge is complete (i.e cycles back to the origin edge without hitting the twin of the origin edge)
         //get edge name
         std::string getEdgeName();
+        std::string getEdgeName(bool isVoronoi);
 };
 
 

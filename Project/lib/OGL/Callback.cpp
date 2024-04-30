@@ -22,7 +22,12 @@ bool displayDCEL;
 bool displayDelaunay;
 // BeachLine *beachLine;
 
-bool rayIntersectsSegment(double x, double y, double theta, double x1, double y1, double x2, double y2, double *ix, double *iy){
+
+
+
+// bool isPaused{ true }; // Whether the simulation is paused
+namespace OGLcallbacks{
+    bool rayIntersectsSegment(double x, double y, double theta, double x1, double y1, double x2, double y2, double *ix, double *iy){
     // Calculate the direction of the line segment
     double dx = x2 - x1;
     double dy = y2 - y1;
@@ -56,8 +61,6 @@ bool rayIntersectsSegment(double x, double y, double theta, double x1, double y1
 }
 
 
-// bool isPaused{ true }; // Whether the simulation is paused
-namespace OGLcallbacks{
     void initOpenGL() {
         glClearColor(0.0, 0.0, 0.0, 1.0); // Set clear color to black
         isPaused = true;
@@ -78,16 +81,18 @@ namespace OGLcallbacks{
     void handleKeypress(unsigned char key, int x, int y) {
         switch (key) {
             case 'p': // Pause or unpause the simulation
+            case 'P':
                 isPaused = !isPaused;
                 break;
-            case 'w':
-                if(isPaused){
-                    SweepAnimationHeight += 0.1;
-                    // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
-                    glutPostRedisplay(); // Redraw the scene immediately
-                }
-                break;
+            // case 'w':
+            //     if(isPaused){
+            //         SweepAnimationHeight += 0.1;
+            //         // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
+            //         glutPostRedisplay(); // Redraw the scene immediately
+            //     }
+            //     break;
             case 's': // Step through the simulation one frame at a time
+            case 'S':
                 if (isPaused) {
                     SweepAnimationHeight -= 0.1;
                     // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
@@ -95,12 +100,15 @@ namespace OGLcallbacks{
                 }
                 break;
             case 'a': // Draw all arcs
+            case 'A':
                 drawAllArcs = !drawAllArcs;
                 break;
             case 'e': // Draw all half edges
+            case 'E':
                 drawAllHalfEdges = !drawAllHalfEdges;
                 break;
             case 'l':
+            case 'L':
                 // beachLine->setSweepLine(beachLine->getSweepLine() - 0.001);
                 std::cout << std::endl;
                 std::cout << std::endl;
@@ -110,27 +118,41 @@ namespace OGLcallbacks{
                 // beachLine->setSweepLine(beachLine->getSweepLine() + 0.001);
                 break;
             case 'q':
+            case 'Q':
                 eventQueue->printQueue();
                 break;
             case 'f':
+            case 'F':
                 isPaused = false;
                 SweepAnimationHeight = -1.25 * windowHeight/heightScale;
                 // beachLine->printTree(beachLine->getRoot(), SweepAnimationHeight);
                 glutPostRedisplay(); // Redraw the scene immediately
                 break;
             case 'd':
-                dcel->printDCEL();
+            case 'D':
+                if(hasEnded){
+                    dcel->printDCEL();
+                }
                 break;
             case 'x':
-                dcelDelaunay->printDCEL();
+            case 'X':
+                if(hasEnded){
+                    dcelDelaunay->printDCEL();
+                }
                 break;
             case 'v':
-                displayDCEL = !displayDCEL;
-                displayDelaunay = false;
+            case 'V':
+                if(hasEnded){
+                    displayDCEL = !displayDCEL;
+                    displayDelaunay = false;
+                }
                 break;
             case 'c':
-                displayDelaunay = !displayDelaunay;
-                displayDCEL = false;
+            case 'C':
+                if(hasEnded){
+                    displayDelaunay = !displayDelaunay;
+                    displayDCEL = false;
+                }
                 break;
             default:
                 break;
@@ -145,9 +167,6 @@ namespace OGLcallbacks{
             if(topEvent != nullptr && SweepAnimationHeight < topEvent->getY()){
                 eventQueue->pop();
                 topEvent->handleEvent();
-            }
-            else if(topEvent == nullptr){
-                isPaused = true;
             }
         }
 
@@ -293,6 +312,7 @@ namespace OGLcallbacks{
             writeDCELStoFile();
 
             hasEnded = true;
+            displayDCEL = true;
         }
 
 
@@ -312,13 +332,15 @@ namespace OGLcallbacks{
         }
 
         //switch color to orange 
-        glColor3f(1.0, 0.5, 0.0);
+        // glColor3f(1.0, 0.5, 0.0);
         // DrawObjects::drawVerticalLine(0);
         // DrawObjects::drawHorizontalLine(0.333333);
 
         //switch color to green and draw the beachline
-        glColor3f(0.0, 1.0, 0.0);
-        DrawObjects::drawBeachLine();
+        if(!hasEnded){
+            glColor3f(0.0, 1.0, 0.0);
+            DrawObjects::drawBeachLine();
+        }
 
         if(drawAllArcs){
             //switch color to yellow and draw all the arcs
@@ -332,7 +354,7 @@ namespace OGLcallbacks{
             DrawObjects::drawAllHalfEdges();
         }
 
-        if(!displayDCEL && !displayDelaunay){
+        if(!hasEnded){
             //set color to blue and draw finished edges
             glColor3f(0.0, 0.0, 1.0);
             DrawObjects::drawFinishedEdges();
@@ -369,6 +391,8 @@ namespace OGLcallbacks{
         voronoiFile << "****** Delaunay triangulation ******" << std::endl;
         voronoiFile << delaunay;
         voronoiFile.close();
+
+        std::cout << "DCELs written to voronoi.txt" << std::endl;
     }
 }
 

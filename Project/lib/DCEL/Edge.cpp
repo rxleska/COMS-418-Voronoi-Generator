@@ -160,7 +160,7 @@ void Edge::setSite(Vertex * site, Vertex * site2) {
         this->site = site;
     } else {
         //if the sites are colinear choose the one with the smallest y value
-        throw "Error: sites are colinear";
+        this->site = site->getY() < site2->getY() ? site : site2;
     }
 
 }
@@ -190,18 +190,18 @@ std::string Edge::edgeToString(bool isVoronoi) {
     std::string edgeString = "";
     if(isVoronoi){
         edgeString += "e" + this->getEdgeName() + " " + 
-        (this->origin == nullptr ? "nil" : this->origin->getVertexName()) + " " + 
-        (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) + " " + 
-        (this->next == nullptr ? "nil" : this->next->getEdgeName()) + " " + 
-        (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) + " " + 
+        (this->origin == nullptr ? "nil" : this->origin->getVertexName(isVoronoi)) + " " + 
+        (this->twin == nullptr ? "nil" : this->twin->getEdgeName(isVoronoi)) + " " + 
+        (this->next == nullptr ? "nil" : this->next->getEdgeName(isVoronoi)) + " " + 
+        (this->prev == nullptr ? "nil" : this->prev->getEdgeName(isVoronoi)) + " " + 
         (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
     }
     else{
         edgeString += "d" + this->getEdgeName() + " " + 
-        (this->origin == nullptr ? "nil" : this->origin->getVertexName(false)) + " " + 
-        (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) + " " + 
-        (this->next == nullptr ? "nil" : this->next->getEdgeName()) + " " + 
-        (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) + " " + 
+        (this->origin == nullptr ? "nil" : this->origin->getVertexName(isVoronoi)) + " " + 
+        (this->twin == nullptr ? "nil" : this->twin->getEdgeName(isVoronoi)) + " " + 
+        (this->next == nullptr ? "nil" : this->next->getEdgeName(isVoronoi)) + " " + 
+        (this->prev == nullptr ? "nil" : this->prev->getEdgeName(isVoronoi)) + " " + 
         (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
     }
     return edgeString;
@@ -223,4 +223,11 @@ bool Edge::getIsClosed() {
 
 std::string Edge::getEdgeName() {
     return std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
+}
+
+std::string Edge::getEdgeName(bool isVoronoi) {
+    if(isVoronoi){
+        return "e" + std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
+    }
+    return "d" + std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
 }

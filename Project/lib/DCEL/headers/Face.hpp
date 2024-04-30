@@ -45,6 +45,8 @@ class Face{
         void printFace();
         std::string faceToString(bool isVoronoi);
         std::string getFaceName();
+        std::string getFaceName(bool isVoronoi);
+        
 
         //Methods
         std::vector<Vertex> getVertices();

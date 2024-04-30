@@ -530,13 +530,13 @@ void DCEL::printDCEL() {
         std::cout << vertex->vertexToString(isVoronoi) << std::endl;
     }
     std::cout << std::endl;
+    for (Face* face : this->faces) {
+        std::cout << face->faceToString(isVoronoi) << std::endl;
+    }
+    std::cout << std::endl;
     // std::cout << "edge og twin next prev fc" << std::endl;
     for (Edge* edge : this->edges) {
         std::cout << edge->edgeToString(isVoronoi) << std::endl;
-    }
-    std::cout << std::endl;
-    for (Face* face : this->faces) {
-        std::cout << face->faceToString(isVoronoi) << std::endl;
     }
 }
 
@@ -546,12 +546,12 @@ std::string DCEL::dcelToString(){
         dcelString += vertex->vertexToString(isVoronoi) + "\n";
     }
     dcelString += "\n";
-    for(Edge * edge : this->edges){
-        dcelString += edge->edgeToString(isVoronoi) + "\n";
-    }
-    dcelString += "\n";
     for(Face * face : this->faces){
         dcelString += face->faceToString(isVoronoi) + "\n";
+    }
+    dcelString += "\n";
+    for(Edge * edge : this->edges){
+        dcelString += edge->edgeToString(isVoronoi) + "\n";
     }
     return dcelString;
 }
@@ -602,6 +602,13 @@ DCEL * DCEL::toDelaunayTriangulation(){
                     delaunay->addEdge(newEdgeTwin);
                     destination->addOutwardsEdge(newEdgeTwin);
                     destination->addInwardsEdge(newEdge);
+
+                    if(origin->getIncidentEdge() == nullptr){
+                        origin->setIncidentEdge(newEdge);
+                    }
+                    if(destination->getIncidentEdge() == nullptr){
+                        destination->setIncidentEdge(newEdgeTwin);
+                    }
                 }
                 else{
                     delete newEdge;
@@ -616,41 +623,6 @@ DCEL * DCEL::toDelaunayTriangulation(){
 
     //find the faces of the DCEL
     delaunay->findFaces();
-
-    //fix the outer face (convert from outer component to inner component)
-    //find the 2 top most vertices
-    Vertex * top1 = nullptr;
-    Vertex * top2 = nullptr;
-    for(Vertex * vertex : delaunay->getVertices()){
-        if(top1 == nullptr || vertex->getY() > top1->getY()){
-            top2 = top1;
-            top1 = vertex;
-        }
-        else if(top2 == nullptr || vertex->getY() > top2->getY()){
-            top2 = vertex;
-        }
-    }
-
-    //sort them from right to left
-    if(top1->getX() < top2->getX()){
-        Vertex * temp = top1;
-        top1 = top2;
-        top2 = temp;
-    }
-
-    //find the outwards edge of the top1 vertex that connects to the top2 vertex
-    Edge * top1Edge = nullptr;
-    for(Edge * edge : top1->getOutwardsEdges()){
-        if(edge->getTwin()->getOrigin() == top2){
-            top1Edge = edge;
-            break;
-        }
-    }
-
-    //get the face of the top1 edge
-    Face * outerFace = top1Edge->getIncidentFace();
-    outerFace->setInnerComponent(top1Edge);
-    outerFace->setOuterComponent(nullptr);
 
     return delaunay;
 }
@@ -679,6 +651,9 @@ void DCEL::fixEdges(){
 
 //finds the faces of the DCEL
 void DCEL::findFaces(){
+    int MostEdges = 0;
+    Face * MostEdgesFace = nullptr;
+    Edge * MostEdgesEdge = nullptr;
     int i = 1;
     for (Edge *edge : this->edges) {
         if (edge->getIncidentFace() == nullptr) {
@@ -690,6 +665,7 @@ void DCEL::findFaces(){
                 face->setSite(edge->getSite());
                 siteAssigned = true;
             }
+            int countOfEdges = 1;
             edge->setIncidentFace(face);
             Edge *e = edge->getNext();
             bool isAllUnbounded = true;
@@ -705,7 +681,7 @@ void DCEL::findFaces(){
                     face->setSite(edge->getSite());
                     siteAssigned = true;
                 }
-
+                countOfEdges++;
                 e = e->getNext();
             }
             //if isAllUnbounded is true, set face to use inner component
@@ -713,8 +689,20 @@ void DCEL::findFaces(){
                 face->setInnerComponent(edge);
                 face->setOuterComponent(nullptr);
             }
-
+            if((countOfEdges > 3 && !(this->getIsVoronoi()))){
+                if(countOfEdges > MostEdges){
+                    MostEdges = countOfEdges;
+                    MostEdgesFace = face;
+                    MostEdgesEdge = edge;
+                }
+            }
             this->addFace(face);
         }
+    }
+
+    if(MostEdgesFace != nullptr){
+        MostEdgesFace->setIsUnbounded(true);
+        MostEdgesFace->setInnerComponent(MostEdgesEdge);
+        MostEdgesFace->setOuterComponent(nullptr);
     }
 }

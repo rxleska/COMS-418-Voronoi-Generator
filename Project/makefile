@@ -66,7 +66,7 @@ bin/Event.o: lib/EventQueue/Event.cpp lib/EventQueue/headers/Event.hpp lib/Beach
 
 
 clean:
-	rm -f bin/*.o run valgrind_output.log
+	rm -f bin/*.o run valgrind_output.log voronoi.txt
 
 rebuild: clean all
 
