@@ -44,6 +44,9 @@ The Following controls run the OpenGL animation:
     - q/Q: print out the current Event Queue.
     - l/L: print out the current Beach Line.
 
+    - [/{ : increase the speed of the animation.
+    - ]/} : decrease the speed of the animation.
+
 The following controls are available after the animation is finished:
 
     - d/D: print out the current Voronoi Diagram as a DCEL.

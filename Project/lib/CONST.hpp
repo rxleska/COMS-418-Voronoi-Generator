@@ -50,6 +50,7 @@ extern double heightScale;
 extern bool drawAllArcs;
 extern bool drawAllHalfEdges;
 extern bool hasEnded;
+extern double ASLspeed;
 
 extern std::vector<PseudoEdge> pseudoEdges;
 

@@ -232,6 +232,12 @@ int main(int argc, char *argv[]) {
     //add 5% to each side
     double dx = maxX - minX;
     double dy = maxY - minY;
+    if(ParabolaMath::areSameDouble(0.0, dx)){
+        dx = dy;
+    }
+    if(ParabolaMath::areSameDouble(0.0, dy)){
+        dy = dx;
+    }
     minX -= dx * boundingScale;
     maxX += dx * boundingScale;
     minY -= dy * boundingScale;

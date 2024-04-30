@@ -20,6 +20,7 @@ bool hasEnded;
 bool drawAllHalfEdges;
 bool displayDCEL;
 bool displayDelaunay;
+double ASLspeed;
 // BeachLine *beachLine;
 
 
@@ -68,11 +69,12 @@ namespace OGLcallbacks{
         drawAllHalfEdges = true;
         hasEnded = false;
         displayDCEL = false;
+        ASLspeed = 0.15;
     }
 
     void update(int value) {
         if (!isPaused) {
-            SweepAnimationHeight -= 0.15;
+            SweepAnimationHeight -= ASLspeed;
             glutPostRedisplay(); // Redraw the window
         }
         glutTimerFunc(16, update, 0); // Schedule next update
@@ -84,6 +86,14 @@ namespace OGLcallbacks{
             case 'p': // Pause or unpause the simulation
             case 'P':
                 isPaused = !isPaused;
+                break;
+            case '{':
+            case '[':
+                ASLspeed /= 1.5;
+                break;
+            case '}':
+            case ']':
+                ASLspeed *= 1.5;
                 break;
             // case 'w':
             //     if(isPaused){
@@ -167,6 +177,18 @@ namespace OGLcallbacks{
             default:
                 break;
         }
+
+        if(displayDCEL){
+            glutSetWindowTitle("Voronoi Diagram");
+        }
+        else if(displayDelaunay){
+            glutSetWindowTitle("Delaunay Triangulation");
+        }
+        else if(!displayDCEL && !displayDelaunay){
+            glutSetWindowTitle("Fortune's Algorithm");
+        }
+
+
         glutPostRedisplay(); // Redraw the scene immediately
     }
 
@@ -323,6 +345,7 @@ namespace OGLcallbacks{
 
             hasEnded = true;
             displayDCEL = true;
+            glutSetWindowTitle("Voronoi Diagram");
         }
 
 

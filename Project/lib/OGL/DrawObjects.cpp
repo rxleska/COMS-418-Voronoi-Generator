@@ -182,14 +182,14 @@ namespace DrawObjects
                 //switch color to black and draw the site 
                 if(face->getSite() != nullptr){
                     glColor3f(0.0f, 0.0f, 0.0f);
-                    glPointSize(10);
+                    glPointSize(5);
                     glBegin(GL_POINTS);
                     glVertex2f(face->getSite()->getX()*widthScale/windowWidth, face->getSite()->getY()*heightScale/windowHeight);
                     glEnd();
 
                     //draw the site using the face color as the fill
                     glColor3f(pastelColors[i%9][0], pastelColors[i%9][1], pastelColors[i%9][2]);
-                    glPointSize(5);
+                    glPointSize(3);
                     glBegin(GL_POINTS);
                     glVertex2f(face->getSite()->getX()*widthScale/windowWidth, face->getSite()->getY()*heightScale/windowHeight);
                     glEnd();
