@@ -79,6 +79,7 @@ namespace OGLcallbacks{
     }
 
     void handleKeypress(unsigned char key, int x, int y) {
+        double saveBeachLine;
         switch (key) {
             case 'p': // Pause or unpause the simulation
             case 'P':
@@ -109,13 +110,14 @@ namespace OGLcallbacks{
                 break;
             case 'l':
             case 'L':
-                // beachLine->setSweepLine(beachLine->getSweepLine() - 0.001);
+                saveBeachLine = beachLine->getSweepLine();
+                beachLine->setSweepLine(SweepAnimationHeight);
                 std::cout << std::endl;
                 std::cout << std::endl;
                 std::cout << "Printing Beach Line" << std::endl;
                 std::cout << "y: " << beachLine->getSweepLine() << std::endl;
                 beachLine->printEdgesInOrder(beachLine->getRoot());
-                // beachLine->setSweepLine(beachLine->getSweepLine() + 0.001);
+                beachLine->setSweepLine(saveBeachLine);
                 break;
             case 'q':
             case 'Q':
@@ -152,6 +154,14 @@ namespace OGLcallbacks{
                 if(hasEnded){
                     displayDelaunay = !displayDelaunay;
                     displayDCEL = false;
+                }
+                break;
+            case 'n':
+            case 'N':
+                if(!hasEnded && eventQueue->peek() != nullptr){
+                    SweepAnimationHeight = eventQueue->peek()->getY() - 0.1;
+
+                    glutPostRedisplay(); // Redraw the scene immediately
                 }
                 break;
             default:

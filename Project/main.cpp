@@ -266,7 +266,6 @@ int main(int argc, char *argv[]) {
     //     std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
     // }
 
-
     //if the first two sites have the same y value
     if(site1->getY() == site2->getY()){
         //define the y value of the edge to be an arbirarly large number
@@ -293,8 +292,8 @@ int main(int argc, char *argv[]) {
 
         // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
         beachLine->insert(leftEdge);
-        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
         beachLine->insert(rightEdge);
+        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
     }
 
 

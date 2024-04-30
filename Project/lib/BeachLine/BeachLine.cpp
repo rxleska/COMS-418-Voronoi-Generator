@@ -210,7 +210,16 @@ void BeachLine::insert(EdgeNode *node){
     }
 
     node->setParent(parent);
-    if(node->getValue(this->sweepLine) < parent->getValue(this->sweepLine)){
+    if(ParabolaMath::areSameDouble(node->getValue(this->sweepLine), parent->getValue(this->sweepLine))){
+        //compare at a slightly lower value
+        if(node->getValue(this->sweepLine + 0.01) < parent->getValue(this->sweepLine + 0.01)){
+            parent->setLeft(node);
+        } 
+        else{
+            parent->setRight(node);
+        }
+    } 
+    else if(node->getValue(this->sweepLine) < parent->getValue(this->sweepLine)){
         parent->setLeft(node);
     } else {
         parent->setRight(node);

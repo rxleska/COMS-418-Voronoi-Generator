@@ -575,7 +575,12 @@ DCEL * DCEL::toDelaunayTriangulation(){
     //CONVERT EDGES (Vvertex to Vvertex) TO EDGES (site to site)
     for(Edge * edge : this->edges){
         if(!edge->getConverted()){
-            if(edge->getSite() != nullptr && edge->getTwin()->getSite() != nullptr){
+            if(edge->getIncidentFace()->getOuterComponent() == nullptr || edge->getTwin()->getIncidentFace()->getOuterComponent() == nullptr){
+                //edge should not be included mark as converted
+                edge->setConverted(true);
+                edge->getTwin()->setConverted(true);
+            }
+            else if(edge->getIncidentFace()->getSite() != nullptr && edge->getTwin()->getIncidentFace()->getSite() != nullptr){
                 //mark the edges as converted
                 edge->setConverted(true);
                 edge->getTwin()->setConverted(true);
@@ -584,8 +589,16 @@ DCEL * DCEL::toDelaunayTriangulation(){
                 //set twin pointers
                 newEdge->setTwin(newEdgeTwin);
                 newEdgeTwin->setTwin(newEdge);
-                Vertex * origin = delaunay->searchVertex(*edge->getSite());
-                Vertex * destination = delaunay->searchVertex(*edge->getTwin()->getSite());
+                //TODO SWTICH TO USING THE INCIDENT FACE OF THE EDGE instead of getSite (getSite will prematurely try to triangulate edge cases)
+                Vertex * origin = nullptr;
+                Vertex * destination = nullptr;
+                if(edge->getIncidentFace()->getInnerComponent() == nullptr){
+                     origin = delaunay->searchVertex(*edge->getIncidentFace()->getSite());
+
+                }
+                if(edge->getTwin()->getIncidentFace()->getInnerComponent() == nullptr){
+                    destination = delaunay->searchVertex(*edge->getTwin()->getIncidentFace()->getSite());
+                }
                 if(origin != nullptr && destination != nullptr){
                     newEdge->setOrigin(origin);
                     newEdgeTwin->setOrigin(destination);
@@ -622,7 +635,9 @@ DCEL * DCEL::toDelaunayTriangulation(){
     delaunay->fixEdges();
 
     //find the faces of the DCEL
+    //TODO FIX FACES WITH 4 or more faces
     delaunay->findFaces();
+
 
     return delaunay;
 }

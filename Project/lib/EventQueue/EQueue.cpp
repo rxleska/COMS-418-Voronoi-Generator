@@ -87,6 +87,12 @@ bool EventQueue::compare(Event *a, Event *b){
     if (ParabolaMath::isGreaterThanDouble(a->getY(), b->getY())) {
         return true;
     } else if (ParabolaMath::areSameDouble(a->getY(), b->getY())) {
+        // if y is teh same prioritize site events
+        if (a->getIsCircle() && !b->getIsCircle()) {
+            return true;
+        } else if (!a->getIsCircle() && b->getIsCircle()) {
+            return false;
+        }
         // If y is the same, use x value, smaller x is better
         return ParabolaMath::isLessThanDouble(a->getX(), b->getX());
     }
