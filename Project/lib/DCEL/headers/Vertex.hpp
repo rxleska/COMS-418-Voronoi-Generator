@@ -52,9 +52,11 @@ class Vertex {
 
         //print vertex
         void printVertex();
+        std::string vertexToString(bool isVoronoi);
 
         //get vertex name  
         std::string getVertexName();
+        std::string getVertexName(bool isVoronoi);
 };
 
 #endif // VERTEX_HPP

@@ -35,6 +35,7 @@ class PsuedoEdge;
 
 
 extern DCEL *dcel;
+extern DCEL *dcelDelaunay;
 extern BeachLine *beachLine;
 extern std::vector<Vertex> vertices;
 extern std::vector<Edge *> finishedEdges; //will be replaced with extern DCEL
@@ -49,7 +50,6 @@ extern double heightScale;
 extern bool drawAllArcs;
 extern bool drawAllHalfEdges;
 extern bool hasEnded;
-extern bool displayDCEL;
 
 extern std::vector<PseudoEdge> pseudoEdges;
 

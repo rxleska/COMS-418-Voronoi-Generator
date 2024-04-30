@@ -141,8 +141,38 @@ void Vertex::printVertex() {
     std::cout << "v" << id << " (" << x << ", " << y << ") " << (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName()) << std::endl;
 }
 
+std::string Vertex::vertexToString(bool isVoronoi){
+    std::string vertexString = "";
+    if(isVoronoi){
+        if(isBoundary){
+            // std::cout << "b" << id << " (" << x << ", " << y << ") " << (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName()) << std::endl;
+            vertexString += "b" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+        }
+        else{
+            // std::cout << "v" << id << " (" << x << ", " << y << ") " << (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName()) << std::endl;
+            vertexString += "v" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+        }
+    }
+    else{
+        //use p for delaunay
+        vertexString += "p" + std::to_string(id) + " (" + std::to_string(x) + ", " + std::to_string(y) + ") " + (incidentEdge == nullptr ? "nil": incidentEdge->getEdgeName());
+    }
+    return vertexString;
+}
+
 //get vertex name
 std::string Vertex::getVertexName() {
+    if(isBoundary) {
+        return "b" + std::to_string(id);
+    }
+
+    return "v" + std::to_string(id);
+}
+
+std::string Vertex::getVertexName(bool isVoronoi) {
+    if(isVoronoi) {
+        return "p" + std::to_string(id);
+    }
     if(isBoundary) {
         return "b" + std::to_string(id);
     }

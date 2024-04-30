@@ -66,7 +66,9 @@ bin/Event.o: lib/EventQueue/Event.cpp lib/EventQueue/headers/Event.hpp lib/Beach
 
 
 clean:
-	rm -f bin/*.o run
+	rm -f bin/*.o run valgrind_output.log
+
+rebuild: clean all
 
 progress:
 	find . -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "Makefile" \) -exec wc -l {} + | awk '{total += $1} END {print total}'

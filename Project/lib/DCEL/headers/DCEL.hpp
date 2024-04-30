@@ -26,6 +26,7 @@ class DCEL{
         int xSortedSize;
         std::vector<Edge*> edges;
         std::vector<Face*> faces;
+        bool isVoronoi;
     public:
         DCEL();
         DCEL(int n);
@@ -36,6 +37,7 @@ class DCEL{
         std::vector<Face*> getFaces();
         Vertex** getXSortedVertices();
         int getXSortedSize();
+        bool getIsVoronoi();
 
         //Setters //these setters are not used in the project
         void setVertices(std::vector<Vertex*> vertices);
@@ -43,6 +45,7 @@ class DCEL{
         void setFaces(std::vector<Face*> faces);
         void setXSortedVertices(Vertex** xSortedVertices);
         void setXSortedSize(int xSortedSize);
+        void setIsVoronoi(bool isVoronoi);
 
         //Methods
         bool compareVertices(Vertex v1, Vertex v2);
@@ -62,7 +65,13 @@ class DCEL{
         //search for a vertex in the DCEL
         Vertex* searchVertex(Vertex vertex);
 
+        //Create a copy of the current dcel and convert it to a Denauly Triangulation
+        DCEL* toDelaunayTriangulation();
+        void fixEdges();
+        void findFaces();
+
         void printDCEL();
+        std::string dcelToString();
 
 };
 

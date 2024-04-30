@@ -159,10 +159,13 @@ namespace DrawObjects
         }
     }
 
-    void drawDCEL(){
+    void drawDCEL(DCEL *thisDCEL){
+        if(thisDCEL == nullptr){
+            return;
+        }
         int i = 0;
 
-        for(Face * face : dcel->getFaces()){
+        for(Face * face : thisDCEL->getFaces()){
             if(face->getOuterComponent() != nullptr){
                 //set the color
                 glColor3f(pastelColors[i%9][0], pastelColors[i%9][1], pastelColors[i%9][2]);
@@ -202,7 +205,7 @@ namespace DrawObjects
         //change the line width
         glLineWidth(3.0);
 
-        for(Edge * edge : dcel->getEdges()){
+        for(Edge * edge : thisDCEL->getEdges()){
             glBegin(GL_LINES);
             glVertex2f(edge->getOrigin()->getX()*widthScale/windowWidth, edge->getOrigin()->getY()*heightScale/windowHeight);
             glVertex2f(edge->getTwin()->getOrigin()->getX()*widthScale/windowWidth, edge->getTwin()->getOrigin()->getY()*heightScale/windowHeight);
@@ -213,7 +216,7 @@ namespace DrawObjects
         glColor3f(1.0f, 0.0f, 0.0f);
         glPointSize(5);
         glBegin(GL_POINTS);
-        for(Vertex *v : dcel->getVertices()){
+        for(Vertex *v : thisDCEL->getVertices()){
             glVertex2f(v->getX()*widthScale/windowWidth, v->getY()*heightScale/windowHeight);
         }
         glEnd();

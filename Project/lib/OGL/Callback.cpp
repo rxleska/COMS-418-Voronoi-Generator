@@ -6,7 +6,12 @@
 #include "../BeachLine/headers/BeachLine.hpp"
 #include "../DCEL/headers/PseudoEdge.hpp"
 
+//include ostream
+#include <iostream>
+#include <fstream>
+
 std::vector<PseudoEdge> pseudoEdges;
+DCEL *dcelDelaunay;
 
 
 bool isPaused;
@@ -14,6 +19,7 @@ bool drawAllArcs;
 bool hasEnded;
 bool drawAllHalfEdges;
 bool displayDCEL;
+bool displayDelaunay;
 // BeachLine *beachLine;
 
 bool rayIntersectsSegment(double x, double y, double theta, double x1, double y1, double x2, double y2, double *ix, double *iy){
@@ -115,8 +121,16 @@ namespace OGLcallbacks{
             case 'd':
                 dcel->printDCEL();
                 break;
-            case 'c':
+            case 'x':
+                dcelDelaunay->printDCEL();
+                break;
+            case 'v':
                 displayDCEL = !displayDCEL;
+                displayDelaunay = false;
+                break;
+            case 'c':
+                displayDelaunay = !displayDelaunay;
+                displayDCEL = false;
                 break;
             default:
                 break;
@@ -274,6 +288,9 @@ namespace OGLcallbacks{
 
             //calculate the dcel 
             dcel->constructDCEL(pseudoEdges);
+            dcelDelaunay = dcel->toDelaunayTriangulation();
+
+            writeDCELStoFile();
 
             hasEnded = true;
         }
@@ -284,13 +301,15 @@ namespace OGLcallbacks{
 
         // Draw the scene here
         
-        //switch color to blue and draw the points
-        glColor3f(0.0, 0.0, 1.0);
-        DrawObjects::drawSites();
+        if(!displayDCEL && !displayDelaunay){
+            //switch color to blue and draw the points
+            glColor3f(0.0, 0.0, 1.0);
+            DrawObjects::drawSites();
 
-        //swithc color to red and draw the sweepline
-        glColor3f(1.0, 0.0, 0.0);
-        DrawObjects::drawSweepLine(SweepAnimationHeight);
+            //swithc color to red and draw the sweepline
+            glColor3f(1.0, 0.0, 0.0);
+            DrawObjects::drawSweepLine(SweepAnimationHeight);
+        }
 
         //switch color to orange 
         glColor3f(1.0, 0.5, 0.0);
@@ -313,22 +332,43 @@ namespace OGLcallbacks{
             DrawObjects::drawAllHalfEdges();
         }
 
-        
-        //set color to blue and draw finished edges
-        glColor3f(0.0, 0.0, 1.0);
-        DrawObjects::drawFinishedEdges();
+        if(!displayDCEL && !displayDelaunay){
+            //set color to blue and draw finished edges
+            glColor3f(0.0, 0.0, 1.0);
+            DrawObjects::drawFinishedEdges();
+        }
 
         if(displayDCEL){
             //set color to white and draw the DCEL
             glColor3f(1.0, 1.0, 1.0);
-            DrawObjects::drawDCEL();
+            DrawObjects::drawDCEL(dcel);
 
             // glColor3f(0.0, 0.0, 1.0);
             // DrawObjects::drawSites();
         }
+        else if(displayDelaunay){
+            //set color to white and draw the DCEL
+            glColor3f(1.0, 1.0, 1.0);
+            DrawObjects::drawDCEL(dcelDelaunay);
+        }
 
 
         glutSwapBuffers(); // Swap the front and back buffers
+    }
+
+    void writeDCELStoFile(){
+        std::string voronoi = dcel->dcelToString();
+        std::string delaunay = dcelDelaunay->dcelToString();
+
+        //write to voronoi.txt
+        std::ofstream voronoiFile;
+        voronoiFile.open("voronoi.txt");
+        voronoiFile << "****** Voronoi diagram ******" << std::endl;
+        voronoiFile << voronoi;
+        voronoiFile << std::endl;
+        voronoiFile << "****** Delaunay triangulation ******" << std::endl;
+        voronoiFile << delaunay;
+        voronoiFile.close();
     }
 }
 

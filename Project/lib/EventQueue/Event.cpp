@@ -242,8 +242,8 @@ void CircleEvent::handleEvent(){
     rightEdge = EdgesToEnd[0];
 
     //log choice
-    std::cout << "Left Edge: " << leftEdge->getX() << " " << leftEdge->getY() << " " << leftEdge->getAngle() << std::endl;
-    std::cout << "Right Edge: " << rightEdge->getX() << " " << rightEdge->getY() << " " << rightEdge->getAngle() << std::endl;
+    // std::cout << "Left Edge: " << leftEdge->getX() << " " << leftEdge->getY() << " " << leftEdge->getAngle() << std::endl;
+    // std::cout << "Right Edge: " << rightEdge->getX() << " " << rightEdge->getY() << " " << rightEdge->getAngle() << std::endl;
 
 
 
@@ -429,7 +429,7 @@ void CircleEvent::handleEvent(){
     // if(DEBUG) std::cout << "x: " << newEdge->getX() << " y: " << newEdge->getY() << " angle: " << newEdge->getAngle() << std::endl;
     
     //insert the new edge
-    std::cout << "EDGE INSERTED" << " X: " << newEdge->getX() << " Y: " << newEdge->getY() << " Angle: " << newEdge->getAngle() << std::endl;
+    // std::cout << "EDGE INSERTED" << " X: " << newEdge->getX() << " Y: " << newEdge->getY() << " Angle: " << newEdge->getAngle() << std::endl;
     beachLine->insert(newEdge);
 
     //check for more circle events 
@@ -565,7 +565,7 @@ void SiteEvent::handleEvent(){
             //if angle is PI/2, do not add it 
             if(ParabolaMath::areSameDouble(leftEdge->getAngle(), 3*PI / 2)){ //points down, set y to large number 
                 leftEdge->setY(10000);
-                std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+                // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
                 beachLine->insert(leftEdge);
                 insertLeft = true;
             }
@@ -580,7 +580,7 @@ void SiteEvent::handleEvent(){
             
         }
         else{
-            std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+            // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
             beachLine->insert(leftEdge);
             insertLeft = true;
         }
@@ -591,7 +591,7 @@ void SiteEvent::handleEvent(){
             //if angle is PI/2, do not add it 
             if(ParabolaMath::areSameDouble(rightEdge->getAngle(), 3*PI / 2)){ //points down, set y to large number 
                 rightEdge->setY(10000);
-                std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+                // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
                 beachLine->insert(rightEdge);
                 insertRight = true;
             }
@@ -606,7 +606,7 @@ void SiteEvent::handleEvent(){
             
         }
         else{
-            std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+            // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
             beachLine->insert(rightEdge);
             insertRight = true;
         }

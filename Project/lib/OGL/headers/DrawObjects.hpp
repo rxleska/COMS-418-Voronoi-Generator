@@ -30,7 +30,7 @@ namespace DrawObjects
 
     void drawFinishedEdges();
 
-    void drawDCEL();
+    void drawDCEL(DCEL * thisDCEL);
     
 } // namespace DrawObjects
 

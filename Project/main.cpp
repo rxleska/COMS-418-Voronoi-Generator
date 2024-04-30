@@ -176,10 +176,10 @@ int main(int argc, char *argv[]) {
     Arc *arc2 = new Arc(site2->getX(), site2->getY());
 
     //print the first two sites locations
-    if(1){
-        std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
-        std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
-    }
+    // if(1){
+    //     std::cout << "Site 1: (" << site1->getX() << ", " << site1->getY() << ")" << std::endl;
+    //     std::cout << "Site 2: (" << site2->getX() << ", " << site2->getY() << ")" << std::endl;
+    // }
 
 
     //if the first two sites have the same y value
@@ -206,14 +206,14 @@ int main(int argc, char *argv[]) {
         rightEdge->setRightArc(arc1);
         ParabolaMath::getParabolaEdges(*arc1, *arc2, beachLine->getSweepLine(), leftEdge, rightEdge);
 
-        std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
+        // std::cout << "EDGE INSERTED" << " X: " << leftEdge->getX() << " Y: " << leftEdge->getY() << " Angle: " << leftEdge->getAngle() << std::endl;
         beachLine->insert(leftEdge);
-        std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
+        // std::cout << "EDGE INSERTED" << " X: " << rightEdge->getX() << " Y: " << rightEdge->getY() << " Angle: " << rightEdge->getAngle() << std::endl;
         beachLine->insert(rightEdge);
     }
 
 
-    beachLine->printTree(beachLine->getRoot());
+    // beachLine->printTree(beachLine->getRoot());
 
 
     //set animation sweepline to the second site

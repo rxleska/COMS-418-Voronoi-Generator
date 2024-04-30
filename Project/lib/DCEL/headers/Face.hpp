@@ -35,6 +35,7 @@ class Face{
         void setSite(Vertex * site);
         //Constructors
         Face();
+        Face(int id);
         Face(Edge* outerComponent, Edge* innerComponent);
         Face(Edge* outerComponent, Edge* innerComponent, int id);
         //Destructor
@@ -42,6 +43,7 @@ class Face{
 
         //Methods
         void printFace();
+        std::string faceToString(bool isVoronoi);
         std::string getFaceName();
 
         //Methods

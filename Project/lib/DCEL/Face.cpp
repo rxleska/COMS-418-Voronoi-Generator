@@ -56,6 +56,14 @@ Face::Face(){
     this->site = nullptr;
 }
 
+Face::Face(int id){
+    this->id = id;
+    outerComponent = nullptr;
+    innerComponent = nullptr;
+    this->isUnbounded = false;
+    this->site = nullptr;
+}
+
 Face::Face(Edge* outerComponent, Edge* innerComponent){
     id = idCounter++;
     this->outerComponent = outerComponent;
@@ -82,6 +90,21 @@ Face::~Face(){
 void Face::printFace(){
     if(isUnbounded) std::cout << "uf" << id << " " << (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) << " " << (innerComponent == nullptr? "nil" : innerComponent->getEdgeName()) << std::endl;
     else std::cout << "f" << id << " " << (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) << " " << (innerComponent == nullptr? "nil" : innerComponent->getEdgeName()) << std::endl;
+}
+
+std::string Face::faceToString(bool isVoronoi){
+    std::string faceString = "";
+    if(isUnbounded){
+        faceString += "uf" + std::to_string(id) + " " + 
+        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) + " " + 
+        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName());
+    }
+    else{
+        faceString += (isVoronoi? "f" :"t") + std::to_string(id) + " " + 
+        (outerComponent == nullptr? "nil" : outerComponent->getEdgeName()) + " " + 
+        (innerComponent == nullptr? "nil" : innerComponent->getEdgeName());
+    }
+    return faceString;
 }
 
 std::string Face::getFaceName(){

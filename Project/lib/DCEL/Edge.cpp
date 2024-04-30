@@ -5,6 +5,18 @@
 //init static variable
 int Edge::idCounter = 1;
 
+Edge::Edge(int id) {
+    this->origin = nullptr;
+    this->twin = nullptr;
+    this->next = nullptr;
+    this->prev = nullptr;
+    this->incidentFace = nullptr;
+    this->isBorder = false;
+    this->id = id;
+    this->site = nullptr;
+    this->converted = false;
+}
+
 // constructors
 Edge::Edge() {
     this->origin = nullptr;
@@ -15,6 +27,7 @@ Edge::Edge() {
     this->isBorder = false;
     this->id = idCounter++;
     this->site = nullptr;
+    this->converted = false;
 }
 
 Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFace) {
@@ -26,6 +39,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev, Face* incidentFac
     this->isBorder = false;
     this->id = idCounter++;
     this->site = nullptr;
+    this->converted = false;
 }
 
 Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev) {
@@ -37,6 +51,7 @@ Edge::Edge(Vertex* origin, Edge* twin, Edge* next, Edge* prev) {
     this->isBorder = false;
     this->id = idCounter++;
     this->site = nullptr;
+    this->converted = false;
 }
 
 // getters
@@ -66,6 +81,10 @@ int Edge::getId() {
 
 bool Edge::getIsBorder() {
     return this->isBorder;
+}
+
+bool Edge::getConverted() {
+    return this->converted;
 }
 
 Vertex * Edge::getSite() {
@@ -107,6 +126,10 @@ void Edge::setIncidentFace(Face* incidentFace) {
 
 void Edge::setIsBorder(bool isBorder) {
     this->isBorder = isBorder;
+}
+
+void Edge::setConverted(bool converted) {
+    this->converted = converted;
 }
 
 void Edge::setSite(Vertex * site) {
@@ -154,13 +177,34 @@ Edge::~Edge() {
 
 // methods
 void Edge::printEdge() {
-    std::cout << this->getEdgeName() << " " << 
+    std::cout << "e" << this->getEdgeName() << " " << 
     (this->origin == nullptr ? "nil" : this->origin->getVertexName()) << " " << 
     (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) << " " << 
     (this->next == nullptr ? "nil" : this->next->getEdgeName()) << " " << 
     (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) << " " << 
     (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName()) << " " 
     << std::endl;    
+}
+
+std::string Edge::edgeToString(bool isVoronoi) {
+    std::string edgeString = "";
+    if(isVoronoi){
+        edgeString += "e" + this->getEdgeName() + " " + 
+        (this->origin == nullptr ? "nil" : this->origin->getVertexName()) + " " + 
+        (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) + " " + 
+        (this->next == nullptr ? "nil" : this->next->getEdgeName()) + " " + 
+        (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) + " " + 
+        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
+    }
+    else{
+        edgeString += "d" + this->getEdgeName() + " " + 
+        (this->origin == nullptr ? "nil" : this->origin->getVertexName(false)) + " " + 
+        (this->twin == nullptr ? "nil" : this->twin->getEdgeName()) + " " + 
+        (this->next == nullptr ? "nil" : this->next->getEdgeName()) + " " + 
+        (this->prev == nullptr ? "nil" : this->prev->getEdgeName()) + " " + 
+        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
+    }
+    return edgeString;
 }
 
 bool Edge::getIsClosed() {
@@ -178,5 +222,5 @@ bool Edge::getIsClosed() {
 }
 
 std::string Edge::getEdgeName() {
-    return "e" + std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
+    return std::to_string(this->getOrigin()->getId()) + "," +  std::to_string(this->getTwin()->getOrigin()->getId());
 }

@@ -181,11 +181,11 @@ void BeachLine::insert(EdgeNode *node){
         parent = current;
         if(ParabolaMath::areSameDouble(node->getValue(this->sweepLine),current->getValue(this->sweepLine))){
             if(node->getLeftArc() != nullptr && current->getRightArc() != nullptr && node->getLeftArc() == current->getRightArc()){
-                std::cout << "used right on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl;
+                // std::cout << "used right on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl;
                 current = current->getRight();
             }
             else if(node->getRightArc() != nullptr && current->getLeftArc() != nullptr && node->getRightArc() == current->getLeftArc()){
-                std::cout << "used left on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl; 
+                // std::cout << "used left on c:" << current->getX() << " : " << current->getY() <<" : " <<  current->getAngle() << std::endl; 
                 current = current->getLeft();
             }
             else{
@@ -502,14 +502,14 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
                 if(DEBUG) std::cout << "inserted circle event: " << evtx << " " << evty - evtr << std::endl;
             }
             else{
-                std::cout << "did not insert circle event: " << evtx << " " << evty - evtr << " " << evty << std::endl;
+                // std::cout << "did not insert circle event: " << evtx << " " << evty - evtr << " " << evty << std::endl;
                 delete event;
             }        
         }
-        else{
-            std::cout << "a1: " << a1->getX() << " " << a1->getY() << " a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << std::endl;
-            std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
-        }
+        // else{
+        //     std::cout << "a1: " << a1->getX() << " " << a1->getY() << " a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << std::endl;
+        //     std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
+        // }
     }
 
     if(nextRight != nullptr && !(
@@ -534,10 +534,10 @@ void BeachLine::checkCircleEvent(EdgeNode *centerEdge){
                 delete event;
             }
         }
-        else{
-            std::cout << "a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << " a4: " << a4->getX() << " " << a4->getY() << std::endl;
-            std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
-        }
+        // else{
+        //     std::cout << "a2: " << a2->getX() << " " << a2->getY() << " a3: " << a3->getX() << " " << a3->getY() << " a4: " << a4->getX() << " " << a4->getY() << std::endl;
+        //     std::cout << "did not insert circle event: " << evtx << " " << evtr << " " << evty << std::endl;
+        // }
     }
 }
 

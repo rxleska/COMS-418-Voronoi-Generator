@@ -10,6 +10,7 @@ DCEL::DCEL() {
     this->xSortedSize = 0;
     this->edges = std::vector<Edge*>();
     this->faces = std::vector<Face*>();
+    this->isVoronoi = true;
 }
 
 DCEL::DCEL(int n){
@@ -19,6 +20,7 @@ DCEL::DCEL(int n){
     this->xSortedSize = 0;
     this->edges = std::vector<Edge*>();
     this->faces = std::vector<Face*>();
+    this->isVoronoi = true;
 }
 
 DCEL::~DCEL() {
@@ -54,6 +56,10 @@ int DCEL::getXSortedSize() {
     return this->xSortedSize;
 }
 
+bool DCEL::getIsVoronoi() {
+    return this->isVoronoi;
+}
+
 //setters not used in the project
 void DCEL::setVertices(std::vector<Vertex*> vertices) {
     this->vertices = vertices;
@@ -73,6 +79,10 @@ void DCEL::setXSortedVertices(Vertex** xSortedVertices) {
 
 void DCEL::setXSortedSize(int xSortedSize) {
     this->xSortedSize = xSortedSize;
+}
+
+void DCEL::setIsVoronoi(bool isVoronoi) {
+    this->isVoronoi = isVoronoi;
 }
 
 
@@ -517,15 +527,194 @@ Vertex* DCEL::searchVertex(Vertex vertex) {
 void DCEL::printDCEL() {
     std::cout << "DCEL" << std::endl;
     for (Vertex* vertex : this->vertices) {
-        vertex->printVertex();
+        std::cout << vertex->vertexToString(isVoronoi) << std::endl;
     }
     std::cout << std::endl;
-    std::cout << "edge og twin next prev fc" << std::endl;
+    // std::cout << "edge og twin next prev fc" << std::endl;
     for (Edge* edge : this->edges) {
-        edge->printEdge();
+        std::cout << edge->edgeToString(isVoronoi) << std::endl;
     }
     std::cout << std::endl;
     for (Face* face : this->faces) {
-        face->printFace();
+        std::cout << face->faceToString(isVoronoi) << std::endl;
+    }
+}
+
+std::string DCEL::dcelToString(){
+    std::string dcelString = "";
+    for(Vertex * vertex : this->vertices){
+        dcelString += vertex->vertexToString(isVoronoi) + "\n";
+    }
+    dcelString += "\n";
+    for(Edge * edge : this->edges){
+        dcelString += edge->edgeToString(isVoronoi) + "\n";
+    }
+    dcelString += "\n";
+    for(Face * face : this->faces){
+        dcelString += face->faceToString(isVoronoi) + "\n";
+    }
+    return dcelString;
+}
+
+
+
+//converts DCEL of voronoi diagram to delaunay triangulation DCEL
+DCEL * DCEL::toDelaunayTriangulation(){
+    //create a new DCEL
+    DCEL * delaunay = new DCEL(this->faces.size());
+    delaunay->setIsVoronoi(false);
+    
+    //CONVERT FACES TO VERTICES
+    for(Face * face : this->faces){
+        if(face->getOuterComponent() != nullptr){
+            Vertex * vertex = new Vertex(face->getSite()->getX(), face->getSite()->getY(), face->getId());
+            delaunay->addVertex(vertex);
+        }
+    }
+
+    //CONVERT EDGES (Vvertex to Vvertex) TO EDGES (site to site)
+    for(Edge * edge : this->edges){
+        if(!edge->getConverted()){
+            if(edge->getSite() != nullptr && edge->getTwin()->getSite() != nullptr){
+                //mark the edges as converted
+                edge->setConverted(true);
+                edge->getTwin()->setConverted(true);
+                Edge * newEdge = new Edge(edge->getId());
+                Edge * newEdgeTwin = new Edge(edge->getTwin()->getId());
+                //set twin pointers
+                newEdge->setTwin(newEdgeTwin);
+                newEdgeTwin->setTwin(newEdge);
+                Vertex * origin = delaunay->searchVertex(*edge->getSite());
+                Vertex * destination = delaunay->searchVertex(*edge->getTwin()->getSite());
+                if(origin != nullptr && destination != nullptr){
+                    newEdge->setOrigin(origin);
+                    newEdgeTwin->setOrigin(destination);
+                    //set next and prev pointers (prematurely will be fixed later)
+                    newEdge->setNext(newEdgeTwin);
+                    newEdgeTwin->setPrev(newEdge);
+                    newEdgeTwin->setNext(newEdge);
+                    newEdge->setPrev(newEdgeTwin);
+
+                    //add the edges to the DCEL
+                    delaunay->addEdge(newEdge);
+                    origin->addOutwardsEdge(newEdge);
+                    origin->addInwardsEdge(newEdgeTwin);
+                    delaunay->addEdge(newEdgeTwin);
+                    destination->addOutwardsEdge(newEdgeTwin);
+                    destination->addInwardsEdge(newEdge);
+                }
+                else{
+                    delete newEdge;
+                    delete newEdgeTwin;
+                }
+            }
+        }
+    }
+
+    //fix the next and prev pointers of the edges
+    delaunay->fixEdges();
+
+    //find the faces of the DCEL
+    delaunay->findFaces();
+
+    //fix the outer face (convert from outer component to inner component)
+    //find the 2 top most vertices
+    Vertex * top1 = nullptr;
+    Vertex * top2 = nullptr;
+    for(Vertex * vertex : delaunay->getVertices()){
+        if(top1 == nullptr || vertex->getY() > top1->getY()){
+            top2 = top1;
+            top1 = vertex;
+        }
+        else if(top2 == nullptr || vertex->getY() > top2->getY()){
+            top2 = vertex;
+        }
+    }
+
+    //sort them from right to left
+    if(top1->getX() < top2->getX()){
+        Vertex * temp = top1;
+        top1 = top2;
+        top2 = temp;
+    }
+
+    //find the outwards edge of the top1 vertex that connects to the top2 vertex
+    Edge * top1Edge = nullptr;
+    for(Edge * edge : top1->getOutwardsEdges()){
+        if(edge->getTwin()->getOrigin() == top2){
+            top1Edge = edge;
+            break;
+        }
+    }
+
+    //get the face of the top1 edge
+    Face * outerFace = top1Edge->getIncidentFace();
+    outerFace->setInnerComponent(top1Edge);
+    outerFace->setOuterComponent(nullptr);
+
+    return delaunay;
+}
+
+
+//fixes the edges of the DCEL
+void DCEL::fixEdges(){
+    //for each vertex fix the next and prev pointers
+    for (Vertex *vertex : this->vertices) {
+        //set the next and prev pointers using the getOutwardsEdges and getInwardsEdges lists of the vertex
+        
+        //get and sort the outwards edges by angle
+        std::vector<Edge *> inwardEdges = vertex->getInwardsEdges();
+        //sort the outwards edges by angle
+        std::sort(inwardEdges.begin(), inwardEdges.end(), [](Edge *e1, Edge *e2) {
+            return e1->getAngle() < e2->getAngle();
+        });
+
+        //set the next and prev pointers in order of the sorted list
+        for (int i = 0; i < (int) inwardEdges.size(); i++) {
+            inwardEdges[i]->setNext(inwardEdges[(i + 1) % inwardEdges.size()]->getTwin());
+            inwardEdges[(i + 1) % inwardEdges.size()]->getTwin()->setPrev(inwardEdges[i]);
+        }
+    }
+}
+
+//finds the faces of the DCEL
+void DCEL::findFaces(){
+    int i = 1;
+    for (Edge *edge : this->edges) {
+        if (edge->getIncidentFace() == nullptr) {
+            Face *face = new Face(i);
+            i++;
+            face->setOuterComponent(edge);
+            bool siteAssigned = false;
+            if(edge->getSite() != nullptr){
+                face->setSite(edge->getSite());
+                siteAssigned = true;
+            }
+            edge->setIncidentFace(face);
+            Edge *e = edge->getNext();
+            bool isAllUnbounded = true;
+            while (e != edge) {
+                e->setIncidentFace(face);
+                if(e->getIsBorder()){
+                    face->setIsUnbounded(true);
+                }
+                else{
+                    isAllUnbounded = false;
+                }
+                if(!siteAssigned && edge->getSite() != nullptr){
+                    face->setSite(edge->getSite());
+                    siteAssigned = true;
+                }
+
+                e = e->getNext();
+            }
+            //if isAllUnbounded is true, set face to use inner component
+            if(isAllUnbounded){
+                face->setInnerComponent(edge);
+                face->setOuterComponent(nullptr);
+            }
+
+            this->addFace(face);
+        }
     }
 }
