@@ -233,11 +233,19 @@ int main(int argc, char *argv[]) {
     double dx = maxX - minX;
     double dy = maxY - minY;
     if(ParabolaMath::areSameDouble(0.0, dx)){
-        dx = dy;
+        dx = dy * 2;
     }
     if(ParabolaMath::areSameDouble(0.0, dy)){
+        dy = dx * 2;
+    }
+
+    if(dx * 3 < dy){
+        dx = dy;
+    }
+    else if(dy * 3 < dx){
         dy = dx;
     }
+
     minX -= dx * boundingScale;
     maxX += dx * boundingScale;
     minY -= dy * boundingScale;
@@ -280,7 +288,7 @@ int main(int argc, char *argv[]) {
         onlyEdge->setLeftArc(arc1);
         onlyEdge->setRightArc(arc2);
         onlyEdge->setX((arc1->getX() + arc2->getX()) / 2.0); // middle of the 2 arcs
-        onlyEdge->setY(10000); //arbitrarily large number
+        onlyEdge->setY(fabs(10000)); //arbitrarily large number
         onlyEdge->setAngle(3*PI/2.0);
 
         beachLine->insert(onlyEdge);        
@@ -352,8 +360,21 @@ int main(int argc, char *argv[]) {
 
             
             double ix, iy;
+            double ix2, iy2;
+            //intersects both top and bottom segments
+            if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[1], ys[0], &ix, &iy) && OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[1], xs[1], ys[1], &ix2, &iy2)){
+                PseudoEdge pe = PseudoEdge(
+                    new Vertex(ix2, iy2, -1), 
+                    new Vertex(ix, iy, -1), 
+                    false, 
+                    new Vertex(arc->getX(), arc->getY(), -1),
+                    new Vertex(arc2->getX(), arc2->getY(), -1)
+                );
+                pseudoEdges.push_back(pe);
+                bounds.push_back(Vertex(ix, iy, -1));
+            }
             //bottom segment
-            if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[1], ys[0], &ix, &iy)){
+            else if(OGLcallbacks::rayIntersectsSegment(sx, sy, theta, xs[0], ys[0], xs[1], ys[0], &ix, &iy)){
                 PseudoEdge pe = PseudoEdge(
                     new Vertex(sx, sy, -1), 
                     new Vertex(ix, iy, -1), 
@@ -396,7 +417,9 @@ int main(int argc, char *argv[]) {
             }
             else{
                 //ray starts outside of the bounding box
-                bounds.push_back(Vertex(sx, sy, -1)); 
+                if(fabs(sy - ys[1]) > EPSILON){
+                    bounds.push_back(Vertex(sx, sy, -1)); 
+                }
             }
 
             beachLine->remove(beachLine->getRoot());
@@ -429,6 +452,13 @@ int main(int argc, char *argv[]) {
                     pseudoEdges.erase(pseudoEdges.begin() + i + 1);
                     i--;
                 }
+                //if the edge is on the top edge of the bounding box, add the end point to the bounds
+                if(fabs(start1->getY()- ys[1]) < EPSILON){
+                    bounds.push_back(*start1);
+                }
+                if(fabs(start2->getY()- ys[1]) < EPSILON){
+                    bounds.push_back(*start2);
+                }
             }
 
             //sort bounds by angle with respect to the center of the bounding box
@@ -448,6 +478,10 @@ int main(int argc, char *argv[]) {
             for (size_t i = 0; i < bounds.size(); i++) {
                 Vertex *start = &bounds[i];
                 Vertex *end = &bounds[(i + 1) % bounds.size()];
+                //if start and end are the same, skip
+                if(fabs(start->getX() - end->getX()) < EPSILON && fabs(start->getY() - end->getY()) < EPSILON){
+                    continue;
+                }
                 PseudoEdge pe = PseudoEdge(start, end, true);
                 pseudoEdges.push_back(pe);
             }

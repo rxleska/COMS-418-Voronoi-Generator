@@ -53,3 +53,27 @@ The following controls are available after the animation is finished:
     - x/X: print out the current Delaunay Triangulation as a DCEL.
     - c/C: display the current Voronoi Diagram using OpenGL.
     - v/V: display the current Delaunay Triangulation using OpenGL.
+
+
+
+
+# MY PROVIDED TEST CASES
+
+In the folder labeled myTestCases I have provided 4 test cases that I have created. The test cases are as follows:
+
+1. provided.txt - uses the five points provided as an example source in the project description (integers)
+
+2. hexagon.txt - uses 6 points in a hexagon shape (floats)
+
+3. heptagon.txt - uses 7 points in a heptagon shape (floats)
+
+4. 100Points.txt - is a random set of 100 points generated using a python script (integers)
+
+5. 5colin1below.txt - 5 colinear points with one point below the line (integers)
+
+6. 5colinear.txt - 5 colinear points (integers)
+
+
+By default the program will read from sites.txt, but you can specify the file you want to read from by passing the filename as an argument when running the program. For example, to run the program with the hexagon.txt file you would run the following command:
+
+./run myTestCases/hexagon.txt

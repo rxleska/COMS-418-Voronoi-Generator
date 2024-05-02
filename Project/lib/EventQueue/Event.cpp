@@ -271,15 +271,29 @@ void CircleEvent::handleEvent(){
         edge2->setTwin(edge1);
 
         finishedEdges.push_back(edge1);
-        pseudoEdges.push_back(
-            PseudoEdge(
-                new Vertex(edge->getX(), edge->getY(), -1), 
-                new Vertex(this->getX(), this->getIntersectionY(), -1), 
-                false, 
-                new Vertex(edge->getLeftArc()->getX(), edge->getLeftArc()->getY(), -1), 
-                new Vertex(edge->getRightArc()->getX(), edge->getRightArc()->getY(), -1)
-            )
-        );
+        //if edge has a y of 10000 set it to the bounding box max y
+        if(ParabolaMath::areSameDouble(edge->getY(), 10000)){
+            pseudoEdges.push_back(
+                PseudoEdge(
+                    new Vertex(edge->getX(), windowHeight/heightScale, -1), 
+                    new Vertex(this->getX(), this->getIntersectionY(), -1), 
+                    false, 
+                    new Vertex(edge->getLeftArc()->getX(), edge->getLeftArc()->getY(), -1), 
+                    new Vertex(edge->getRightArc()->getX(), edge->getRightArc()->getY(), -1)
+                )
+            );
+        }
+        else{
+            pseudoEdges.push_back(
+                PseudoEdge(
+                    new Vertex(edge->getX(), edge->getY(), -1), 
+                    new Vertex(this->getX(), this->getIntersectionY(), -1), 
+                    false, 
+                    new Vertex(edge->getLeftArc()->getX(), edge->getLeftArc()->getY(), -1), 
+                    new Vertex(edge->getRightArc()->getX(), edge->getRightArc()->getY(), -1)
+                )
+            );
+        }
 
     }
 
@@ -510,15 +524,40 @@ void SiteEvent::handleEvent(){
 
             //add edges to edge list
             finishedEdges.push_back(edge1);
-            pseudoEdges.push_back(
-                PseudoEdge(
-                    new Vertex(searchResult->getX(), searchResult->getY(), -1), 
-                    new Vertex(leftEdge->getX(), leftEdge->getY(), -1),
-                    false,
-                    new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY(), -1),
-                    new Vertex(searchResult->getRightArc()->getX(), searchResult->getRightArc()->getY(), -1)
-                )
-            );
+            //if edge has a y of 10000 set it to the bounding box max y
+            if(ParabolaMath::areSameDouble(searchResult->getY(), 10000)){
+                pseudoEdges.push_back(
+                    PseudoEdge(
+                        new Vertex(searchResult->getX(), windowHeight/heightScale, -1), 
+                        new Vertex(leftEdge->getX(), leftEdge->getY(), -1), 
+                        false, 
+                        new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY(), -1), 
+                        new Vertex(searchResult->getRightArc()->getX(), searchResult->getRightArc()->getY(), -1)
+                    )
+                );
+            }
+            else if(ParabolaMath::areSameDouble(leftEdge->getY(), 10000)){
+                pseudoEdges.push_back(
+                    PseudoEdge(
+                        new Vertex(searchResult->getX(), searchResult->getY(), -1), 
+                        new Vertex(leftEdge->getX(), windowHeight/heightScale, -1), 
+                        false, 
+                        new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY(), -1), 
+                        new Vertex(searchResult->getRightArc()->getX(), searchResult->getRightArc()->getY(), -1)
+                    )
+                );
+            }
+            else{
+                pseudoEdges.push_back(
+                    PseudoEdge(
+                        new Vertex(searchResult->getX(), searchResult->getY(), -1), 
+                        new Vertex(leftEdge->getX(), leftEdge->getY(), -1), 
+                        false, 
+                        new Vertex(searchResult->getLeftArc()->getX(), searchResult->getLeftArc()->getY(), -1), 
+                        new Vertex(searchResult->getRightArc()->getX(), searchResult->getRightArc()->getY(), -1)
+                    )
+                );
+            }
 
             //remove circle events that use this edge
             if (searchResult != nullptr) {

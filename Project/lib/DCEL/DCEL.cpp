@@ -577,9 +577,6 @@ DCEL * DCEL::toDelaunayTriangulation(){
 
     //CONVERT EDGES (Vvertex to Vvertex) TO EDGES (site to site)
     for(Edge * edge : this->edges){
-        std::cout << "Converting edge: " << edge->getEdgeName() << std::endl;
-        std::cout << "is border: " << edge->getIsBorder() << std::endl;
-
         if(!edge->getConverted()){
             if(edge->getIncidentFace()->getOuterComponent() == nullptr || edge->getTwin()->getIncidentFace()->getOuterComponent() == nullptr){
                 //edge should not be included mark as converted
@@ -641,9 +638,9 @@ DCEL * DCEL::toDelaunayTriangulation(){
     delaunay->fixEdges();
 
     //find the faces of the DCEL
-    //TODO FIX FACES WITH 4 or more faces
     delaunay->findFaces();
 
+    //FIX FACES WITH 4 or more faces
     //for each face call fixFace if the face has more than 3 edges
     for(Face * face : delaunay->getFaces()){
         delaunay->fixFace(face);
