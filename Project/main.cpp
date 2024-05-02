@@ -247,15 +247,15 @@ int main(int argc, char *argv[]) {
     //if width to height ratio is greater than 16x9, scale by width, else scale by height 
     //max width is 1280 and max height is 720
     if((maxX - minX) / (maxY - minY) > 16.0/9.0){
-        windowWidth = 1280;
-        windowHeight = 1280 * (maxY - minY) / (maxX - minX);
-        widthScale = 1280 / (maxX - minX);
+        windowWidth = 1280*1.5;
+        windowHeight = 1280*1.5 * (maxY - minY) / (maxX - minX);
+        widthScale = 1280*1.5 / (maxX - minX);
         heightScale = windowHeight / (maxY - minY);
     }else{
-        windowHeight = 720;
-        windowWidth = 720 * (maxX - minX) / (maxY - minY);
+        windowHeight = 720*1.5;
+        windowWidth = 720*1.5 * (maxX - minX) / (maxY - minY);
         widthScale = windowWidth / (maxX - minX);
-        heightScale = 720 / (maxY - minY);
+        heightScale = 720*1.5 / (maxY - minY);
     }
 
 

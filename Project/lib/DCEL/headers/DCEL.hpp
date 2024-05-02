@@ -69,6 +69,7 @@ class DCEL{
         DCEL* toDelaunayTriangulation();
         void fixEdges();
         void findFaces();
+        void fixFace(Face * faceToFix); //in denaunay convert >3 edges faces to sets of 3 edges faces
 
         void printDCEL();
         std::string dcelToString();

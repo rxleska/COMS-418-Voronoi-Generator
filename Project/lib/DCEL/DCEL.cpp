@@ -420,6 +420,9 @@ void DCEL::constructDCEL(std::vector<PseudoEdge> pseudoEdges) {
             edge->setIncidentFace(face);
             Edge *e = edge->getNext();
             bool isAllUnbounded = true;
+            if(!e->getIsBorder() || !edge->getIsBorder()){
+                isAllUnbounded = false;
+            }
             while (e != edge) {
                 e->setIncidentFace(face);
                 if(e->getIsBorder()){
@@ -574,6 +577,9 @@ DCEL * DCEL::toDelaunayTriangulation(){
 
     //CONVERT EDGES (Vvertex to Vvertex) TO EDGES (site to site)
     for(Edge * edge : this->edges){
+        std::cout << "Converting edge: " << edge->getEdgeName() << std::endl;
+        std::cout << "is border: " << edge->getIsBorder() << std::endl;
+
         if(!edge->getConverted()){
             if(edge->getIncidentFace()->getOuterComponent() == nullptr || edge->getTwin()->getIncidentFace()->getOuterComponent() == nullptr){
                 //edge should not be included mark as converted
@@ -589,7 +595,7 @@ DCEL * DCEL::toDelaunayTriangulation(){
                 //set twin pointers
                 newEdge->setTwin(newEdgeTwin);
                 newEdgeTwin->setTwin(newEdge);
-                //TODO SWTICH TO USING THE INCIDENT FACE OF THE EDGE instead of getSite (getSite will prematurely try to triangulate edge cases)
+                //SWTICHED TO USING THE INCIDENT FACE OF THE EDGE instead of getSite (getSite will prematurely try to triangulate edge cases)
                 Vertex * origin = nullptr;
                 Vertex * destination = nullptr;
                 if(edge->getIncidentFace()->getInnerComponent() == nullptr){
@@ -638,6 +644,11 @@ DCEL * DCEL::toDelaunayTriangulation(){
     //TODO FIX FACES WITH 4 or more faces
     delaunay->findFaces();
 
+    //for each face call fixFace if the face has more than 3 edges
+    for(Face * face : delaunay->getFaces()){
+        delaunay->fixFace(face);
+    }
+
 
     return delaunay;
 }
@@ -682,8 +693,11 @@ void DCEL::findFaces(){
             }
             int countOfEdges = 1;
             edge->setIncidentFace(face);
-            Edge *e = edge->getNext();
             bool isAllUnbounded = true;
+            Edge *e = edge->getNext();
+            if(!e->getIsBorder() || !edge->getIsBorder()){
+                isAllUnbounded = false;
+            }
             while (e != edge) {
                 e->setIncidentFace(face);
                 if(e->getIsBorder()){
@@ -719,5 +733,81 @@ void DCEL::findFaces(){
         MostEdgesFace->setIsUnbounded(true);
         MostEdgesFace->setInnerComponent(MostEdgesEdge);
         MostEdgesFace->setOuterComponent(nullptr);
+    }
+}
+
+
+//in denaunay convert >3 edges faces to sets of 3 edges faces
+void DCEL::fixFace(Face * faceToFix){
+    //check if face has more than 3 edges
+    int countOfEdges = 0;
+    Edge * edge = faceToFix->getOuterComponent();
+    if(edge != nullptr){
+        countOfEdges++;
+        edge = edge->getNext();
+        while(edge != faceToFix->getOuterComponent()){
+            countOfEdges++;
+            edge = edge->getNext();
+        }
+    }
+    else{
+        return;
+    }
+    // std::cout << "Count of edges: " << countOfEdges << std::endl;
+    // return;
+    if(countOfEdges > 3){
+        //divide the face in half and create a new face for the new half
+        Face * newFace = new Face();
+        newFace->setId(this->faces.size() + 1);
+        //create a double edge to split the face from the first edge to the count/2 edge
+        Edge * doubleEdge = new Edge(this->edges.size() + 1);
+        Edge * doubleEdgeTwin = new Edge(this->edges.size() + 2);
+        doubleEdge->setTwin(doubleEdgeTwin);
+        doubleEdgeTwin->setTwin(doubleEdge);
+        doubleEdgeTwin->setOrigin(edge->getOrigin());
+        //get the edge that is count/2 edges away
+        Edge * splitEdge = edge;
+        for(int i = 0; i < countOfEdges/2; i++){
+            splitEdge = splitEdge->getNext();
+        }
+        //set the origin of the edge to be the origin of the split edge
+        doubleEdge->setOrigin(splitEdge->getOrigin());
+
+
+        //set the next and prev pointers of the double edge
+        //set the next and prev pointers of the double edge twin
+        //the order here matters a lot, do new edges then fix the old edges
+        doubleEdge->setNext(edge);
+        doubleEdge->setPrev(splitEdge->getPrev());
+        doubleEdgeTwin->setNext(splitEdge);
+        doubleEdgeTwin->setPrev(edge->getPrev());
+
+        doubleEdge->getNext()->setPrev(doubleEdge);
+        doubleEdge->getPrev()->setNext(doubleEdge);
+        doubleEdgeTwin->getNext()->setPrev(doubleEdgeTwin);
+        doubleEdgeTwin->getPrev()->setNext(doubleEdgeTwin);
+
+        //set the incident face of the double edge
+        doubleEdge->setIncidentFace(faceToFix);
+        doubleEdgeTwin->setIncidentFace(newFace);
+        newFace->setOuterComponent(doubleEdgeTwin);
+
+        //cycle through the edges and set the incident face of the new face
+        Edge * e = doubleEdgeTwin->getNext();
+        while(e != doubleEdgeTwin){
+            e->setIncidentFace(newFace);
+            e = e->getNext();
+        }
+
+        //add the new face to the DCEL
+        this->addFace(newFace);
+
+        //add the double edge to the DCEL
+        this->addEdge(doubleEdge);
+        this->addEdge(doubleEdgeTwin); 
+
+        // recursively call fixFace on the new face and the old face
+        this->fixFace(faceToFix);
+        this->fixFace(newFace);
     }
 }
