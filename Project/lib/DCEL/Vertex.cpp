@@ -170,13 +170,13 @@ std::string Vertex::getVertexName() {
 }
 
 std::string Vertex::getVertexName(bool isVoronoi) {
-    if(isVoronoi) {
-        return "p" + std::to_string(id);
-    }
     if(isBoundary) {
         return "b" + std::to_string(id);
     }
+    if(isVoronoi) {
+        return "v" + std::to_string(id);
+    }
 
-    return "v" + std::to_string(id);
+    return "p" + std::to_string(id);
 }
 

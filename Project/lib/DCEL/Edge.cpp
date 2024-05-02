@@ -194,7 +194,7 @@ std::string Edge::edgeToString(bool isVoronoi) {
         (this->twin == nullptr ? "nil" : this->twin->getEdgeName(isVoronoi)) + " " + 
         (this->next == nullptr ? "nil" : this->next->getEdgeName(isVoronoi)) + " " + 
         (this->prev == nullptr ? "nil" : this->prev->getEdgeName(isVoronoi)) + " " + 
-        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
+        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName(isVoronoi));
     }
     else{
         edgeString += "d" + this->getEdgeName() + " " + 
@@ -202,7 +202,7 @@ std::string Edge::edgeToString(bool isVoronoi) {
         (this->twin == nullptr ? "nil" : this->twin->getEdgeName(isVoronoi)) + " " + 
         (this->next == nullptr ? "nil" : this->next->getEdgeName(isVoronoi)) + " " + 
         (this->prev == nullptr ? "nil" : this->prev->getEdgeName(isVoronoi)) + " " + 
-        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName());
+        (this->incidentFace == nullptr ? "nil" : this->incidentFace->getFaceName(isVoronoi));
     }
     return edgeString;
 }
